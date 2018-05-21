@@ -1,0 +1,6 @@
+Download latest SFML binary/include/lib/...:
+https://www.sfml-dev.org/download/sfml/2.5.0/ Visual C++ 15 (2017) - 64-bit
+
+VS solution is : prj/prj.sln
+Make sure your include/lib path for SFML are ok
+
