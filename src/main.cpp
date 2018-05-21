@@ -1,5 +1,7 @@
-//
-//
+//=================================================================================================
+//                  Copyright (C) 2018 Alain Lanthier - All Rights Reserved  
+//                  License: MIT License
+//=================================================================================================
 #include <SFML/Graphics/Export.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
