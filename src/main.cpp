@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 {
     std::vector<path> files_img;
 
-    path p = path("E:\\000 plant\\p\\Bugleweed - see root");
+    path p = path("..\\chufa (leave_stem, oil, root)");
     std::vector<std::string> files = filesystem::get_directory_file(p, false);
     for (size_t i = 0; i < files.size(); i++)
     {
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         path pv = files.at(i);
         if (pv.is_file())
         {
-            if ((pv.extension() == "jpg") || (pv.extension() == "png"))
+            if ((pv.extension() == "jpg") || (pv.extension() == "png") || (pv.extension() == "gif") || (pv.extension() == "jpeg"))
             {
                 files_img.push_back(pv);
             }
