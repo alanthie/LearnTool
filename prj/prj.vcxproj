@@ -120,6 +120,12 @@
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\filesystem\fwd.h" />
+    <ClInclude Include="..\src\filesystem\path.h" />
+    <ClInclude Include="..\src\filesystem\resolver.h" />
+    <ClInclude Include="..\src\filesystem\windirent.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

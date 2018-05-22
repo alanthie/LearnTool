@@ -19,6 +19,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 using namespace sf;
@@ -32,7 +33,6 @@ int main(int argc, char *argv[])
     std::vector<std::string> files = filesystem::get_directory_file(p, false);
     for (size_t i = 0; i < files.size(); i++)
     {
-        //cout << "dir:" << p.make_absolute() << " has :" << files.at(i)  << endl;
         path pv = files.at(i);
         if (pv.is_file())
         {
@@ -53,16 +53,19 @@ int main(int argc, char *argv[])
         // Fenêtre
         RenderWindow Fenetre(VideoMode(600, 600), "Learning Tool");
 
-        std::vector<Texture*> img_texture;
-        std::vector<Sprite*> img_sprite;
+        std::vector<std::shared_ptr<Texture>>   img_texture;
+        std::vector<std::shared_ptr<Sprite>>    img_sprite;
+
         for (size_t i = 0; i < files_img.size(); i++)
         {
-            Texture* texture = new Texture;
+            std::shared_ptr<Texture> texture(new Texture);
             texture->loadFromFile(files_img[i].make_absolute().str());
             img_texture.push_back(texture);
 
-            Sprite* sprite = new Sprite(*texture);
-            sprite->scale(Vector2f{ 600.0f / sprite->getTextureRect().width, 600.0f / sprite->getTextureRect().height });
+            std::shared_ptr<Sprite> sprite (new Sprite(*texture));
+            float sx = (float)Fenetre.getSize().x / (float)sprite->getTextureRect().width;
+            float sy = (float)Fenetre.getSize().y / (float)sprite->getTextureRect().height;
+            sprite->scale(Vector2f{ std::min(sx, sy), std::min(sx, sy) });
             img_sprite.push_back(sprite);
         }
 
@@ -81,6 +84,7 @@ int main(int argc, char *argv[])
                 cnt_loop = 0;
             }
 
+            Fenetre.clear();
             Fenetre.draw(*img_sprite[index_img]);
 
             Fenetre.display();
@@ -98,7 +102,7 @@ int main(int argc, char *argv[])
     }
     catch (string s)
     {
-        std::cout << s;
+        std::cerr << s;
     }
 
 
