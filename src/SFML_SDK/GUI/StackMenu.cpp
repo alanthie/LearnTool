@@ -71,11 +71,11 @@ void StackMenu::setTitle(const std::string & title)
         m_titleText.getPosition().y);
 }
 
-void StackMenu::handleEvent(sf::Event e, const sf::RenderWindow& window)
+void StackMenu::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g)
 {
     for (auto& widget : m_widgets) 
     {
-        widget->handleEvent(e, window);
+        widget->handleEvent(e, window, g);
     }
 }
 

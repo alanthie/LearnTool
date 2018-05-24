@@ -1,7 +1,7 @@
 //
 #pragma once
 
-#include "Game.h"
+#include "SFML_SDK/Game.h"
 #include <string>
 
 class UImain : public Game

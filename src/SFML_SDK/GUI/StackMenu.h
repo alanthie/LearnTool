@@ -32,7 +32,7 @@ class StackMenu : public NonCopyable
 
         void setTitle(const std::string& title);
 
-        void handleEvent   (sf::Event e, const sf::RenderWindow& window);
+        void handleEvent   (sf::Event e, const sf::RenderWindow& window, StateBase& g);
         void render        (sf::RenderTarget& renderer);
 
         std::vector<std::unique_ptr<Widget>>& getWidgets() { return m_widgets; }

@@ -4,7 +4,7 @@
 
 namespace gui {
 
-Button::Button(ButtonSize s)
+Button::Button(const std::string& n, ButtonSize s) : gui::Widget(n)
 {
     m_button.setOutlineThickness(1);
     m_button.setOutlineColor(sf::Color::Green);
@@ -20,7 +20,7 @@ Button::Button(ButtonSize s)
     }
 }
 
-void Button::setFunction(std::function<void(void)>func)
+void Button::setFunction(std::function<void(StateBase& g, std::string& n)>func)
 {
     m_function = func;
 }
@@ -36,7 +36,7 @@ void Button::setTexture (const sf::Texture& tex)
     m_button.setTexture(&tex);
 }
 
-void Button::handleEvent(sf::Event e, const sf::RenderWindow& window)
+void Button::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g)
 {
     auto pos = sf::Mouse::getPosition(window);
 
@@ -44,8 +44,9 @@ void Button::handleEvent(sf::Event e, const sf::RenderWindow& window)
         case sf::Event::MouseButtonPressed:
             switch(e.mouseButton.button) {
                 case sf::Mouse::Left:
-                    if (m_button.getGlobalBounds().contains((float)pos.x, (float)pos.y)) {
-                        m_function();
+                    if (m_button.getGlobalBounds().contains((float)pos.x, (float)pos.y)) 
+                    {
+                        m_function(g, name);
                     }
 
                 default:

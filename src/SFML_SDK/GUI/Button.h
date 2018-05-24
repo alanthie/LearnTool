@@ -15,13 +15,13 @@ namespace gui
     class Button : public gui::Widget
     {
         public:
-            Button(ButtonSize s = ButtonSize::Wide);
+            Button(const std::string& n, ButtonSize s = ButtonSize::Wide);
 
-            void setFunction(std::function<void(void)> func);
+            void setFunction(std::function<void(StateBase& g, std::string& n)> func);
             void setText    (const std::string& str);
             void setTexture (const sf::Texture& tex);
 
-            void handleEvent    (sf::Event e, const sf::RenderWindow& window) override;
+            void handleEvent    (sf::Event e, const sf::RenderWindow& window, StateBase& g) override;
             void render         (sf::RenderTarget& renderer) override;
             void setPosition    (const sf::Vector2f& pos)   override;
             sf::Vector2f getSize() const    override;
@@ -33,9 +33,9 @@ namespace gui
 
             Rectangle   m_button;
             Text        m_text;
-            std::function<void(void)> m_function = [](){};
+            std::function<void(StateBase& g, std::string& n)> m_function;// = []() {};
 
     };
 
-    inline std::unique_ptr<Button> makeButton() { return std::make_unique<Button>(); }
+    inline std::unique_ptr<Button> makeButton(const std::string& n) { return std::make_unique<Button>(n); }
 }

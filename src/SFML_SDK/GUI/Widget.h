@@ -3,13 +3,18 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include "../ResourceManager/ResourceHolder.h"
+#include "SFML_SDK/States/StateBase.h"
 
 namespace gui
 {
     class Widget
     {
         public:
-            virtual void handleEvent(sf::Event e, const sf::RenderWindow& window) = 0;
+            std::string name;
+
+            Widget(const std::string& n) : name(n) {}
+
+            virtual void handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g) = 0;
             virtual void render(sf::RenderTarget& renderer) = 0;
             virtual void setPosition(const sf::Vector2f& pos) = 0;
             virtual sf::Vector2f getSize() const = 0;

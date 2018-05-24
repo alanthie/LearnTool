@@ -24,11 +24,13 @@ class UIState : public StateBase
 public:
     UImain& ui;
 
-private:
+//private:
     gui::Button                 button_pause;
     gui::Button                 button_name;
     gui::Button                 button_parts;
     std::shared_ptr<sf::Sprite> sprite_canva;
+
+    bool is_pause = false;
 
     size_t  index_img = 0;
     long    cnt_loop = 0;
@@ -40,8 +42,8 @@ private:
     std::vector<std::shared_ptr<sf::Texture>>   img_texture;
     std::vector<std::shared_ptr<sf::Sprite>>    img_sprite;
 
-    float canvas_x_perc = 0.75f;
-    float canvas_y_perc = 0.75f;
+    float canvas_x_perc = 0.85f;
+    float canvas_y_perc = 0.85f;
     int w;
     int h;
     int canvas_w;
@@ -62,3 +64,5 @@ public:
     sf::Vector2f    scale(std::shared_ptr<sf::Sprite> sprite);
     void            load_path(filesystem::path& p);
 };
+
+void button_click(StateBase& g, std::string& n);

@@ -1,6 +1,6 @@
 //
-#include "Game.h"
 #include "States/StateBase.h"
+#include "SFML_SDK/Game.h"
 #include <iostream>
 #include <string>
 
@@ -12,7 +12,7 @@ Game::Game(int w, int h, std::string title)
     /*pushState<StatePlaying>(*this);*/
 }
 
-// Runs the main loop
+// Runs the main loop 
 void Game::run()
 {
     constexpr unsigned TPS = 30; // ticks per seconds

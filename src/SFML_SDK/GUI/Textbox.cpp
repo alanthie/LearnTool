@@ -3,8 +3,8 @@
 
 namespace gui {
 
-TextBox::TextBox(std::string& modString)
-:   m_pModString (&modString)
+TextBox::TextBox(const std::string& n, std::string& modString) : gui::Widget(n)
+        , m_pModString (&modString)
 {
     m_label.setCharacterSize(15);
     m_rect.setFillColor({52, 152, 219});
@@ -16,7 +16,7 @@ void TextBox::setLabel(const std::string& str)
     m_label.setString(str);
 }
 
-void TextBox::handleEvent(sf::Event e, const sf::RenderWindow& window)
+void TextBox::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g)
 {
     handleClick     (e, window);
     handleTextInput (e);

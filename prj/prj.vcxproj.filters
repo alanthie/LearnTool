@@ -13,14 +13,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\filesystem">
-      <UniqueIdentifier>{32c006e1-bd3f-4f06-83a2-bc574e8f7e4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\SFML_SDK">
       <UniqueIdentifier>{fad4276b-2de8-48f2-a7a2-47b025b262e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\ini_parser">
       <UniqueIdentifier>{23d49e70-0ae4-422e-ac3d-5389fec2a039}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\filesystem">
+      <UniqueIdentifier>{32c006e1-bd3f-4f06-83a2-bc574e8f7e4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,16 +75,16 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\filesystem\fwd.h">
-      <Filter>Header Files\filesystem</Filter>
+      <Filter>Source Files\filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\src\filesystem\path.h">
-      <Filter>Header Files\filesystem</Filter>
+      <Filter>Source Files\filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\src\filesystem\resolver.h">
-      <Filter>Header Files\filesystem</Filter>
+      <Filter>Source Files\filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\src\filesystem\windirent.h">
-      <Filter>Header Files\filesystem</Filter>
+      <Filter>Source Files\filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SFML_SDK\Game.h">
       <Filter>Source Files\SFML_SDK</Filter>

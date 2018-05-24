@@ -1,9 +1,9 @@
 //
 //
 #include "UIState.h"
-#include "Game.h"
-#include "SFML_SDK//GUI/Button.h"
-#include "SFML_SDK//GUI/Textbox.h"
+#include "SFML_SDK/Game.h"
+#include "SFML_SDK/GUI/Button.h"
+#include "SFML_SDK/GUI/Textbox.h"
 #include "SFML_SDK/States/StateBase.h"
 #include "SFML_SDK/GUI/StackMenu.h"
 #include <SFML/Graphics/Texture.hpp>
@@ -13,6 +13,15 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+
+void button_click(StateBase& g, std::string& n)
+{
+    std::cout << "button" << n << " clicked!" << '\n';
+    if (n == "b_pause")
+    {
+        ((UIState&)g).is_pause = !((UIState&)g).is_pause;
+    }
+}
 
 std::vector<std::string> split(const std::string &text, char sep) 
 {
@@ -41,22 +50,14 @@ std::string merge(std::vector<std::string> v)
 
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
-    button_pause(gui::ButtonSize::Small),
-    button_name(gui::ButtonSize::Small),
-    button_parts(gui::ButtonSize::Wide)
+    button_pause("b_pause", gui::ButtonSize::Small),
+    button_name("b_name", gui::ButtonSize::Small),
+    button_parts("b_parts", gui::ButtonSize::Wide)
 {
-    button_pause.setFunction([]() 
-    {
-        std::cout << "button_pause clicked!" << '\n';
-    });
-    button_name.setFunction([]()
-    {
-        std::cout << "button_name clicked!" << '\n';
-    });
-    button_parts.setFunction([]()
-    {
-        std::cout << "button_parts clicked!" << '\n';
-    });
+    std::function<void(StateBase& g, std::string& n)> f = button_click;
+    button_pause.setFunction(f);
+    button_name.setFunction(f);
+    button_parts.setFunction(f);
 
     load_path(filesystem::path("..\\chufa (leave_stem, oil, root)"));
 
@@ -64,9 +65,9 @@ UIState::UIState(UImain& g) : StateBase(g),
 
 void UIState::handleEvent(sf::Event e) 
 {
-    button_pause.handleEvent(e, m_pGame->getWindow());
-    button_name.handleEvent(e, m_pGame->getWindow());
-    button_parts.handleEvent(e, m_pGame->getWindow());
+    button_pause.handleEvent(e, m_pGame->getWindow(), *this);
+    button_name.handleEvent(e, m_pGame->getWindow(), *this);
+    button_parts.handleEvent(e, m_pGame->getWindow(), *this);
 }
 
 void UIState::handleInput() 
@@ -75,15 +76,18 @@ void UIState::handleInput()
 
 void UIState::update(sf::Time deltaTime) 
 {
-    cnt_loop++;
-    if (cnt_loop > 20 * 1) // 1 sec
+    if (is_pause == false)
     {
-        index_img++;
-        if (index_img >= img_sprite.size() - 1)
+        cnt_loop++;
+        if (cnt_loop > 60 * 1) // 1 sec
         {
-            index_img = 0;
+            index_img++;
+            if (index_img >= img_sprite.size() - 1)
+            {
+                index_img = 0;
+            }
+            cnt_loop = 0;
         }
-        cnt_loop = 0;
     }
 }
 

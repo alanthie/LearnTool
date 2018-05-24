@@ -12,9 +12,6 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Graphics.hpp>
 
-//#include "../src/filesystem/path.h"
-//#include "../src/filesystem/resolver.h"
-
 #include "UImain.h"
 #include "Config.hpp"
 #include <string>
