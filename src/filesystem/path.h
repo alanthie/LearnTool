@@ -324,61 +324,113 @@ protected:
         return tokens;
     }
 
+    public:
+    static bool create_directory(const path& p)
+    {
+#if defined(_WIN32)
+        return CreateDirectoryW(p.wstr().c_str(), NULL) != 0;
+#else
+        return mkdir(p.str().c_str(), S_IRUSR | S_IWUSR | S_IXUSR) == 0;
+#endif
+    }
+
+#if defined(_WIN32)
+    static std::vector<std::string> get_directory_file(const path& p, bool recursive = false)
+    {
+        std::vector<std::string> files;
+        if (p.empty()) return files;
+        if (!p.exists()) return files;
+        if (!p.is_directory()) return files;
+
+        std::string dir = p.make_absolute().str();
+
+        std::shared_ptr<DIR> directory_ptr(opendir(dir.c_str()), [](DIR* dir) { dir && closedir(dir); });
+        struct dirent *dirent_ptr;
+        if (!directory_ptr)
+        {
+            // throw...
+            return files;
+        }
+
+        while ((dirent_ptr = readdir(directory_ptr.get())) != nullptr)
+        {
+            if ((std::string(dirent_ptr->d_name) != ".") && (std::string(dirent_ptr->d_name) != ".."))
+            {
+                path pt = p / path(std::string(dirent_ptr->d_name));
+                files.push_back(pt.make_absolute().str());
+                if (recursive)
+                {
+                    path pv = files.at(files.size() - 1);
+                    if (pv.is_directory())
+                    {
+                        std::vector<std::string> f = get_directory_file(pv, true);
+                        for (size_t i = 0; i < f.size(); i++)
+                        {
+                            files.push_back(f[i]);
+                        }
+                    }
+                }
+            }
+        }
+        return files;
+    }
+#endif
+
 protected:
     path_type m_type;
     std::vector<std::string> m_path;
     bool m_absolute;
 };
-
-inline bool create_directory(const path& p)
-{
-#if defined(_WIN32)
-    return CreateDirectoryW(p.wstr().c_str(), NULL) != 0;
-#else
-    return mkdir(p.str().c_str(), S_IRUSR | S_IWUSR | S_IXUSR) == 0;
-#endif
-}
-
-#if defined(_WIN32)
-std::vector<std::string> get_directory_file(const path& p, bool recursive = false)
-{
-    std::vector<std::string> files;
-    if (p.empty()) return files;
-    if (!p.exists()) return files;
-    if (!p.is_directory()) return files;
-
-    std::string dir = p.make_absolute().str();
-
-    std::shared_ptr<DIR> directory_ptr(opendir(dir.c_str()), [](DIR* dir) { dir && closedir(dir); });
-    struct dirent *dirent_ptr;
-    if (!directory_ptr)
-    {
-        // throw...
-        return files;
-    }
-
-    while ((dirent_ptr = readdir(directory_ptr.get())) != nullptr)
-    {
-        if ((std::string(dirent_ptr->d_name) != ".") && (std::string(dirent_ptr->d_name) != ".."))
-        {
-            path pt = p / path(std::string(dirent_ptr->d_name));
-            files.push_back(pt.make_absolute().str());
-            if (recursive)
-            {
-                path pv = files.at(files.size()-1);
-                if (pv.is_directory())
-                {
-                    std::vector<std::string> f = get_directory_file(pv, true);
-                    for (size_t i = 0; i < f.size(); i++)
-                    {
-                        files.push_back(f[i]);
-                    }
-                }
-            }
-        }
-    }
-    return files;
-}
-#endif
+//
+//inline bool create_directory(const path& p)
+//{
+//#if defined(_WIN32)
+//    return CreateDirectoryW(p.wstr().c_str(), NULL) != 0;
+//#else
+//    return mkdir(p.str().c_str(), S_IRUSR | S_IWUSR | S_IXUSR) == 0;
+//#endif
+//}
+//
+//#if defined(_WIN32)
+//std::vector<std::string> get_directory_file(const path& p, bool recursive = false)
+//{
+//    std::vector<std::string> files;
+//    if (p.empty()) return files;
+//    if (!p.exists()) return files;
+//    if (!p.is_directory()) return files;
+//
+//    std::string dir = p.make_absolute().str();
+//
+//    std::shared_ptr<DIR> directory_ptr(opendir(dir.c_str()), [](DIR* dir) { dir && closedir(dir); });
+//    struct dirent *dirent_ptr;
+//    if (!directory_ptr)
+//    {
+//        // throw...
+//        return files;
+//    }
+//
+//    while ((dirent_ptr = readdir(directory_ptr.get())) != nullptr)
+//    {
+//        if ((std::string(dirent_ptr->d_name) != ".") && (std::string(dirent_ptr->d_name) != ".."))
+//        {
+//            path pt = p / path(std::string(dirent_ptr->d_name));
+//            files.push_back(pt.make_absolute().str());
+//            if (recursive)
+//            {
+//                path pv = files.at(files.size()-1);
+//                if (pv.is_directory())
+//                {
+//                    std::vector<std::string> f = get_directory_file(pv, true);
+//                    for (size_t i = 0; i < f.size(); i++)
+//                    {
+//                        files.push_back(f[i]);
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    return files;
+//}
+//#endif
 
 NAMESPACE_END(filesystem)
