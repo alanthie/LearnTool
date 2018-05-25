@@ -16,8 +16,6 @@
 #include <memory>
 #include <iostream>
 
-//class Game;
-
 //
 class UIState : public StateBase
 {
@@ -32,11 +30,11 @@ public:
 
     bool is_pause = false;
 
-    size_t  index_img = 0;
-    long    cnt_loop = 0;
-
-    std::string ini_filename;
+    std::string                 ini_filename;
     std::shared_ptr<ini_parser> ini;
+
+    size_t                      index_img = 0;
+    long                        cnt_loop = 0;
 
     std::vector<filesystem::path>               img_files;
     std::vector<std::shared_ptr<sf::Texture>>   img_texture;
@@ -63,6 +61,6 @@ public:
     void            refresh_size();
     sf::Vector2f    scale(std::shared_ptr<sf::Sprite> sprite);
     void            load_path(filesystem::path& p);
-};
 
-void button_click(StateBase& g, std::string& n);
+    void b_click(std::string& b_name) override;
+};

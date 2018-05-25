@@ -1,6 +1,6 @@
 //
 #include "States/StateBase.h"
-#include "SFML_SDK/Game.h"
+#include "Game.h"
 #include <iostream>
 #include <string>
 
@@ -90,7 +90,14 @@ void Game::handleEvent()
 
     while (m_window.pollEvent(e)) 
     {
+        //---------------------------------
+        // widgets event
+        //---------------------------------
         getCurrentState().handleEvent(e);
+
+        //---------------------------------
+        // window event
+        //---------------------------------
         switch (e.type) 
         {
             case sf::Event::Closed:

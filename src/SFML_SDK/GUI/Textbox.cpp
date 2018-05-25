@@ -16,7 +16,7 @@ void TextBox::setLabel(const std::string& str)
     m_label.setString(str);
 }
 
-void TextBox::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g)
+void TextBox::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& current_state)
 {
     handleClick     (e, window);
     handleTextInput (e);

@@ -14,12 +14,12 @@
 #include <algorithm>
 #include <iterator>
 
-void button_click(StateBase& g, std::string& n)
+void UIState::b_click(std::string& b_name)
 {
-    std::cout << "button" << n << " clicked!" << '\n';
-    if (n == "b_pause")
+    std::cout << "button" << b_name << " clicked!" << '\n';
+    if (b_name == "b_pause")
     {
-        ((UIState&)g).is_pause = !((UIState&)g).is_pause;
+        is_pause = !is_pause;
     }
 }
 
@@ -51,16 +51,14 @@ std::string merge(std::vector<std::string> v)
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
     button_pause("b_pause", gui::ButtonSize::Small),
-    button_name("b_name", gui::ButtonSize::Small),
+    button_name("b_name",   gui::ButtonSize::Small),
     button_parts("b_parts", gui::ButtonSize::Wide)
 {
-    std::function<void(StateBase& g, std::string& n)> f = button_click;
-    button_pause.setFunction(f);
-    button_name.setFunction(f);
-    button_parts.setFunction(f);
+    button_pause.setFunction(   &StateBase::b_click);
+    button_name.setFunction(    &StateBase::b_click);
+    button_parts.setFunction(   &StateBase::b_click);
 
     load_path(filesystem::path("..\\chufa (leave_stem, oil, root)"));
-
 }
 
 void UIState::handleEvent(sf::Event e) 
@@ -154,7 +152,9 @@ void UIState::load_path(filesystem::path& p)
         filesystem::path pv = files.at(i);
         if (pv.is_file())
         {
-            if ((pv.extension() == "jpg") || (pv.extension() == "png") || (pv.extension() == "gif") || (pv.extension() == "jpeg"))
+            std::string s = pv.extension();
+            std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+            if ((s== "jpg") || (s == "png") || (s == "gif") || (s == "jpeg"))
             {
                 img_files.push_back(pv);
             }

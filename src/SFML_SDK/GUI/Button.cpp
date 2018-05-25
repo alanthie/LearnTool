@@ -1,15 +1,15 @@
 #include "Button.h"
-
 #include <iostream>
 
 namespace gui {
 
-Button::Button(const std::string& n, ButtonSize s) : gui::Widget(n)
+Button::Button(const std::string& name, ButtonSize s) : gui::Widget(name)
 {
     m_button.setOutlineThickness(1);
     m_button.setOutlineColor(sf::Color::Green);
     m_button.setFillColor(sf::Color::Black);
-    switch (s) {
+    switch (s) 
+    {
         case ButtonSize::Wide:
             m_button.setSize({256, 64});
             break;
@@ -18,11 +18,6 @@ Button::Button(const std::string& n, ButtonSize s) : gui::Widget(n)
             m_button.setSize({128, 64});
             break;
     }
-}
-
-void Button::setFunction(std::function<void(StateBase& g, std::string& n)>func)
-{
-    m_function = func;
 }
 
 void Button::setText (const std::string& str)
@@ -36,17 +31,19 @@ void Button::setTexture (const sf::Texture& tex)
     m_button.setTexture(&tex);
 }
 
-void Button::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g)
+void Button::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& current_state)
 {
     auto pos = sf::Mouse::getPosition(window);
 
-    switch(e.type) {
+    switch(e.type) 
+    {
         case sf::Event::MouseButtonPressed:
-            switch(e.mouseButton.button) {
+            switch(e.mouseButton.button) 
+            {
                 case sf::Mouse::Left:
                     if (m_button.getGlobalBounds().contains((float)pos.x, (float)pos.y)) 
                     {
-                        m_function(g, name);
+                        std::invoke(m_state_func, &current_state, name); // current_state->m_state_func(name)
                     }
 
                 default:
@@ -76,13 +73,9 @@ void Button::setPosition(const sf::Vector2f& pos)
 
 void Button::updateText()
 {
-    m_text.setOrigin(m_text.getGlobalBounds().width  / 2,
-                     m_text.getGlobalBounds().height / 2);
-
-    m_text.move(m_button.getGlobalBounds().width  / 2.0f,
-                m_button.getGlobalBounds().height / 2.5f);
+    m_text.setOrigin(   m_text.getGlobalBounds().width  / 2,        m_text.getGlobalBounds().height / 2);
+    m_text.move(        m_button.getGlobalBounds().width  / 2.0f,   m_button.getGlobalBounds().height / 2.5f);
 }
-
 
 sf::Vector2f Button::getSize() const
 {

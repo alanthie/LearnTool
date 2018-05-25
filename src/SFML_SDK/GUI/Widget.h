@@ -12,9 +12,9 @@ namespace gui
         public:
             std::string name;
 
-            Widget(const std::string& n) : name(n) {}
+            Widget(const std::string& _name) : name(_name) {}
 
-            virtual void handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& g) = 0;
+            virtual void handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& current_state) = 0;
             virtual void render(sf::RenderTarget& renderer) = 0;
             virtual void setPosition(const sf::Vector2f& pos) = 0;
             virtual sf::Vector2f getSize() const = 0;

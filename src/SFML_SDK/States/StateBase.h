@@ -5,11 +5,12 @@
 
 class Game;
 
-class StateBase /*: public NonCopyable*/
+class StateBase
 {
     public:
-        StateBase(Game& game) : m_pGame(&game)
-        {}
+        StateBase(Game& game) : m_pGame(&game) {}
+
+        virtual void b_click(std::string& b_name) {}
 
         virtual ~StateBase() = default;
 
@@ -19,6 +20,5 @@ class StateBase /*: public NonCopyable*/
         virtual void fixedUpdate(sf::Time deltaTime) {}
         virtual void render(sf::RenderTarget& renderer) = 0;
 
-    //protected:
         Game* m_pGame;
 };
