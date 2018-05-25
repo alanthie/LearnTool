@@ -319,24 +319,34 @@ void UIState::load_path(filesystem::path& p)
                     {
                     }
 
-                    std::string s;
+                    std::string key;
                     try
                     {
-                        s = ini->get_string("edible", "parts");
+                        key = ini->get_string("key", "parts");
                     }
                     catch (...)
                     {
                     }
 
-                    if (s.size() > 0)
+                    std::string value;
+                    try
                     {
-                        std::vector<std::string> edible_parts = split(s, ';');
-
-                        button_name.setText(name);
-                        s = "Edible: " + merge(edible_parts);
+                        value = ini->get_string("value", "parts");
+                    }
+                    catch (...)
+                    {
                     }
 
-                    button_parts.setText(s);
+                    std::string desc;
+                    if (key.size() > 0)
+                    {
+                        std::vector<std::string> parts = split(value, ';');
+                        desc = key + ": " + merge(parts);
+                    }
+
+                    button_name.setText(name);
+
+                    button_parts.setText(desc);
                     button_parts.m_rect.setSize({ 50 + (float)(button_parts.m_text.getLocalBounds().width) , b_h });
                 }
             }
