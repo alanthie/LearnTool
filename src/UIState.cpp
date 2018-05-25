@@ -13,6 +13,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <cassert>
 
 void UIState::b_click(std::string& b_name)
 {
@@ -21,9 +22,27 @@ void UIState::b_click(std::string& b_name)
     {
         is_pause = !is_pause;
 		if (is_pause)
-			button_pause.setText("continue");
+            button_menu[0][0]->setText("continue");
 		else
-			button_pause.setText("pause");
+            button_menu[0][0]->setText("pause");
+    }
+
+    else if (b_name == "b_img_next")
+    {
+        index_img++;
+        if (index_img > img_sprite.size() - 1)
+        {
+            index_img = 0;
+        }
+    }
+
+    else if (b_name == "b_img_prev")
+    {
+        index_img--;
+        if (index_img < 0)
+        {
+            index_img = (long)img_sprite.size() - 1;
+        }
     }
 }
 
@@ -62,12 +81,16 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
     button_menu[2][0] = new gui::Button("b_zoom_plus", gui::ButtonSize::Small);
     button_menu[2][1] = new gui::Button("b_zoom_less", gui::ButtonSize::Small);
+    button_menu[3][0] = new gui::Button("b_topic_prev", gui::ButtonSize::Small);
+    button_menu[3][1] = new gui::Button("b_topic_next", gui::ButtonSize::Small);
 
     button_menu[0][0]->setText("pause");
     button_menu[1][0]->setText("<");
     button_menu[1][1]->setText(">");
     button_menu[2][0]->setText("+");
     button_menu[2][1]->setText("-");
+    button_menu[3][0]->setText("<<");
+    button_menu[3][1]->setText(">>");
     
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -75,12 +98,16 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_menu[1][1]->m_rect.setSize({ b_w , b_h });
     button_menu[2][0]->m_rect.setSize({ b_w , b_h });
     button_menu[2][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[3][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[3][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[0][0]->setFunction(&StateBase::b_click);
     button_menu[1][0]->setFunction(&StateBase::b_click);
     button_menu[1][1]->setFunction(&StateBase::b_click);
     button_menu[2][0]->setFunction(&StateBase::b_click);
     button_menu[2][1]->setFunction(&StateBase::b_click);
+    button_menu[3][0]->setFunction(&StateBase::b_click);
+    button_menu[3][1]->setFunction(&StateBase::b_click);
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
 
@@ -94,6 +121,8 @@ void UIState::handleEvent(sf::Event e)
     button_menu[1][1]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[2][0]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[2][1]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[3][0]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[3][1]->handleEvent(e, m_pGame->getWindow(), *this);
 
     button_name.handleEvent(e, m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
@@ -111,7 +140,7 @@ void UIState::update(sf::Time deltaTime)
         if (cnt_loop > 60 * 1) // 1 sec
         {
             index_img++;
-            if (index_img >= img_sprite.size() - 1)
+            if (index_img > img_sprite.size() - 1)
             {
                 index_img = 0;
             }
@@ -131,6 +160,9 @@ void UIState::render(sf::RenderTarget& renderer)
 
     if (img_sprite.size() > 0)
     {
+        assert(index_img >= 0);
+        assert(index_img <= img_sprite.size() - 1);
+
         sprite_canva = img_sprite[index_img];
         if (img_sprite[index_img].get() != nullptr)
         {
@@ -147,6 +179,8 @@ void UIState::render(sf::RenderTarget& renderer)
     button_menu[1][1]->render(renderer);
     button_menu[2][0]->render(renderer);
     button_menu[2][1]->render(renderer);
+    button_menu[3][0]->render(renderer);
+    button_menu[3][1]->render(renderer);
 
     button_name.render(renderer);
     button_parts.render(renderer);
@@ -160,7 +194,7 @@ void UIState::refresh_size()
     canvas_h = (int)(canvas_y_perc * h);
     left_w = (int)((1.0f - canvas_x_perc) * w);
     left_h = (int)((1.0f - canvas_y_perc) * h);
-    float b_w = (w - canvas_w) / 2;
+    float b_w = (float)(w - canvas_w) / 2;
 
     button_menu[0][0]->setPosition({ (float)canvas_w, 0 });
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -169,11 +203,15 @@ void UIState::refresh_size()
     button_menu[1][1]->m_rect.setSize({ b_w , b_h });
     button_menu[2][0]->m_rect.setSize({ b_w , b_h });
     button_menu[2][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[3][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[3][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[1][0]->setPosition({ (float)canvas_w, b_h });
     button_menu[1][1]->setPosition({ (float)canvas_w + b_w, b_h });
     button_menu[2][0]->setPosition({ (float)canvas_w, 2*b_h });
     button_menu[2][1]->setPosition({ (float)canvas_w + b_w, 2*b_h });
+    button_menu[3][0]->setPosition({ (float)canvas_w, 3 * b_h });
+    button_menu[3][1]->setPosition({ (float)canvas_w + b_w, 3 * b_h });
 
     button_name.setPosition({ (float)0, (float)canvas_h });
     button_name.m_rect.setSize({ button_name.getSize().x  , b_h });

@@ -25,7 +25,6 @@ public:
     gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
-	gui::Button                 button_prev;
     std::shared_ptr<sf::Sprite> sprite_canva;
 
     bool is_pause = false;
@@ -33,7 +32,7 @@ public:
     std::string                 ini_filename;
     std::shared_ptr<ini_parser> ini;
 
-    size_t                      index_img = 0;
+    long                        index_img = 0;
     long                        cnt_loop = 0;
 
     std::vector<filesystem::path>               img_files;
