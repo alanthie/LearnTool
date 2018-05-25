@@ -26,6 +26,7 @@ public:
     gui::Button                 button_pause;
     gui::Button                 button_name;
     gui::Button                 button_parts;
+	gui::Button                 button_prev;
     std::shared_ptr<sf::Sprite> sprite_canva;
 
     bool is_pause = false;
