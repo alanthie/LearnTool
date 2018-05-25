@@ -29,6 +29,12 @@ public:
 
     bool is_pause = false;
 
+    filesystem::path            root;
+    std::vector<std::string>    root_files;
+
+    filesystem::path            current_parent;
+    filesystem::path            current_path;
+
     std::string                 ini_filename;
     std::shared_ptr<ini_parser> ini;
 
@@ -63,4 +69,8 @@ public:
     void            load_path(filesystem::path& p);
 
     void b_click(std::string& b_name) override;
+
+    filesystem::path find_next_folder(filesystem::path parent_folder, filesystem::path last_folder);
+
+    void end_path();
 };

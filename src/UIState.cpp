@@ -111,7 +111,59 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
 
-    load_path(filesystem::path("..\\chufa (leave_stem, oil, root)"));
+    root = filesystem::path("..\\res\\topic");
+    root_files = filesystem::path::get_directory_file(root, false);
+
+    current_parent = filesystem::path(root);
+    current_path = find_next_folder(root, filesystem::path());
+    load_path(current_path);
+    /*load_path(filesystem::path("..\\res\\\plant\\chufa (leave_stem, oil, root)"));*/
+}
+
+void UIState::end_path()
+{
+    current_path = find_next_folder(current_parent, current_path);
+    if (current_path.empty() == false)
+    {
+        load_path(current_path);
+    }
+    else
+    {
+        current_parent = filesystem::path(root);
+        current_path = find_next_folder(root, filesystem::path());
+        load_path(current_path);
+    }
+}
+
+filesystem::path UIState::find_next_folder(filesystem::path parent_folder, filesystem::path last_folder)
+{
+    filesystem::path p;
+    if (last_folder.empty())
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+        for (size_t i = 0; i < v.size(); i++)
+        {
+            p = filesystem::path(v[i]);
+            break;
+        }
+    }
+    else
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+        for (size_t i = 0; i < v.size(); i++)
+        {
+            if (v[i] == last_folder.make_absolute().str())
+            {
+                if (i < v.size() - 1)
+                {
+                    p = filesystem::path(v[i + 1]);
+                    break;
+                }
+            }
+        }
+    }
+
+    return p;
 }
 
 void UIState::handleEvent(sf::Event e) 
@@ -142,7 +194,8 @@ void UIState::update(sf::Time deltaTime)
             index_img++;
             if (index_img > img_sprite.size() - 1)
             {
-                index_img = 0;
+                end_path();
+                //index_img = 0;
             }
             cnt_loop = 0;
         }
@@ -234,6 +287,9 @@ void UIState::load_path(filesystem::path& p)
     img_texture.clear();
     img_sprite.clear();
 
+    index_img = 0;
+    cnt_loop = 0;
+
     std::vector<std::string> files = filesystem::path::get_directory_file(p, false);
     for (size_t i = 0; i < files.size(); i++)
     {
@@ -242,7 +298,7 @@ void UIState::load_path(filesystem::path& p)
         {
             std::string s = pv.extension();
             std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-            if ((s== "jpg") || (s == "png") || (s == "gif") || (s == "jpeg"))
+            if ((s== "jpg") || (s == "png") || (s == "gif") || (s == "jpeg") || (s == "bmp"))
             {
                 img_files.push_back(pv);
             }
@@ -254,13 +310,32 @@ void UIState::load_path(filesystem::path& p)
                     ini.reset();
                     ini = std::shared_ptr<ini_parser>(new ini_parser(pv.make_absolute().str()));
 
-                    std::string name = ini->get_string("name", "main");
+                    std::string name;
+                    try
+                    {
+                        name = ini->get_string("name", "main");
+                    }
+                    catch (...)
+                    {
+                    }
 
-                    std::string s = ini->get_string("edible", "parts");
-                    std::vector<std::string> edible_parts = split(s, ';');
+                    std::string s;
+                    try
+                    {
+                        s = ini->get_string("edible", "parts");
+                    }
+                    catch (...)
+                    {
+                    }
 
-                    button_name.setText(name);
-                    s = "Edible: " + merge(edible_parts);
+                    if (s.size() > 0)
+                    {
+                        std::vector<std::string> edible_parts = split(s, ';');
+
+                        button_name.setText(name);
+                        s = "Edible: " + merge(edible_parts);
+                    }
+
                     button_parts.setText(s);
                     button_parts.m_rect.setSize({ 50 + (float)(button_parts.m_text.getLocalBounds().width) , b_h });
                 }
