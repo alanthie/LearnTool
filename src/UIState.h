@@ -20,9 +20,8 @@
 class UIState : public StateBase
 {
 public:
-    UImain& ui;
+    UImain&                     ui;
 
-//private:
     gui::Button                 button_pause;
     gui::Button                 button_name;
     gui::Button                 button_parts;

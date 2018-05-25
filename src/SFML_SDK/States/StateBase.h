@@ -9,10 +9,9 @@ class StateBase
 {
     public:
         StateBase(Game& game) : m_pGame(&game) {}
+        virtual ~StateBase() = default;
 
         virtual void b_click(std::string& b_name) {}
-
-        virtual ~StateBase() = default;
 
         virtual void handleEvent(sf::Event e) {}
         virtual void handleInput() = 0;
