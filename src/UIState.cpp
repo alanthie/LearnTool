@@ -20,6 +20,10 @@ void UIState::b_click(std::string& b_name)
     if (b_name == "b_pause")
     {
         is_pause = !is_pause;
+		if (is_pause)
+			button_pause.setText("continue");
+		else
+			button_pause.setText("pause");
     }
 }
 
@@ -52,12 +56,14 @@ UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
     button_pause("b_pause", gui::ButtonSize::Small),
     button_name("b_name",   gui::ButtonSize::Small),
-    button_parts("b_parts", gui::ButtonSize::Wide)
+    button_parts("b_parts", gui::ButtonSize::Wide),
+	button_prev("b_prev"  , gui::ButtonSize::Wide)
 {
     button_pause.setFunction(   &StateBase::b_click);
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
-
+	button_prev.setFunction(	&StateBase::b_click);
+	button_pause.setText("pause");
     load_path(filesystem::path("..\\chufa (leave_stem, oil, root)"));
 }
 
@@ -66,6 +72,7 @@ void UIState::handleEvent(sf::Event e)
     button_pause.handleEvent(e, m_pGame->getWindow(), *this);
     button_name.handleEvent(e, m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
+	button_prev.handleEvent(e, m_pGame->getWindow(), *this);
 }
 
 void UIState::handleInput() 
@@ -114,6 +121,7 @@ void UIState::render(sf::RenderTarget& renderer)
     button_pause.render(renderer);
     button_name.render(renderer);
     button_parts.render(renderer);
+	button_prev.render(renderer);
 }
 
 void UIState::refresh_size()
@@ -125,8 +133,10 @@ void UIState::refresh_size()
     left_w = (int)((1.0f - canvas_x_perc) * w);
     left_h = (int)((1.0f - canvas_y_perc) * h);
 
-    button_pause.setText("pause");
     button_pause.setPosition({ (float)canvas_w, 10 });
+
+	button_prev.setText("prev");
+	button_prev.setPosition({ (float)canvas_w, 100 });
 
     button_name.setPosition({ (float)10, (float)canvas_h });
     button_parts.setPosition({ (float)300, (float)canvas_h });
