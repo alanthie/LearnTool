@@ -30,7 +30,7 @@ namespace gui
             void updateText();
 
             sf::Vector2f    m_position;
-            Rectangle       m_button;
+            Rectangle       m_rect;
             Text            m_text;
             StateBaseMemFn  m_state_func;
     };

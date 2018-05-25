@@ -54,25 +54,49 @@ std::string merge(std::vector<std::string> v)
 
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
-    button_pause("b_pause", gui::ButtonSize::Small),
     button_name("b_name",   gui::ButtonSize::Small),
-    button_parts("b_parts", gui::ButtonSize::Wide),
-	button_prev("b_prev"  , gui::ButtonSize::Wide)
+    button_parts("b_parts", gui::ButtonSize::Wide)
 {
-    button_pause.setFunction(   &StateBase::b_click);
+    button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
+    button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
+    button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
+    button_menu[2][0] = new gui::Button("b_zoom_plus", gui::ButtonSize::Small);
+    button_menu[2][1] = new gui::Button("b_zoom_less", gui::ButtonSize::Small);
+
+    button_menu[0][0]->setText("pause");
+    button_menu[1][0]->setText("<");
+    button_menu[1][1]->setText(">");
+    button_menu[2][0]->setText("+");
+    button_menu[2][1]->setText("-");
+    
+    float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
+    button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
+    button_menu[1][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[1][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[2][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[2][1]->m_rect.setSize({ b_w , b_h });
+
+    button_menu[0][0]->setFunction(&StateBase::b_click);
+    button_menu[1][0]->setFunction(&StateBase::b_click);
+    button_menu[1][1]->setFunction(&StateBase::b_click);
+    button_menu[2][0]->setFunction(&StateBase::b_click);
+    button_menu[2][1]->setFunction(&StateBase::b_click);
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
-	button_prev.setFunction(	&StateBase::b_click);
-	button_pause.setText("pause");
+
     load_path(filesystem::path("..\\chufa (leave_stem, oil, root)"));
 }
 
 void UIState::handleEvent(sf::Event e) 
 {
-    button_pause.handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[0][0]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[1][0]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[1][1]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[2][0]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[2][1]->handleEvent(e, m_pGame->getWindow(), *this);
+
     button_name.handleEvent(e, m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
-	button_prev.handleEvent(e, m_pGame->getWindow(), *this);
 }
 
 void UIState::handleInput() 
@@ -118,10 +142,14 @@ void UIState::render(sf::RenderTarget& renderer)
         }
     }
 
-    button_pause.render(renderer);
+    button_menu[0][0]->render(renderer);
+    button_menu[1][0]->render(renderer);
+    button_menu[1][1]->render(renderer);
+    button_menu[2][0]->render(renderer);
+    button_menu[2][1]->render(renderer);
+
     button_name.render(renderer);
     button_parts.render(renderer);
-	button_prev.render(renderer);
 }
 
 void UIState::refresh_size()
@@ -132,14 +160,26 @@ void UIState::refresh_size()
     canvas_h = (int)(canvas_y_perc * h);
     left_w = (int)((1.0f - canvas_x_perc) * w);
     left_h = (int)((1.0f - canvas_y_perc) * h);
+    float b_w = (w - canvas_w) / 2;
 
-    button_pause.setPosition({ (float)canvas_w, 10 });
+    button_menu[0][0]->setPosition({ (float)canvas_w, 0 });
+    button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
 
-	button_prev.setText("prev");
-	button_prev.setPosition({ (float)canvas_w, 100 });
+    button_menu[1][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[1][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[2][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[2][1]->m_rect.setSize({ b_w , b_h });
 
-    button_name.setPosition({ (float)10, (float)canvas_h });
-    button_parts.setPosition({ (float)300, (float)canvas_h });
+    button_menu[1][0]->setPosition({ (float)canvas_w, b_h });
+    button_menu[1][1]->setPosition({ (float)canvas_w + b_w, b_h });
+    button_menu[2][0]->setPosition({ (float)canvas_w, 2*b_h });
+    button_menu[2][1]->setPosition({ (float)canvas_w + b_w, 2*b_h });
+
+    button_name.setPosition({ (float)0, (float)canvas_h });
+    button_name.m_rect.setSize({ button_name.getSize().x  , b_h });
+
+    button_parts.setPosition({ button_name.getSize().x , (float)canvas_h });
+    button_parts.m_rect.setSize({ w - (0 + button_name.getSize().x )  , b_h });
 }
 
 sf::Vector2f UIState::scale(std::shared_ptr<sf::Sprite> sprite)
@@ -183,8 +223,8 @@ void UIState::load_path(filesystem::path& p)
 
                     button_name.setText(name);
                     s = "Edible: " + merge(edible_parts);
-                    button_parts.m_button.setSize({ (float) (15 * s.size()) , 64 });
                     button_parts.setText(s);
+                    button_parts.m_rect.setSize({ 50 + (float)(button_parts.m_text.getLocalBounds().width) , b_h });
                 }
             }
         }

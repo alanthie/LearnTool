@@ -22,7 +22,7 @@ class UIState : public StateBase
 public:
     UImain&                     ui;
 
-    gui::Button                 button_pause;
+    gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
 	gui::Button                 button_prev;
@@ -48,6 +48,7 @@ public:
     int canvas_h;
     int left_w;
     int left_h;
+    float b_h = 50;
 
 public:
     UIState(UImain& g);
