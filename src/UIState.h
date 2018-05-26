@@ -66,6 +66,8 @@ public:
     void            refresh_size();
     sf::Vector2f    scale(std::shared_ptr<sf::Sprite> sprite);
     sf::Vector2f    canvas_scale = { 1.0f, 1.0f };
+    sf::Vector2f    canvas_full_scale = { 1.0f, 1.0f };
+    sf::Vector2f    canvas_movepos = { 0.0f, 0.0f };
 
     void load_path(filesystem::path& p);
     void load_root();

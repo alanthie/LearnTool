@@ -82,14 +82,12 @@ void UIState::b_click(std::string& b_name)
     else if (b_name == "b_zoom_plus")
     {
         canvas_scale = canvas_scale * 1.25f;
-        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_scale);
-        // minimap.m_drag_rect.setPosition()...
+        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_full_scale * 1.25f , canvas_movepos);
     }
     else if (b_name == "b_zoom_less")
     {
         canvas_scale = canvas_scale / 1.25f;
-        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_scale);
-        // minimap.m_drag_rect.setPosition()...
+        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_full_scale / 1.25f , canvas_movepos);
     }
 }
 
@@ -515,7 +513,10 @@ void UIState::render(sf::RenderTarget& renderer)
             sprite_canva->scale(scale(sprite_canva));
             sprite_canva->scale(canvas_scale);
 
+            canvas_full_scale = sprite_canva->getScale();
+
             sprite_canva->move(-1.0f * minimap.ratio_offset.x * (float)canvas_w, -1.0f * minimap.ratio_offset.y * (float)canvas_h);
+            canvas_movepos = { -1.0f * minimap.ratio_offset.x * (float)canvas_w, -1.0f * minimap.ratio_offset.y * (float)canvas_h };
             renderer.draw(*(sprite_canva.get()));
         }
     }
