@@ -12,6 +12,7 @@ class StateBase
         virtual ~StateBase() = default;
 
         virtual void b_click(std::string& b_name) {}
+        virtual void minmap_change(std::string& b_name) {}
 
         virtual void handleEvent(sf::Event e) {}
         virtual void handleInput() = 0;

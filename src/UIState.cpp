@@ -15,6 +15,28 @@
 #include <iterator>
 #include <cassert>
 
+void UIState::img_changed()
+{
+    minimap.moving = false;
+    minimap.ratio_offset = { 0.0f, 0.0f };
+    const sf::Vector2f pos_rect = minimap.m_rect.getPosition();
+    const sf::Vector2f wh_rect = minimap.m_rect.getSize();
+    minimap.m_drag_rect.setPosition(pos_rect.x + 1, pos_rect.y + 1);
+    minimap.m_drag_rect.setSize({ wh_rect.x - 1, wh_rect.y - 1 });
+
+    canvas_scale = { 1.0f, 1.0f };
+}
+
+void UIState::minmap_change(std::string& b_name) 
+{
+    std::cout << "minmap" << b_name << " change!" << '\n';
+    const sf::Vector2f pos = minimap.m_drag_rect.getPosition();
+    const sf::Vector2f pos_rect = minimap.m_rect.getPosition();
+    const sf::Vector2f wh = minimap.m_drag_rect.getSize();
+    const sf::Vector2f delta_pos = (pos - pos_rect) ;
+    minimap.ratio_offset = sf::Vector2f{ 0.0f + (delta_pos.x/wh.x), 0.0f + (delta_pos.y / wh.y) };
+}
+
 void UIState::b_click(std::string& b_name)
 {
     std::cout << "button" << b_name << " clicked!" << '\n';
@@ -34,8 +56,8 @@ void UIState::b_click(std::string& b_name)
         {
             index_img = 0;
         }
+        img_changed();
     }
-
     else if (b_name == "b_img_prev")
     {
         index_img--;
@@ -43,16 +65,31 @@ void UIState::b_click(std::string& b_name)
         {
             index_img = (long)img_files.size() - 1;
         }
+        img_changed();
     }
 
     else if (b_name == "b_topic_prev")
     {
         prev_path();
+        img_changed();
     }
-
     else if (b_name == "b_topic_next")
     {
         next_path();
+        img_changed();
+    }
+
+    else if (b_name == "b_zoom_plus")
+    {
+        canvas_scale = canvas_scale * 1.25f;
+        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_scale);
+        // minimap.m_drag_rect.setPosition()...
+    }
+    else if (b_name == "b_zoom_less")
+    {
+        canvas_scale = canvas_scale / 1.25f;
+        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_scale);
+        // minimap.m_drag_rect.setPosition()...
     }
 }
 
@@ -80,27 +117,12 @@ std::string merge(std::vector<std::string> v)
     return s;
 }
 
-void UIState::load_root()
-{
-    // Restart
-    current_parent  = filesystem::path(root);
-    current_path    = find_next_folder(root, filesystem::path());
-
-    if (current_path.empty() == false)
-    {
-        load_path(current_path);
-    }
-    else
-    {
-        assert(false);
-    }
-}
-
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
     button_name("b_name",   gui::ButtonSize::Small),
     button_parts("b_parts", gui::ButtonSize::Wide),
-    button_msg("b_msg",     gui::ButtonSize::Wide)
+    button_msg("b_msg",     gui::ButtonSize::Wide),
+    minimap("mmap", 50, 50)
 {
     button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
     button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
@@ -127,6 +149,8 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_menu[3][0]->m_rect.setSize({ b_w , b_h });
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
 
+    minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
+
     button_menu[0][0]->setFunction(&StateBase::b_click);
     button_menu[1][0]->setFunction(&StateBase::b_click);
     button_menu[1][1]->setFunction(&StateBase::b_click);
@@ -137,12 +161,36 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
 
-    //root = filesystem::path("..\\res\\topic");
+    minimap.setFunction(&StateBase::minmap_change);
+
+    root = filesystem::path("..\\res\\topic");
     //root = filesystem::path("E:\\000 plant\\p");
-    root = filesystem::path("E:\\000 plant\\p root");
+    //root = filesystem::path("E:\\000 plant\\p root");
     root_files = filesystem::path::get_directory_file(root, false, true);
 
-    load_root();
+    current_parent  = filesystem::path(root);
+    current_path    = find_next_folder(root, filesystem::path());
+
+    if (current_path.empty() == false)
+    {
+        load_path(current_path);
+    }
+}
+
+void UIState::load_root()
+{
+    // Restart
+    current_parent = filesystem::path(root);
+    current_path = find_next_folder(root, filesystem::path());
+
+    if (current_path.empty() == false)
+    {
+        load_path(current_path);
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
 void UIState::next_path(bool no_deepening)
@@ -413,6 +461,8 @@ void UIState::handleEvent(sf::Event e)
     button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
     button_msg.handleEvent(e,   m_pGame->getWindow(), *this);
+
+    minimap.handleEvent(e, m_pGame->getWindow(), *this);
 }
 
 
@@ -433,6 +483,7 @@ void UIState::update(sf::Time deltaTime)
                 next_path();
             }
             cnt_loop = 0;
+            img_changed();
         }
     }
 }
@@ -462,6 +513,9 @@ void UIState::render(sf::RenderTarget& renderer)
             sprite_canva.reset();
             sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
             sprite_canva->scale(scale(sprite_canva));
+            sprite_canva->scale(canvas_scale);
+
+            sprite_canva->move(-1.0f * minimap.ratio_offset.x * (float)canvas_w, -1.0f * minimap.ratio_offset.y * (float)canvas_h);
             renderer.draw(*(sprite_canva.get()));
         }
     }
@@ -473,6 +527,8 @@ void UIState::render(sf::RenderTarget& renderer)
     button_menu[2][1]->render(renderer);
     button_menu[3][0]->render(renderer);
     button_menu[3][1]->render(renderer);
+
+    minimap.render(renderer);
 
     button_name.render(renderer);
     button_parts.render(renderer);
@@ -489,6 +545,15 @@ void UIState::refresh_size()
 
     button_menu[0][0]->setPosition({ (float)canvas_w, 1 });
     button_menu[0][0]->m_rect.setSize({ 2 * b_w  , b_h });
+
+    float mmap_w = 4 * b_h - 1;
+    minimap.m_rect.setSize({ mmap_w , mmap_w, });
+
+    //minimap.m_drag_rect.setSize({ mmap_w - 1, mmap_w - 1 });
+    if (minimap.moving == false)
+    {
+        minimap.setPosition({ (float)canvas_w - mmap_w, 1 });
+    }
 
     button_menu[1][0]->m_rect.setSize({ b_w , b_h });
     button_menu[1][1]->m_rect.setSize({ b_w  , b_h });
