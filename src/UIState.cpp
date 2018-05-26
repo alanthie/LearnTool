@@ -123,7 +123,8 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_parts.setFunction(   &StateBase::b_click);
 
     //root = filesystem::path("..\\res\\topic");
-    root = filesystem::path("E:\\000 plant\\p");
+    //root = filesystem::path("E:\\000 plant\\p");
+    root = filesystem::path("E:\\000 plant\\p root");
 
     root_files = filesystem::path::get_directory_file(root, false, true);
 
@@ -277,7 +278,7 @@ void UIState::prev_path(bool no_deepening)
     {
         current_path = save_current_parent;
         current_parent = save_current_parent.parent_path();
-        /*current_path = find_prev_folder(current_parent, current_path, true);*/
+
         if ((current_path.empty() == true) || (current_path == root))
         {
             // Restart
@@ -369,7 +370,6 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
             }
         }
 
-        //...
     }
 
     return p;
@@ -551,7 +551,7 @@ void UIState::refresh_size()
     button_menu[3][1]->setPosition({ (float)canvas_w + b_w, 3 * b_h });
 
     button_name.setPosition({ (float)1, (float)canvas_h });
-    button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w/1.5: w/3 ) , b_h });
+    button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w-1: w/3 ) , b_h });
 
     button_parts.setPosition({ button_name.getSize().x , (float)canvas_h });
     button_parts.m_rect.setSize({ w - (button_name.getSize().x + 1) , b_h });
@@ -607,8 +607,11 @@ void UIState::load_path(filesystem::path& p)
         ui.getWindow().display();
     }
 
-    std::string name = p.filename();
+    std::string fullname = p.make_absolute().str();
+    std::string name = fullname.substr(fullname.find(root.make_absolute().str()) + root.make_absolute().str().size()+1);
     std::string desc;
+
+    std::cout << "Name:" << name << std::endl;
 
     ui.getWindow().setTitle(ui.cfg.title + " [" + p.make_absolute().str() + "]");
 
