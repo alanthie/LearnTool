@@ -36,6 +36,15 @@ void UIState::b_click(std::string& b_name)
         }
     }
 
+    else if (b_name == "b_img_prev")
+    {
+        index_img--;
+        if (index_img < 0)
+        {
+            index_img = (long)img_files.size() - 1;
+        }
+    }
+
     else if (b_name == "b_topic_prev")
     {
         prev_path();
@@ -44,15 +53,6 @@ void UIState::b_click(std::string& b_name)
     else if (b_name == "b_topic_next")
     {
         next_path();
-    }
-
-    else if (b_name == "b_img_prev")
-    {
-        index_img--;
-        if (index_img < 0)
-        {
-            index_img = (long)img_files.size() - 1;
-        }
     }
 }
 
@@ -80,6 +80,21 @@ std::string merge(std::vector<std::string> v)
     return s;
 }
 
+void UIState::load_root()
+{
+    // Restart
+    current_parent  = filesystem::path(root);
+    current_path    = find_next_folder(root, filesystem::path());
+
+    if (current_path.empty() == false)
+    {
+        load_path(current_path);
+    }
+    else
+    {
+        assert(false);
+    }
+}
 
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
@@ -125,20 +140,9 @@ UIState::UIState(UImain& g) : StateBase(g),
     //root = filesystem::path("..\\res\\topic");
     //root = filesystem::path("E:\\000 plant\\p");
     root = filesystem::path("E:\\000 plant\\p root");
-
     root_files = filesystem::path::get_directory_file(root, false, true);
 
-    current_parent = filesystem::path(root);
-    current_path = find_next_folder(root, filesystem::path());
-
-    if (current_path.empty() == false)
-    {
-        load_path(current_path);
-    }
-    else
-    {
-        assert(false);
-    }
+    load_root();
 }
 
 void UIState::next_path(bool no_deepening)
@@ -166,17 +170,7 @@ void UIState::next_path(bool no_deepening)
     else if (save_current_parent == root)
     {
          // Restart
-        current_parent = filesystem::path(root);
-        current_path = find_next_folder(root, filesystem::path());
-
-        if (current_path.empty() == false)
-        {
-            load_path(current_path);
-        }
-        else
-        {
-            assert(false);
-        }
+        load_root();
         return;
     }
     else
@@ -186,17 +180,7 @@ void UIState::next_path(bool no_deepening)
         if (current_path == root)
         {
             // Restart
-            current_parent = filesystem::path(root);
-            current_path = find_next_folder(root, filesystem::path());
-
-            if (current_path.empty() == false)
-            {
-                load_path(current_path);
-            }
-            else
-            {
-                assert(false);
-            }
+            load_root();
             return;
         }
 
@@ -209,17 +193,7 @@ void UIState::next_path(bool no_deepening)
             if (current_path == root)
             {
                 // Restart
-                current_parent = filesystem::path(root);
-                current_path = find_next_folder(root, filesystem::path());
-
-                if (current_path.empty() == false)
-                {
-                    load_path(current_path);
-                }
-                else
-                {
-                    assert(false);
-                }
+                load_root();
                 return;
             }
 
@@ -249,17 +223,7 @@ void UIState::prev_path(bool no_deepening)
         if (current_path == root)
         {
             // Restart
-            current_parent = filesystem::path(root);
-            current_path = find_last_folder(root);
-
-            if (current_path.empty() == false)
-            {
-                load_path(current_path);
-            }
-            else
-            {
-                assert(false);
-            }
+            load_root();
             return;
         }
         else
@@ -282,17 +246,7 @@ void UIState::prev_path(bool no_deepening)
         if ((current_path.empty() == true) || (current_path == root))
         {
             // Restart
-            current_parent = filesystem::path(root);
-            current_path = find_last_folder(root);
-
-            if (current_path.empty() == false)
-            {
-                load_path(current_path);
-            }
-            else
-            {
-                assert(false);
-            }
+            load_root();
             return;
         }
 

@@ -63,7 +63,9 @@ public:
 
     void            refresh_size();
     sf::Vector2f    scale(std::shared_ptr<sf::Sprite> sprite);
-    void            load_path(filesystem::path& p);
+
+    void load_root();
+    void load_path(filesystem::path& p);
 
     void b_click(std::string& b_name) override;
 
