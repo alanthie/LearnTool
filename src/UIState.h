@@ -25,6 +25,7 @@ public:
     gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
+    gui::Button                 button_msg;
     std::shared_ptr<sf::Sprite> sprite_canva;
 
     bool is_pause = false;
@@ -43,16 +44,12 @@ public:
 
     std::vector<filesystem::path>               img_files;
     std::vector<std::shared_ptr<sf::Texture>>   img_texture;
-    std::vector<std::shared_ptr<sf::Sprite>>    img_sprite;
 
     float canvas_x_perc = 0.85f;
-    float canvas_y_perc = 0.85f;
     int w;
     int h;
     int canvas_w;
     int canvas_h;
-    int left_w;
-    int left_h;
     float b_h = 50;
 
 public:
@@ -71,6 +68,11 @@ public:
     void b_click(std::string& b_name) override;
 
     filesystem::path find_next_folder(filesystem::path parent_folder, filesystem::path last_folder);
+    filesystem::path find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder);
+    filesystem::path find_last_folder(filesystem::path parent_folder);
 
-    void end_path();
+    void next_path();
+    void prev_path();
+
+    std::vector<std::string> get_img_files(filesystem::path& p);
 };

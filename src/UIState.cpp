@@ -30,10 +30,20 @@ void UIState::b_click(std::string& b_name)
     else if (b_name == "b_img_next")
     {
         index_img++;
-        if (index_img > img_sprite.size() - 1)
+        if (index_img > img_files.size() - 1)
         {
             index_img = 0;
         }
+    }
+
+    else if (b_name == "b_topic_prev")
+    {
+        prev_path();
+    }
+
+    else if (b_name == "b_topic_next")
+    {
+        next_path();
     }
 
     else if (b_name == "b_img_prev")
@@ -41,7 +51,7 @@ void UIState::b_click(std::string& b_name)
         index_img--;
         if (index_img < 0)
         {
-            index_img = (long)img_sprite.size() - 1;
+            index_img = (long)img_files.size() - 1;
         }
     }
 }
@@ -74,7 +84,8 @@ std::string merge(std::vector<std::string> v)
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
     button_name("b_name",   gui::ButtonSize::Small),
-    button_parts("b_parts", gui::ButtonSize::Wide)
+    button_parts("b_parts", gui::ButtonSize::Wide),
+    button_msg("b_msg",     gui::ButtonSize::Wide)
 {
     button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
     button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
@@ -111,27 +122,59 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
 
-    root = filesystem::path("..\\res\\topic");
+    //root = filesystem::path("..\\res\\topic");
+    root = filesystem::path("E:\\000 plant\\p");
+
     root_files = filesystem::path::get_directory_file(root, false);
 
     current_parent = filesystem::path(root);
     current_path = find_next_folder(root, filesystem::path());
     load_path(current_path);
-    /*load_path(filesystem::path("..\\res\\\plant\\chufa (leave_stem, oil, root)"));*/
 }
 
-void UIState::end_path()
+void UIState::next_path()
 {
     current_path = find_next_folder(current_parent, current_path);
     if (current_path.empty() == false)
     {
         load_path(current_path);
+        if (img_files.size() == 0)
+        {
+        }
     }
     else
     {
+         // Restart
         current_parent = filesystem::path(root);
         current_path = find_next_folder(root, filesystem::path());
+
         load_path(current_path);
+        if (img_files.size() == 0)
+        {
+        }
+    }
+}
+
+void UIState::prev_path()
+{
+    current_path = find_prev_folder(current_parent, current_path);
+    if (current_path.empty() == false)
+    {
+        load_path(current_path);
+        if (img_files.size() == 0)
+        {
+        }
+    }
+    else
+    {
+        // Restart
+        current_parent = filesystem::path(root);
+        current_path = find_last_folder(root);
+
+        load_path(current_path);
+        if (img_files.size() == 0)
+        {
+        }
     }
 }
 
@@ -143,22 +186,94 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
         std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
         for (size_t i = 0; i < v.size(); i++)
         {
-            p = filesystem::path(v[i]);
-            break;
+            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+            if (vf.size() > 0)
+            {
+                p = filesystem::path(v[i]);
+                break;
+            }
         }
     }
     else
     {
         std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
-        for (size_t i = 0; i < v.size(); i++)
+        int k = 0;
+        for (int i = 0; i < v.size(); i++)
         {
             if (v[i] == last_folder.make_absolute().str())
             {
-                if (i < v.size() - 1)
-                {
-                    p = filesystem::path(v[i + 1]);
-                    break;
-                }
+                k = i;
+                break;
+            }
+        }
+
+        for (int i = k+1; i < v.size(); i++)
+        {
+            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+            if (vf.size() > 0)
+            {
+                p = filesystem::path(v[i]);
+                break;
+            }
+        }
+    }
+
+    return p;
+}
+
+filesystem::path UIState::find_last_folder(filesystem::path parent_folder)
+{
+    filesystem::path p;
+
+    std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+    for (size_t i = v.size() - 1; i >= 0; i--)
+    { 
+        std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+        if (vf.size() > 0)
+        {
+            p = filesystem::path(v[i]);
+            break;
+        }
+    }
+    return p;
+}
+
+filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder)
+{
+    filesystem::path p;
+    if (last_folder.empty())
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+        for (size_t i = 0; i < v.size(); i++)
+        {
+            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+            if (vf.size() > 0)
+            {
+                p = filesystem::path(v[i]);
+                break;
+            }
+        }
+    }
+    else
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+        int k = 0;
+        for (int i = 0; i < v.size(); i++)
+        {
+            if (v[i] == last_folder.make_absolute().str())
+            {
+                k = i;
+                break;
+            }
+        }
+
+        for (int i = k-1; i >= 0; i--)
+        {
+            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+            if (vf.size() > 0)
+            {
+                p = filesystem::path(v[i]);
+                break;
             }
         }
     }
@@ -176,9 +291,11 @@ void UIState::handleEvent(sf::Event e)
     button_menu[3][0]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[3][1]->handleEvent(e, m_pGame->getWindow(), *this);
 
-    button_name.handleEvent(e, m_pGame->getWindow(), *this);
+    button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
+    button_msg.handleEvent(e,   m_pGame->getWindow(), *this);
 }
+
 
 void UIState::handleInput() 
 {
@@ -192,10 +309,9 @@ void UIState::update(sf::Time deltaTime)
         if (cnt_loop > 60 * 1) // 1 sec
         {
             index_img++;
-            if (index_img > img_sprite.size() - 1)
+            if (index_img > img_files.size() - 1)
             {
-                end_path();
-                //index_img = 0;
+                next_path();
             }
             cnt_loop = 0;
         }
@@ -211,17 +327,21 @@ void UIState::render(sf::RenderTarget& renderer)
 {
     refresh_size();
 
-    if (img_sprite.size() > 0)
+    if (img_files.size() > 0)
     {
         assert(index_img >= 0);
-        assert(index_img <= img_sprite.size() - 1);
+        assert(index_img <= img_files.size() - 1);
 
-        sprite_canva = img_sprite[index_img];
-        if (img_sprite[index_img].get() != nullptr)
+        if (img_texture[index_img].get() == nullptr)
+        {
+            img_texture[index_img] = std::shared_ptr<sf::Texture>(new sf::Texture);
+            img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
+        }
+
+        if (img_texture[index_img].get() != nullptr)
         {
             sprite_canva.reset();
             sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
- 
             sprite_canva->scale(scale(sprite_canva));
             renderer.draw(*(sprite_canva.get()));
         }
@@ -237,6 +357,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
     button_name.render(renderer);
     button_parts.render(renderer);
+    button_msg.render(renderer);
 }
 
 void UIState::refresh_size()
@@ -244,16 +365,14 @@ void UIState::refresh_size()
     w = (int) ui.getWindow().getSize().x;
     h = (int) ui.getWindow().getSize().y;
     canvas_w = (int)(canvas_x_perc * w);
-    canvas_h = (int)(canvas_y_perc * h);
-    left_w = (int)((1.0f - canvas_x_perc) * w);
-    left_h = (int)((1.0f - canvas_y_perc) * h);
-    float b_w = (float)(w - canvas_w) / 2;
+    canvas_h = (int)(h - 2 * b_h);
+    float b_w = (float)(w - canvas_w -1) / 2;
 
-    button_menu[0][0]->setPosition({ (float)canvas_w, 0 });
-    button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
+    button_menu[0][0]->setPosition({ (float)canvas_w, 1 });
+    button_menu[0][0]->m_rect.setSize({ 2 * b_w  , b_h });
 
     button_menu[1][0]->m_rect.setSize({ b_w , b_h });
-    button_menu[1][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[1][1]->m_rect.setSize({ b_w  , b_h });
     button_menu[2][0]->m_rect.setSize({ b_w , b_h });
     button_menu[2][1]->m_rect.setSize({ b_w , b_h });
     button_menu[3][0]->m_rect.setSize({ b_w , b_h });
@@ -266,11 +385,14 @@ void UIState::refresh_size()
     button_menu[3][0]->setPosition({ (float)canvas_w, 3 * b_h });
     button_menu[3][1]->setPosition({ (float)canvas_w + b_w, 3 * b_h });
 
-    button_name.setPosition({ (float)0, (float)canvas_h });
-    button_name.m_rect.setSize({ button_name.getSize().x  , b_h });
+    button_name.setPosition({ (float)1, (float)canvas_h });
+    button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w/2: w/3 ) , b_h });
 
     button_parts.setPosition({ button_name.getSize().x , (float)canvas_h });
-    button_parts.m_rect.setSize({ w - (0 + button_name.getSize().x )  , b_h });
+    button_parts.m_rect.setSize({ w - (button_name.getSize().x + 1) , b_h });
+
+    button_msg.setPosition({ 1 , (float)canvas_h + b_h });
+    button_msg.m_rect.setSize({ (float)w - 2, b_h - 1 });
 }
 
 sf::Vector2f UIState::scale(std::shared_ptr<sf::Sprite> sprite)
@@ -280,15 +402,50 @@ sf::Vector2f UIState::scale(std::shared_ptr<sf::Sprite> sprite)
     return sf::Vector2f{ std::min(sx, sy), std::min(sx, sy) };
 }
 
+std::vector<std::string> UIState::get_img_files(filesystem::path& p)
+{
+    std::vector<std::string> imgfiles;
+    std::vector<std::string> files = filesystem::path::get_directory_file(p, false);
+    for (size_t i = 0; i < files.size(); i++)
+    {
+        filesystem::path pv = files.at(i);
+        if (pv.is_file())
+        {
+            std::string s = pv.extension();
+            std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+            if ((s == "jpg") || (s == "png") || (s == "gif") || (s == "jpeg") || (s == "bmp"))
+            {
+                imgfiles.push_back(pv.make_absolute().str());
+            }
+        }
+    }
+    return imgfiles;
+}
+
 void UIState::load_path(filesystem::path& p)
 {
     ini_filename.clear();
     img_files.clear();
     img_texture.clear();
-    img_sprite.clear();
 
     index_img = 0;
     cnt_loop = 0;
+    ini.reset();
+
+    {
+        button_msg.setText("loading...");
+        button_name.setText("");
+        button_parts.setText("");
+
+        ui.getWindow().clear();
+        render(ui.getWindow());
+        ui.getWindow().display();
+    }
+
+    std::string name = p.filename();
+    std::string desc;
+
+    ui.getWindow().setTitle(ui.cfg.title + " [" + p.make_absolute().str() + "]");
 
     std::vector<std::string> files = filesystem::path::get_directory_file(p, false);
     for (size_t i = 0; i < files.size(); i++)
@@ -307,10 +464,8 @@ void UIState::load_path(filesystem::path& p)
             {
                 if (pv.filename() == "desc.ini")
                 {
-                    ini.reset();
                     ini = std::shared_ptr<ini_parser>(new ini_parser(pv.make_absolute().str()));
 
-                    std::string name;
                     try
                     {
                         name = ini->get_string("name", "main");
@@ -337,30 +492,23 @@ void UIState::load_path(filesystem::path& p)
                     {
                     }
 
-                    std::string desc;
                     if (key.size() > 0)
                     {
                         std::vector<std::string> parts = split(value, ';');
                         desc = key + ": " + merge(parts);
                     }
-
-                    button_name.setText(name);
-
-                    button_parts.setText(desc);
-                    button_parts.m_rect.setSize({ 50 + (float)(button_parts.m_text.getLocalBounds().width) , b_h });
                 }
             }
         }
     }
 
-    refresh_size();
     for (size_t i = 0; i < img_files.size(); i++)
     {
-        std::shared_ptr<sf::Texture> texture(new sf::Texture);
-        texture->loadFromFile(img_files[i].make_absolute().str());
+        std::shared_ptr<sf::Texture> texture(nullptr);
         img_texture.push_back(texture);
-
-        std::shared_ptr<sf::Sprite> sprite(new sf::Sprite(*texture));
-        img_sprite.push_back(sprite);
     }
+
+    button_name.setText(name);
+    button_parts.setText(desc);
+    button_msg.setText("");
 }

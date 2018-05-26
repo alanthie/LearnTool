@@ -1,4 +1,5 @@
 //
+#pragma once
 #include <string>
 
 class Config
@@ -8,7 +9,5 @@ public:
     int default_w = 900;
     int default_h = 600;
 
-    Config()
-    {
-    }
+    Config() = default;
 };

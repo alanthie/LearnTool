@@ -2,10 +2,13 @@
 #pragma once
 
 #include "SFML_SDK/Game.h"
+#include "Config.hpp"
 #include <string>
 
 class UImain : public Game
 {
 public:
-    UImain(int w, int h, std::string title);
+    UImain(Config& _cfg);
+
+    Config cfg;
 };

@@ -23,7 +23,7 @@
 int main(int argc, char *argv[])
 {
     Config cfg;
-    UImain ui(cfg.default_w, cfg.default_h, cfg.title);
+    UImain ui(cfg);
 
     ui.run();
 

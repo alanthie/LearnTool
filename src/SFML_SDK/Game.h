@@ -28,7 +28,7 @@ class Game /*: public NonCopyable, public NonMovable*/
         template<typename T, typename... Args>
         void changeState(Args&&... args);
 
-        const sf::RenderWindow& getWindow() /*const*/;
+        /*const*/ sf::RenderWindow& getWindow() /*const*/;
 
     //protected:
         void handleEvent();

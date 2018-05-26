@@ -9,7 +9,6 @@ Game::Game(int w, int h, std::string title)
 {
     m_window.setPosition({m_window.getPosition().x, 0});
     m_window.setFramerateLimit(60);
-    /*pushState<StatePlaying>(*this);*/
 }
 
 // Runs the main loop 
@@ -142,7 +141,7 @@ void Game::exitGame()
 }
 
 // on tin
-const sf::RenderWindow& Game::getWindow() /*const*/
+/*const */sf::RenderWindow& Game::getWindow() /*const*/
 {
     return m_window;
 }
