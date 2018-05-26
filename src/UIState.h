@@ -67,12 +67,12 @@ public:
 
     void b_click(std::string& b_name) override;
 
-    filesystem::path find_next_folder(filesystem::path parent_folder, filesystem::path last_folder);
-    filesystem::path find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder);
+    filesystem::path find_next_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening = false);
+    filesystem::path find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening = false);
     filesystem::path find_last_folder(filesystem::path parent_folder);
 
-    void next_path();
-    void prev_path();
+    void next_path(bool no_deepening = false);
+    void prev_path(bool no_deepening = false);
 
     std::vector<std::string> get_img_files(filesystem::path& p);
 };

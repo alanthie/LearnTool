@@ -125,78 +125,210 @@ UIState::UIState(UImain& g) : StateBase(g),
     //root = filesystem::path("..\\res\\topic");
     root = filesystem::path("E:\\000 plant\\p");
 
-    root_files = filesystem::path::get_directory_file(root, false);
+    root_files = filesystem::path::get_directory_file(root, false, true);
 
     current_parent = filesystem::path(root);
     current_path = find_next_folder(root, filesystem::path());
-    load_path(current_path);
-}
 
-void UIState::next_path()
-{
-    current_path = find_next_folder(current_parent, current_path);
     if (current_path.empty() == false)
     {
         load_path(current_path);
-        if (img_files.size() == 0)
-        {
-        }
     }
     else
+    {
+        assert(false);
+    }
+}
+
+void UIState::next_path(bool no_deepening)
+{
+    filesystem::path save_current_path = current_path;
+    filesystem::path save_current_parent = current_parent;
+
+    current_path = find_next_folder(current_parent, current_path, no_deepening);
+    if (current_path.empty() == false)
+    {
+        if (current_parent != current_path.parent_path())
+        {
+            current_parent = current_path.parent_path();
+        }
+
+        if (current_path.empty() == false)
+        {
+            load_path(current_path);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    else if (save_current_parent == root)
     {
          // Restart
         current_parent = filesystem::path(root);
         current_path = find_next_folder(root, filesystem::path());
 
-        load_path(current_path);
-        if (img_files.size() == 0)
+        if (current_path.empty() == false)
         {
+            load_path(current_path);
         }
-    }
-}
-
-void UIState::prev_path()
-{
-    current_path = find_prev_folder(current_parent, current_path);
-    if (current_path.empty() == false)
-    {
-        load_path(current_path);
-        if (img_files.size() == 0)
+        else
         {
+            assert(false);
         }
+        return;
     }
     else
     {
-        // Restart
-        current_parent = filesystem::path(root);
-        current_path = find_last_folder(root);
-
-        load_path(current_path);
-        if (img_files.size() == 0)
+        current_path = save_current_parent;
+        current_parent = save_current_parent.parent_path();
+        if (current_path == root)
         {
+            // Restart
+            current_parent = filesystem::path(root);
+            current_path = find_next_folder(root, filesystem::path());
+
+            if (current_path.empty() == false)
+            {
+                load_path(current_path);
+            }
+            else
+            {
+                assert(false);
+            }
+            return;
+        }
+
+        current_path = find_next_folder(current_parent, current_path, true);
+        while (current_path.empty() == true)
+        {
+            current_path = save_current_parent.parent_path();
+            current_parent = save_current_parent.parent_path().parent_path();
+
+            if (current_path == root)
+            {
+                // Restart
+                current_parent = filesystem::path(root);
+                current_path = find_next_folder(root, filesystem::path());
+
+                if (current_path.empty() == false)
+                {
+                    load_path(current_path);
+                }
+                else
+                {
+                    assert(false);
+                }
+                return;
+            }
+
+            next_path(true);
+        }
+        
+        if (current_path.empty() == false)
+        {
+            load_path(current_path);
+        }
+        else
+        {
+            assert(false);
         }
     }
 }
 
-filesystem::path UIState::find_next_folder(filesystem::path parent_folder, filesystem::path last_folder)
+void UIState::prev_path(bool no_deepening)
 {
-    filesystem::path p;
-    if (last_folder.empty())
+    filesystem::path save_current_path = current_path;
+    filesystem::path save_current_parent = current_parent;
+
+    current_path = find_prev_folder(current_parent, current_path, no_deepening);
+    if (current_path.empty() == false)
     {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
-        for (size_t i = 0; i < v.size(); i++)
+        current_parent = current_path.parent_path();
+        if (current_path == root)
         {
-            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-            if (vf.size() > 0)
+            // Restart
+            current_parent = filesystem::path(root);
+            current_path = find_last_folder(root);
+
+            if (current_path.empty() == false)
             {
-                p = filesystem::path(v[i]);
-                break;
+                load_path(current_path);
+            }
+            else
+            {
+                assert(false);
+            }
+            return;
+        }
+        else
+        {
+            if (current_path.empty() == false)
+            {
+                load_path(current_path);
+            }
+            else
+            {
+                assert(false);
             }
         }
     }
     else
     {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+        current_path = save_current_parent;
+        current_parent = save_current_parent.parent_path();
+        /*current_path = find_prev_folder(current_parent, current_path, true);*/
+        if ((current_path.empty() == true) || (current_path == root))
+        {
+            // Restart
+            current_parent = filesystem::path(root);
+            current_path = find_last_folder(root);
+
+            if (current_path.empty() == false)
+            {
+                load_path(current_path);
+            }
+            else
+            {
+                assert(false);
+            }
+            return;
+        }
+
+        if (current_path.empty() == false)
+        {
+            current_parent = current_path.parent_path();
+            load_path(current_path);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+}
+
+filesystem::path UIState::find_next_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening)
+{
+    filesystem::path p;
+    if (last_folder.empty())
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
+        for (size_t i = 0; i < v.size(); i++)
+        {
+            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            {
+                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+                if (vf.size() > 0)
+                {
+                    p = filesystem::path(v[i]);
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
         int k = 0;
         for (int i = 0; i < v.size(); i++)
         {
@@ -207,15 +339,37 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
             }
         }
 
-        for (int i = k+1; i < v.size(); i++)
+        if (no_deepening == false)
         {
-            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-            if (vf.size() > 0)
+            std::vector<std::string> v_sub = filesystem::path::get_directory_file(last_folder, false, true);
+            for (size_t j = 0; j < v_sub.size(); j++)
             {
-                p = filesystem::path(v[i]);
-                break;
+                if (filesystem::path(v_sub[j]).filename() != ".Thumbs")
+                {
+                    std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
+                    if (vf_sub.size() > 0)
+                    {
+                        p = filesystem::path(v_sub[j]);
+                        return p;
+                    }
+                }
             }
         }
+
+        for (int i = k+1; i < v.size(); i++)
+        {
+            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            {
+                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+                if (vf.size() > 0)
+                {
+                    p = filesystem::path(v[i]);
+                    break;
+                }
+            }
+        }
+
+        //...
     }
 
     return p;
@@ -225,26 +379,10 @@ filesystem::path UIState::find_last_folder(filesystem::path parent_folder)
 {
     filesystem::path p;
 
-    std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+    std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
     for (size_t i = v.size() - 1; i >= 0; i--)
     { 
-        std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-        if (vf.size() > 0)
-        {
-            p = filesystem::path(v[i]);
-            break;
-        }
-    }
-    return p;
-}
-
-filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder)
-{
-    filesystem::path p;
-    if (last_folder.empty())
-    {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
-        for (size_t i = 0; i < v.size(); i++)
+        if (filesystem::path(v[i]).filename() != ".Thumbs")
         {
             std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
             if (vf.size() > 0)
@@ -254,9 +392,31 @@ filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, files
             }
         }
     }
+    return p;
+}
+
+filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening)
+{
+    filesystem::path p;
+    if (last_folder.empty())
+    {
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
+        for (size_t i = 0; i < v.size(); i++)
+        {
+            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            {
+                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+                if (vf.size() > 0)
+                {
+                    p = filesystem::path(v[i]);
+                    break;
+                }
+            }
+        }
+    }
     else
     {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false);
+        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
         int k = 0;
         for (int i = 0; i < v.size(); i++)
         {
@@ -269,13 +429,18 @@ filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, files
 
         for (int i = k-1; i >= 0; i--)
         {
-            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-            if (vf.size() > 0)
+            if (filesystem::path(v[i]).filename() != ".Thumbs")
             {
-                p = filesystem::path(v[i]);
-                break;
+                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+                if (vf.size() > 0)
+                {
+                    p = filesystem::path(v[i]);
+                    break;
+                }
             }
         }
+        
+        // at root
     }
 
     return p;
@@ -386,7 +551,7 @@ void UIState::refresh_size()
     button_menu[3][1]->setPosition({ (float)canvas_w + b_w, 3 * b_h });
 
     button_name.setPosition({ (float)1, (float)canvas_h });
-    button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w/2: w/3 ) , b_h });
+    button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w/1.5: w/3 ) , b_h });
 
     button_parts.setPosition({ button_name.getSize().x , (float)canvas_h });
     button_parts.m_rect.setSize({ w - (button_name.getSize().x + 1) , b_h });
