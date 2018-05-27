@@ -150,8 +150,8 @@ UIState::UIState(UImain& g) : StateBase(g),
 
     minimap.setFunction(&StateBase::minmap_change);
 
-    //root = filesystem::path("..\\res\\topic");
-    root = filesystem::path("E:\\000 plant\\p");
+    root = filesystem::path("..\\res\\topic");
+    //root = filesystem::path("E:\\000 plant\\p");
     //root = filesystem::path("E:\\000 plant\\p root");
     root_files = filesystem::path::get_directory_file(root, false, true);
 
