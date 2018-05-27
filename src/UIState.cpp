@@ -150,8 +150,9 @@ UIState::UIState(UImain& g) : StateBase(g),
 
     minimap.setFunction(&StateBase::minmap_change);
 
-    root = filesystem::path("..\\res\\topic");
+    //root = filesystem::path("..\\res\\topic");
     //root = filesystem::path("E:\\000 plant\\p");
+    root = filesystem::path("E:\\000 plant");
     //root = filesystem::path("E:\\000 plant\\p root");
     root_files = filesystem::path::get_directory_file(root, false, true);
 
@@ -183,7 +184,6 @@ void UIState::load_root()
 void UIState::next_path(bool no_deepening)
 {
     filesystem::path save_current_path = current_path;
-    //filesystem::path save_current_parent = current_parent;
     filesystem::path save_current_parent = save_current_path.parent_path();
 
     assert(save_current_parent.empty() == false);
@@ -213,8 +213,8 @@ void UIState::next_path(bool no_deepening)
     }
     else
     {
-        current_path = save_current_parent;
-        current_parent = save_current_parent.parent_path();
+        current_path    = save_current_parent;
+        current_parent  = save_current_parent.parent_path();
         if (current_path.make_absolute().str() == root.make_absolute().str())
         {
             // Restart
@@ -252,7 +252,6 @@ void UIState::next_path(bool no_deepening)
 void UIState::prev_path(bool no_deepening)
 {
     filesystem::path save_current_path = current_path;
-    /*filesystem::path save_current_parent = current_parent;*/
     filesystem::path save_current_parent = save_current_path.parent_path();
 
     current_path = find_prev_folder(save_current_parent, save_current_path, no_deepening);
@@ -359,6 +358,20 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
                 {
                     p = filesystem::path(v[i]);
                     break;
+                }
+            }
+
+            std::vector<std::string> v_sub = filesystem::path::get_directory_file(filesystem::path(v[i]), false, true);
+            for (size_t j = 0; j < v_sub.size(); j++)
+            {
+                if (filesystem::path(v_sub[j]).filename() != ".Thumbs")
+                {
+                    std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
+                    if (vf_sub.size() > 0)
+                    {
+                        p = filesystem::path(v_sub[j]);
+                        return p;
+                    }
                 }
             }
         }
@@ -617,7 +630,7 @@ void UIState::load_path(filesystem::path& p)
     }
 
     std::string fullname = p.make_absolute().str();
-    std::string name = fullname.substr(fullname.find(root.make_absolute().str()) + root.make_absolute().str().size()+1);
+    std::string name = fullname.substr(fullname.find(root.make_absolute().str()) + root.make_absolute().str().size());
     std::string desc;
 
     std::cout << "Name:" << name << std::endl;
