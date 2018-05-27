@@ -194,9 +194,12 @@ void UIState::load_root()
 void UIState::next_path(bool no_deepening)
 {
     filesystem::path save_current_path = current_path;
-    filesystem::path save_current_parent = current_parent;
+    //filesystem::path save_current_parent = current_parent;
+    filesystem::path save_current_parent = save_current_path.parent_path();
 
-    current_path = find_next_folder(current_parent, current_path, no_deepening);
+    assert(save_current_parent.empty() == false);
+
+    current_path = find_next_folder(save_current_parent, save_current_path, no_deepening);
     if (current_path.empty() == false)
     {
         if (current_parent != current_path.parent_path())
@@ -213,7 +216,7 @@ void UIState::next_path(bool no_deepening)
             assert(false);
         }
     }
-    else if (save_current_parent == root)
+    else if (save_current_parent.make_absolute().str() == root.make_absolute().str())
     {
          // Restart
         load_root();
@@ -223,7 +226,7 @@ void UIState::next_path(bool no_deepening)
     {
         current_path = save_current_parent;
         current_parent = save_current_parent.parent_path();
-        if (current_path == root)
+        if (current_path.make_absolute().str() == root.make_absolute().str())
         {
             // Restart
             load_root();
@@ -236,7 +239,7 @@ void UIState::next_path(bool no_deepening)
             current_path = save_current_parent.parent_path();
             current_parent = save_current_parent.parent_path().parent_path();
 
-            if (current_path == root)
+            if (current_path.make_absolute().str() == root.make_absolute().str())
             {
                 // Restart
                 load_root();
@@ -260,13 +263,14 @@ void UIState::next_path(bool no_deepening)
 void UIState::prev_path(bool no_deepening)
 {
     filesystem::path save_current_path = current_path;
-    filesystem::path save_current_parent = current_parent;
+    /*filesystem::path save_current_parent = current_parent;*/
+    filesystem::path save_current_parent = save_current_path.parent_path();
 
-    current_path = find_prev_folder(current_parent, current_path, no_deepening);
+    current_path = find_prev_folder(save_current_parent, save_current_path, no_deepening);
     if (current_path.empty() == false)
     {
         current_parent = current_path.parent_path();
-        if (current_path == root)
+        if (current_path.make_absolute().str() == root.make_absolute().str())
         {
             // Restart
             load_root();
@@ -289,7 +293,7 @@ void UIState::prev_path(bool no_deepening)
         current_path = save_current_parent;
         current_parent = save_current_parent.parent_path();
 
-        if ((current_path.empty() == true) || (current_path == root))
+        if ((current_path.empty() == true) || (current_path.make_absolute().str() == root.make_absolute().str()))
         {
             // Restart
             load_root();
@@ -547,15 +551,6 @@ void UIState::refresh_size()
     button_menu[0][0]->setPosition({ (float)canvas_w, 1 });
     button_menu[0][0]->m_rect.setSize({ 2 * b_w  , b_h });
 
-    float mmap_w = 4 * b_h - 1;
-    minimap.m_rect.setSize({ mmap_w , mmap_w, });
-
-    //minimap.m_drag_rect.setSize({ mmap_w - 1, mmap_w - 1 });
-    if (minimap.moving == false)
-    {
-        minimap.setPosition({ (float)canvas_w - mmap_w, 1 });
-    }
-
     button_menu[1][0]->m_rect.setSize({ b_w , b_h });
     button_menu[1][1]->m_rect.setSize({ b_w  , b_h });
     button_menu[2][0]->m_rect.setSize({ b_w , b_h });
@@ -569,6 +564,15 @@ void UIState::refresh_size()
     button_menu[2][1]->setPosition({ (float)canvas_w + b_w, 2*b_h });
     button_menu[3][0]->setPosition({ (float)canvas_w, 3 * b_h });
     button_menu[3][1]->setPosition({ (float)canvas_w + b_w, 3 * b_h });
+
+    //float mmap_w = 4 * b_h - 1;
+    float mmap_w = 2 * b_w;
+    minimap.m_rect.setSize({ mmap_w , mmap_w, });
+    if (minimap.moving == false)
+    {
+        //minimap.setPosition({ (float)canvas_w - mmap_w, 1 });
+        minimap.setPosition({ (float)canvas_w, 4 * b_h });
+    }
 
     button_name.setPosition({ (float)1, (float)canvas_h });
     button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w-1: w/3 ) , b_h });
