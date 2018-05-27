@@ -17,24 +17,13 @@
 
 void UIState::img_changed()
 {
-    minimap.moving = false;
-    minimap.ratio_offset = { 0.0f, 0.0f };
-    const sf::Vector2f pos_rect = minimap.m_rect.getPosition();
-    const sf::Vector2f wh_rect = minimap.m_rect.getSize();
-    minimap.m_drag_rect.setPosition(pos_rect.x + 1, pos_rect.y + 1);
-    minimap.m_drag_rect.setSize({ wh_rect.x - 1, wh_rect.y - 1 });
-
-    canvas_scale = { 1.0f, 1.0f };
+    minimap.reset();
+    canvas_scale        = { 1.0f, 1.0f };
 }
 
 void UIState::minmap_change(std::string& b_name) 
 {
-    std::cout << "minmap" << b_name << " change!" << '\n';
-    const sf::Vector2f pos = minimap.m_drag_rect.getPosition();
-    const sf::Vector2f pos_rect = minimap.m_rect.getPosition();
-    const sf::Vector2f wh = minimap.m_drag_rect.getSize();
-    const sf::Vector2f delta_pos = (pos - pos_rect) ;
-    minimap.ratio_offset = sf::Vector2f{ 0.0f + (delta_pos.x/wh.x), 0.0f + (delta_pos.y / wh.y) };
+    //...
 }
 
 void UIState::b_click(std::string& b_name)
@@ -82,12 +71,12 @@ void UIState::b_click(std::string& b_name)
     else if (b_name == "b_zoom_plus")
     {
         canvas_scale = canvas_scale * 1.25f;
-        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_full_scale * 1.25f , canvas_movepos);
+        minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
     else if (b_name == "b_zoom_less")
     {
         canvas_scale = canvas_scale / 1.25f;
-        minimap.set_view((float)canvas_w, (float)canvas_h, canvas_full_scale / 1.25f , canvas_movepos);
+        minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
 }
 
@@ -161,8 +150,8 @@ UIState::UIState(UImain& g) : StateBase(g),
 
     minimap.setFunction(&StateBase::minmap_change);
 
-    root = filesystem::path("..\\res\\topic");
-    //root = filesystem::path("E:\\000 plant\\p");
+    //root = filesystem::path("..\\res\\topic");
+    root = filesystem::path("E:\\000 plant\\p");
     //root = filesystem::path("E:\\000 plant\\p root");
     root_files = filesystem::path::get_directory_file(root, false, true);
 
@@ -516,11 +505,8 @@ void UIState::render(sf::RenderTarget& renderer)
             sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
             sprite_canva->scale(scale(sprite_canva));
             sprite_canva->scale(canvas_scale);
-
-            canvas_full_scale = sprite_canva->getScale();
-
-            sprite_canva->move(-1.0f * minimap.ratio_offset.x * (float)canvas_w, -1.0f * minimap.ratio_offset.y * (float)canvas_h);
-            canvas_movepos = { -1.0f * minimap.ratio_offset.x * (float)canvas_w, -1.0f * minimap.ratio_offset.y * (float)canvas_h };
+            sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
+            canvas_bounds = sprite_canva->getGlobalBounds();
             renderer.draw(*(sprite_canva.get()));
         }
     }
@@ -544,13 +530,14 @@ void UIState::refresh_size()
 {
     w = (int) ui.getWindow().getSize().x;
     h = (int) ui.getWindow().getSize().y;
-    canvas_w = (int)(canvas_x_perc * w);
-    canvas_h = (int)(h - 2 * b_h);
+
+    canvas_w = (float)(canvas_x_perc * w);
+    canvas_h = (float)(h - 2 * b_h);
+
     float b_w = (float)(w - canvas_w -1) / 2;
 
-    button_menu[0][0]->setPosition({ (float)canvas_w, 1 });
+    button_menu[0][0]->setPosition({ canvas_w, 1 });
     button_menu[0][0]->m_rect.setSize({ 2 * b_w  , b_h });
-
     button_menu[1][0]->m_rect.setSize({ b_w , b_h });
     button_menu[1][1]->m_rect.setSize({ b_w  , b_h });
     button_menu[2][0]->m_rect.setSize({ b_w , b_h });
@@ -558,36 +545,34 @@ void UIState::refresh_size()
     button_menu[3][0]->m_rect.setSize({ b_w , b_h });
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
 
-    button_menu[1][0]->setPosition({ (float)canvas_w, b_h });
-    button_menu[1][1]->setPosition({ (float)canvas_w + b_w, b_h });
-    button_menu[2][0]->setPosition({ (float)canvas_w, 2*b_h });
-    button_menu[2][1]->setPosition({ (float)canvas_w + b_w, 2*b_h });
-    button_menu[3][0]->setPosition({ (float)canvas_w, 3 * b_h });
-    button_menu[3][1]->setPosition({ (float)canvas_w + b_w, 3 * b_h });
+    button_menu[1][0]->setPosition({ canvas_w, b_h });
+    button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
+    button_menu[2][0]->setPosition({ canvas_w, 2*b_h });
+    button_menu[2][1]->setPosition({ canvas_w + b_w, 2*b_h });
+    button_menu[3][0]->setPosition({ canvas_w, 3 * b_h });
+    button_menu[3][1]->setPosition({ canvas_w + b_w, 3 * b_h });
 
-    //float mmap_w = 4 * b_h - 1;
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , mmap_w, });
     if (minimap.moving == false)
     {
-        //minimap.setPosition({ (float)canvas_w - mmap_w, 1 });
-        minimap.setPosition({ (float)canvas_w, 4 * b_h });
+        minimap.setPosition({ canvas_w, 4 * b_h });
     }
 
-    button_name.setPosition({ (float)1, (float)canvas_h });
+    button_name.setPosition({ (float)1, canvas_h });
     button_name.m_rect.setSize({ (float)((button_parts.m_text.getString().getSize() == 0)? w-1: w/3 ) , b_h });
 
-    button_parts.setPosition({ button_name.getSize().x , (float)canvas_h });
+    button_parts.setPosition({ button_name.getSize().x , canvas_h });
     button_parts.m_rect.setSize({ w - (button_name.getSize().x + 1) , b_h });
 
-    button_msg.setPosition({ 1 , (float)canvas_h + b_h });
+    button_msg.setPosition({ 1 , canvas_h + b_h });
     button_msg.m_rect.setSize({ (float)w - 2, b_h - 1 });
 }
 
 sf::Vector2f UIState::scale(std::shared_ptr<sf::Sprite> sprite)
 {
-    float sx = ((float)canvas_w) / (float)sprite->getTextureRect().width;
-    float sy = ((float)canvas_h) / (float)sprite->getTextureRect().height;
+    float sx = (canvas_w) / (float)sprite->getTextureRect().width;
+    float sy = (canvas_h) / (float)sprite->getTextureRect().height;
     return sf::Vector2f{ std::min(sx, sy), std::min(sx, sy) };
 }
 
