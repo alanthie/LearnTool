@@ -111,6 +111,12 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_msg("b_msg",     gui::ButtonSize::Wide),
     minimap("mmap", 50, 50)
 {
+    button_name.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+    button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+    button_msg.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+
+    button_msg.m_text.setOrigin(0.0f, 0.0f);
+
     button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
     button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
     button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
@@ -531,6 +537,11 @@ void UIState::render(sf::RenderTarget& renderer)
 
         if (img_texture[index_img].get() != nullptr)
         {
+            if (index_img < img_files.size())
+            {
+                button_msg.setText(std::string(img_files[index_img].filename()));
+            }
+
             sprite_canva.reset();
             sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
             sprite_canva->scale(scale(sprite_canva));
@@ -581,9 +592,9 @@ void UIState::refresh_size()
     h = (float)ui.getWindow().getSize().y;
 
     canvas_w = (float)(canvas_x_perc * w);
-    canvas_h = (float)(h - 2 * b_h);
+    canvas_h = (float)(h - 2 * b_h - 1.0f);
 
-    float b_w = (float)(w - canvas_w -1) / 2;
+    float b_w = (float)(w - canvas_w - 1) / 2;
 
     button_menu[0][0]->setPosition({ canvas_w, 1 });
     button_menu[0][0]->m_rect.setSize({ 2 * b_w  , b_h });
@@ -614,8 +625,8 @@ void UIState::refresh_size()
     button_parts.setPosition({ button_name.getSize().x , canvas_h });
     button_parts.m_rect.setSize({ w - (button_name.getSize().x + 1) , b_h });
 
+    button_msg.m_rect.setSize({ w - 2.0f, b_h });
     button_msg.setPosition({ 1 , canvas_h + b_h });
-    button_msg.m_rect.setSize({ w - 2.0f, b_h - 1.0f });
 
     main_view.setCenter(w / 2.0f, h / 2.0f);
     main_view.setSize(w, h);
@@ -668,9 +679,9 @@ void UIState::load_path(filesystem::path& p)
         button_name.setText("");
         button_parts.setText("");
 
-        ui.getWindow().clear();
-        render(ui.getWindow());
-        ui.getWindow().display();
+        //ui.getWindow().clear();
+        //render(ui.getWindow());
+        //ui.getWindow().display();
     }
 
     std::string fullname = p.make_absolute().str();

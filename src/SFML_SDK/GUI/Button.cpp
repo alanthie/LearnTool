@@ -66,15 +66,18 @@ void Button::setPosition(const sf::Vector2f& pos)
     m_position = pos;
 
     m_rect.setPosition(m_position);
-    m_text.setPosition  (m_position);
+    m_text.setPosition(m_position);
 
     updateText();
 }
 
 void Button::updateText()
 {
-    m_text.setOrigin(   m_text.getGlobalBounds().width  / 2,        m_text.getGlobalBounds().height / 2);
-    m_text.move(        m_rect.getGlobalBounds().width  / 2.0f,   m_rect.getGlobalBounds().height / 2.5f);
+    auto textRect = m_text.getLocalBounds();
+    auto btnRect = m_rect.getLocalBounds();
+    m_text.setOrigin(0.0f, 0.0f);
+    m_text.setPosition(m_rect.getPosition());
+    m_text.move((btnRect.left + btnRect.width - (textRect.left + textRect.width))/2, (btnRect.top + btnRect.height - (textRect.top + textRect.height))/2 );
 }
 
 sf::Vector2f Button::getSize() const
