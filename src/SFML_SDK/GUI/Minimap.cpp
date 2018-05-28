@@ -12,7 +12,8 @@ namespace gui {
 
         m_drag_rect.setOutlineThickness(1);
         m_drag_rect.setOutlineColor(sf::Color::Red);
-        m_drag_rect.setFillColor(sf::Color::Black);
+        /*m_drag_rect.setFillColor(sf::Color::Black);*/
+        m_drag_rect.setFillColor(sf::Color::Transparent);
         m_drag_rect.setSize({ _w - 1, _h - 1 });
     }
 

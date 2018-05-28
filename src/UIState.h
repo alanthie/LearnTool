@@ -22,6 +22,7 @@ class UIState : public StateBase
 {
 public:
     UImain&                     ui;
+    sf::View                    main_view;
 
     gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
@@ -29,6 +30,7 @@ public:
     gui::Button                 button_msg;
     std::shared_ptr<sf::Sprite> sprite_canva;
     gui::Minimap                minimap;
+    sf::View                    view_minimap;
 
     bool is_pause = false;
 
@@ -46,8 +48,8 @@ public:
     std::vector<std::shared_ptr<sf::Texture>>   img_texture;
 
     float canvas_x_perc = 0.85f;
-    int w;
-    int h;
+    float w;
+    float h;
     float canvas_w;
     float canvas_h;
     float b_h = 50;

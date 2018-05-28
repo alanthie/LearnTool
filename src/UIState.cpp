@@ -454,6 +454,21 @@ filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, files
 
 void UIState::handleEvent(sf::Event e) 
 {
+    switch (e.type)
+    {
+    case sf::Event::Closed:
+        break;
+
+    case sf::Event::Resized:
+        //m_pGame->getWindow().setView(sf::View(sf::FloatRect(0, 0, (float)e.size.width, (float)e.size.height)));
+        refresh_size();
+
+        break;
+
+    default:
+        break;
+    }
+
     button_menu[0][0]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[1][0]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[1][1]->handleEvent(e, m_pGame->getWindow(), *this);
@@ -501,6 +516,8 @@ void UIState::render(sf::RenderTarget& renderer)
 {
     refresh_size();
 
+    m_pGame->getWindow().setView(main_view);
+
     if (img_files.size() > 0)
     {
         assert(index_img >= 0);
@@ -537,12 +554,31 @@ void UIState::render(sf::RenderTarget& renderer)
     button_name.render(renderer);
     button_parts.render(renderer);
     button_msg.render(renderer);
+
+    if (img_texture.size() > 0)
+    {
+        if (img_texture[index_img].get() != nullptr)
+        {
+            sprite_canva.reset();
+            sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
+
+            sf::FloatRect acanvas_bounds = sprite_canva->getGlobalBounds();
+            view_minimap.setCenter((acanvas_bounds.width ) / 2.0f, (acanvas_bounds.height ) / 2.0f);
+            view_minimap.setSize(acanvas_bounds.width , acanvas_bounds.height );
+           
+            m_pGame->getWindow().setView(view_minimap);
+            renderer.draw(*(sprite_canva.get()));
+            m_pGame->getWindow().setView(main_view);
+        }
+    }
+
+    renderer.draw(minimap.m_drag_rect);
 }
 
 void UIState::refresh_size()
 {
-    w = (int) ui.getWindow().getSize().x;
-    h = (int) ui.getWindow().getSize().y;
+    w = (float)ui.getWindow().getSize().x;
+    h = (float)ui.getWindow().getSize().y;
 
     canvas_w = (float)(canvas_x_perc * w);
     canvas_h = (float)(h - 2 * b_h);
@@ -579,7 +615,15 @@ void UIState::refresh_size()
     button_parts.m_rect.setSize({ w - (button_name.getSize().x + 1) , b_h });
 
     button_msg.setPosition({ 1 , canvas_h + b_h });
-    button_msg.m_rect.setSize({ (float)w - 2, b_h - 1 });
+    button_msg.m_rect.setSize({ w - 2.0f, b_h - 1.0f });
+
+    main_view.setCenter(w / 2.0f, h / 2.0f);
+    main_view.setSize(w, h);
+    main_view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
+
+    view_minimap.setCenter(canvas_w / 2.0f, canvas_h / 2.0f);
+    view_minimap.setSize(canvas_w, canvas_h);
+    view_minimap.setViewport(sf::FloatRect(minimap.m_rect.getPosition().x / w , minimap.m_rect.getPosition().y / h, minimap.m_rect.getSize().x / w, minimap.m_rect.getSize().y / h));
 }
 
 sf::Vector2f UIState::scale(std::shared_ptr<sf::Sprite> sprite)
