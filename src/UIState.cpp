@@ -562,7 +562,7 @@ void UIState::render(sf::RenderTarget& renderer)
             sprite_canva.reset();
             sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
 
-            sf::FloatRect acanvas_bounds = sprite_canva->getGlobalBounds();
+            sf::FloatRect acanvas_bounds = sprite_canva->getLocalBounds();
             view_minimap.setCenter((acanvas_bounds.width ) / 2.0f, (acanvas_bounds.height ) / 2.0f);
             view_minimap.setSize(acanvas_bounds.width , acanvas_bounds.height );
            
