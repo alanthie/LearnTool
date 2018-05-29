@@ -15,3 +15,4 @@ TODO list
 [Complex]       Add an option to shows multiple images simultaneously on screen
 [Simple]        Add NanoLog for logging
 [Simple]        Add multiple root path in Config and buttons to navigate them
+[Simple]        Play sound file if present in images folder. Default sound filename(s) to use is in Config
