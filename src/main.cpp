@@ -30,11 +30,11 @@
 // Ex: LearnTool.exe .\\LearnTool.ini
 //
 // Contents of LearnTool.ini:
-// [main]
-// path_folder = E:\000 plant
-// title = "Learning Tool";
-// w = 900;
-// h = 600;
+//[main]
+//path_folder=E:\000 plant
+//title=Plant database
+//w=1024
+//h=800
 //-----------------------------------------
 
 int main(int argc, char *argv[])
