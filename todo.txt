@@ -2,18 +2,25 @@ TODO list
 
 [Simple]        Put config parameters validations in class Config - not in main.cpp
 [Complex]       Read videos (mp4) images with OpenCV
-[Very Complex]  Extract videos sound and play it (what library to use - Bento4?)
+[Complex]       Extract videos sound and play it (what library to use - Bento4?)
 [Simple]        Add default speed for images in class Config
 [Simple]        Add button to increase/decrease image speed
 [Simple]        Move files manipulation (next_path, ...) into a helper class like FolderNavigation
 [Simple]        Add texture to buttons, add some defaults to Config
 [Simple]        Add more fonts and add a default font in Config
-[Complex]       Create a CheckBox class
-[Complex]       Create a quiz file (*.quiz) and manage the quiz questions/answers on the screen
+[Average]       Create a CheckBox class (check github: sfml-widgets)
+[Average]       Create quiz files (*.quiz) and manage the quiz questions/answers on the screen
 [Simple]        Fix minimap selection rectangle
-[Complex]       Add an XML parser (tinyxml2 )for *.quiz and maybe also for the config file
-[Complex]       Add an option to shows multiple images simultaneously on screen
+[Average]       Add an XML parser (tinyxml2 )for *.quiz and maybe also for the config file
+[Average]       Add an option to shows multiple images simultaneously on screen
 [Simple]        Add NanoLog for logging
-[Simple]        Add multiple root path in Config and buttons to navigate them
+[Average]       Add multiple root path in Config and buttons to navigate them
 [Simple]        Play sound file if present in images folder. Default sound filename(s) to use is in Config
-[Complex]       Add Catch.hpp for unit testing and create unit tests
+[Average]       Add Catch.hpp for unit testing and create unit tests
+[Average]       Random quiz of N topics with/without scores
+[Average]       Put back changed library code into own maintained library [Filesystem, SFML_SDK, ini_parser, ...]
+[Complex]       Create a config/build to automatically get all latest source library and compile them
+[Average]       Do a demo learning survival kit [plant<Edible, Medicinal, OtherUsage>, trap, bushcraft<Navigation, Fire, Water, ...>, ...]
+[Average]       Do a demo learning C++ kit
+[Simple]        Add a fading transition between images
+[Very Complex]  Add dynamic SFML small game *.game.dll - Define game virtual interface [load/play/stop/unload/...] - Use Boost.DLL
