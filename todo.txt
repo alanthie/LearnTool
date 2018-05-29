@@ -11,8 +11,9 @@ TODO list
 [Complex]       Create a CheckBox class
 [Complex]       Create a quiz file (*.quiz) and manage the quiz questions/answers on the screen
 [Simple]        Fix minimap selection rectangle
-[Complex]       Add an XML parser for *.quiz and maybe also for  config file
+[Complex]       Add an XML parser for *.quiz and maybe also for the config file
 [Complex]       Add an option to shows multiple images simultaneously on screen
 [Simple]        Add NanoLog for logging
 [Simple]        Add multiple root path in Config and buttons to navigate them
 [Simple]        Play sound file if present in images folder. Default sound filename(s) to use is in Config
+[Complex]       Add Catch.hpp for unit testing and create unit tests
