@@ -1,0 +1,14 @@
+TODO list
+
+[Simple]		Put config parameters validations in class Config - not in main.cpp
+[Complex]		Read videos (mp4) images with OpenCV
+[Very Complex]	Extract videos sound and play it (what library to use - Bento4?)
+[Simple]		Add default speed for images in class Config
+[Simple]		Add button to increase/decrease image speed
+[Simple]		Move files manipulation (next_path, ...) into a helper class like FolderNavigation
+[Simple]		Add texture to buttons, add som defaults to Config
+[Simple]		Add more fonts and add a default font in Config
+[Complex]		Create a CheckBox class
+[Complex]		Create a quiz file (*.quiz) and manage the quiz questions/answers on the screen
+[Simple]		Fix minimap selection rectangle
+
