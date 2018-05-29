@@ -12,6 +12,10 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "filesystem/path.h"
+#include "filesystem/resolver.h"
+#include "ini_parser/ini_parser.hpp"
+
 #include "UImain.h"
 #include "Config.hpp"
 #include <string>
@@ -20,12 +24,88 @@
 #include <iostream>
 #include <memory>
 
+//-----------------------------------------
+// Argument: Config file path
+//
+// Ex: LearnTool.exe .\\LearnTool.ini
+//
+// Contents of LearnTool.ini:
+// [main]
+// path_folder = E:\000 plant
+// title = "Learning Tool";
+// w = 900;
+// h = 600;
+//-----------------------------------------
+
 int main(int argc, char *argv[])
 {
-    Config cfg;
+    Config cfg; // has defaults values
+
+    if (argc >= 2)
+    {
+        std::string config_file = std::string(argv[1]);
+        if (config_file.size() > 0)
+        {
+            filesystem::path p(config_file);
+            if ((p.empty() == false) && (p.exists() == true) && (p.is_file() == true))
+            {
+                std::shared_ptr<ini_parser> cfg_ini = std::shared_ptr<ini_parser>(new ini_parser(p.make_absolute().str()));
+                if (cfg_ini)
+                {
+                    std::string path_dir_temp;
+                    try
+                    {
+                        path_dir_temp = cfg_ini->get_string("path_folder", "main");
+                        filesystem::path path_folder(path_dir_temp);
+                        if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
+                        {
+                            cfg.path_dir = path_folder.make_absolute().str();
+                        }
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    try
+                    {
+                        cfg.title = cfg_ini->get_string("title", "main");
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    try
+                    {
+                        cfg.default_w = cfg_ini->get_int("w", "main");
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    try
+                    {
+                        cfg.default_h = cfg_ini->get_int("h", "main");
+                    }
+                    catch (...)
+                    {
+                    }
+                }
+            }
+        }
+    }
+
+    filesystem::path path_folder(cfg.path_dir);
+    if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
+    {
+        // ok
+    }
+    else
+    {
+        std::cerr << "Invalid config file." << std::endl;
+        return -1;
+    }
+
     UImain ui(cfg);
-
     ui.run();
-
     return 0;
 }

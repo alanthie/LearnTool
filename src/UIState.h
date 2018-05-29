@@ -32,6 +32,9 @@ public:
     gui::Minimap                minimap;
     sf::View                    view_minimap;
 
+    //std::string txt_content;
+    //gui::TextBox txt;
+
     bool is_pause = false;
 
     filesystem::path            root;

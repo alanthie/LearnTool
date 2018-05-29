@@ -158,8 +158,10 @@ UIState::UIState(UImain& g) : StateBase(g),
 
     //root = filesystem::path("..\\res\\topic");
     //root = filesystem::path("E:\\000 plant\\p");
-    root = filesystem::path("E:\\000 plant");
+    //root = filesystem::path("E:\\000 plant");
     //root = filesystem::path("E:\\000 plant\\p root");
+    root = filesystem::path(ui.cfg.path_dir);
+
     root_files = filesystem::path::get_directory_file(root, false, true);
 
     current_parent  = filesystem::path(root);
