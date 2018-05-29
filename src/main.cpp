@@ -28,13 +28,17 @@
 // Argument: Config file path
 //
 // Ex: LearnTool.exe .\\LearnTool.ini
-//
+//-----------------------------------------
 // Contents of LearnTool.ini:
-//[main]
-//path_folder=E:\000 plant
-//title=Plant database
-//w=1024
-//h=800
+//
+//  [main]
+//  path_folder=E:\000 plant
+//  title=Plant database
+//  w=1024
+//  h=800
+//  zoom=1.50
+//  exclude_folder=.Thumbs;.dummy
+//  img=jpg;png;gif;jpeg;bmp
 //-----------------------------------------
 
 int main(int argc, char *argv[])
@@ -89,6 +93,32 @@ int main(int argc, char *argv[])
                     catch (...)
                     {
                     }
+
+                    try
+                    {
+                        cfg.zoom = std::max(1.05f, cfg_ini->get_float("zoom", "main") );
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    try
+                    {
+                        std::string s_excl = cfg_ini->get_string("exclude_folder", "main");
+                        cfg.exclude_folder = Config::split(s_excl, ';');
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    try
+                    {
+                        std::string s_img = cfg_ini->get_string("img", "main");
+                        cfg.img = Config::split(s_img, ';');
+                    }
+                    catch (...)
+                    {
+                    }
                 }
             }
         }
@@ -104,6 +134,8 @@ int main(int argc, char *argv[])
         std::cerr << "Invalid config file." << std::endl;
         return -1;
     }
+
+    std::cerr << "Ressource Path:" << path_folder.make_absolute().str() << std::endl;
 
     UImain ui(cfg);
     ui.run();

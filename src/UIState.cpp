@@ -18,7 +18,7 @@
 void UIState::img_changed()
 {
     minimap.reset();
-    canvas_scale        = { 1.0f, 1.0f };
+    canvas_scale = { 1.0f, 1.0f };
 }
 
 void UIState::minmap_change(std::string& b_name) 
@@ -70,39 +70,16 @@ void UIState::b_click(std::string& b_name)
 
     else if (b_name == "b_zoom_plus")
     {
-        canvas_scale = canvas_scale * 1.25f;
+        canvas_scale = canvas_scale * ui.cfg.zoom;
         minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
     else if (b_name == "b_zoom_less")
     {
-        canvas_scale = canvas_scale / 1.25f;
+        canvas_scale = canvas_scale / ui.cfg.zoom;
         minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
 }
 
-std::vector<std::string> split(const std::string &text, char sep) 
-{
-    std::vector<std::string> tokens;
-    std::size_t start = 0, end = 0;
-    while ((end = text.find(sep, start)) != std::string::npos) {
-        tokens.push_back(text.substr(start, end - start));
-        start = end + 1;
-    }
-    tokens.push_back(text.substr(start));
-    return tokens;
-}
-
-std::string merge(std::vector<std::string> v)
-{
-    std::string s;
-    for (size_t i=0;i<v.size();i++)
-    {
-        s += v[i]; 
-        if (i < v.size() - 1)
-            s += ", ";
-    }
-    return s;
-}
 
 UIState::UIState(UImain& g) : StateBase(g),
     ui(g),
@@ -316,7 +293,7 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
         std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
         for (size_t i = 0; i < v.size(); i++)
         {
-            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
             {
                 std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
                 if (vf.size() > 0)
@@ -345,7 +322,7 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
             std::vector<std::string> v_sub = filesystem::path::get_directory_file(last_folder, false, true);
             for (size_t j = 0; j < v_sub.size(); j++)
             {
-                if (filesystem::path(v_sub[j]).filename() != ".Thumbs")
+                if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == ui.cfg.exclude_folder.end())
                 {
                     std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
                     if (vf_sub.size() > 0)
@@ -359,7 +336,7 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
 
         for (int i = k+1; i < v.size(); i++)
         {
-            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
             {
                 std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
                 if (vf.size() > 0)
@@ -372,7 +349,7 @@ filesystem::path UIState::find_next_folder(filesystem::path parent_folder, files
             std::vector<std::string> v_sub = filesystem::path::get_directory_file(filesystem::path(v[i]), false, true);
             for (size_t j = 0; j < v_sub.size(); j++)
             {
-                if (filesystem::path(v_sub[j]).filename() != ".Thumbs")
+                if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == ui.cfg.exclude_folder.end())
                 {
                     std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
                     if (vf_sub.size() > 0)
@@ -396,7 +373,7 @@ filesystem::path UIState::find_last_folder(filesystem::path parent_folder)
     std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
     for (size_t i = v.size() - 1; i >= 0; i--)
     { 
-        if (filesystem::path(v[i]).filename() != ".Thumbs")
+        if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
         {
             std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
             if (vf.size() > 0)
@@ -417,7 +394,7 @@ filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, files
         std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
         for (size_t i = 0; i < v.size(); i++)
         {
-            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
             {
                 std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
                 if (vf.size() > 0)
@@ -443,7 +420,7 @@ filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, files
 
         for (int i = k-1; i >= 0; i--)
         {
-            if (filesystem::path(v[i]).filename() != ".Thumbs")
+            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
             {
                 std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
                 if (vf.size() > 0)
@@ -657,7 +634,7 @@ std::vector<std::string> UIState::get_img_files(filesystem::path& p)
         {
             std::string s = pv.extension();
             std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-            if ((s == "jpg") || (s == "png") || (s == "gif") || (s == "jpeg") || (s == "bmp"))
+            if (std::find(ui.cfg.img.begin(), ui.cfg.img.end(), s) != ui.cfg.img.end())
             {
                 imgfiles.push_back(pv.make_absolute().str());
             }
@@ -702,7 +679,7 @@ void UIState::load_path(filesystem::path& p)
         {
             std::string s = pv.extension();
             std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-            if ((s== "jpg") || (s == "png") || (s == "gif") || (s == "jpeg") || (s == "bmp"))
+            if (std::find(ui.cfg.img.begin(), ui.cfg.img.end(), s) != ui.cfg.img.end())
             {
                 img_files.push_back(pv);
             }
@@ -741,8 +718,8 @@ void UIState::load_path(filesystem::path& p)
 
                     if (key.size() > 0)
                     {
-                        std::vector<std::string> parts = split(value, ';');
-                        desc = key + ": " + merge(parts);
+                        std::vector<std::string> parts = Config::split(value, ';');
+                        desc = key + ": " + Config::merge(parts);
                     }
                 }
             }

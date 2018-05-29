@@ -5,7 +5,9 @@
 #include "SFML_SDK/Game.h"
 #include <string>
 
-UImain::UImain(Config& _cfg) : Game(_cfg.default_w, _cfg.default_h, _cfg.title), cfg(_cfg)
+UImain::UImain(Config& _cfg) : 
+    Game(_cfg.default_w, _cfg.default_h, _cfg.title), 
+    cfg(_cfg)
 {
     pushState<UIState>(*this);
 }
