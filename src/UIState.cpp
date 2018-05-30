@@ -25,6 +25,7 @@ void UIState::img_changed()
 {
     minimap.reset();
     canvas_scale = { 1.0f, 1.0f };
+    cnt_loop = 0;
 
     if (_vc != nullptr)
     {
@@ -52,21 +53,37 @@ void UIState::b_click(std::string& b_name)
 
     else if (b_name == "b_img_next")
     {
-        index_img++;
-        if (index_img > img_files.size() - 1)
+        if (index_img == img_files.size() - 1)
         {
-            index_img = 0;
+            next_path();
+            img_changed();
         }
-        img_changed();
+        else
+        {
+            index_img++;
+            if (index_img > img_files.size() - 1)
+            {
+                index_img = 0;
+            }
+            img_changed();
+        }
     }
     else if (b_name == "b_img_prev")
     {
-        index_img--;
-        if (index_img < 0)
+        if (index_img == 0)
         {
-            index_img = (long)img_files.size() - 1;
+            prev_path();
+            img_changed();
         }
-        img_changed();
+        else
+        {
+            index_img--;
+            if (index_img < 0)
+            {
+                index_img = (long)img_files.size() - 1;
+            }
+            img_changed();
+        }
     }
 
     else if (b_name == "b_topic_prev")
@@ -146,9 +163,6 @@ UIState::UIState(UImain& g) : StateBase(g),
     minimap.setFunction(&StateBase::minmap_change);
 
     //root = filesystem::path("..\\res\\topic");
-    //root = filesystem::path("E:\\000 plant\\p");
-    //root = filesystem::path("E:\\000 plant");
-    //root = filesystem::path("E:\\000 plant\\p root");
     root = filesystem::path(ui.cfg.path_dir);
 
     root_files = filesystem::path::get_directory_file(root, false, true);
@@ -163,19 +177,6 @@ UIState::UIState(UImain& g) : StateBase(g),
 
     std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
     std::cout << cv::getBuildInformation();
-
-    // Test
-    //_vc = new VideoCapturing("E:\\000 plant\\p\\000 video\\JerusalemArtichokes.mp4");
-    ////_vc = new VideoCapturing("C:\\work\\LearnTool\\prj\\box.mp4");
-    //if (_vc->open() == false)
-    //{
-    //    delete _vc;
-    //    _vc = nullptr;
-    //}
-    //else
-    //{
-    //    _mode = display_mode::show_movie;
-    //}
 }
 
 void UIState::load_root()
@@ -516,7 +517,22 @@ void UIState::update(sf::Time deltaTime)
                 {
                     next_path();
                 }
-                cnt_loop = 0;
+                img_changed();
+            }
+        }
+    }
+
+    if (_mode == display_mode::show_movie)
+    {
+        if (is_pause == false)
+        {
+            if (_vc == nullptr)
+            {
+                index_img++;
+                if (index_img > img_files.size() - 1)
+                {
+                    next_path();
+                }
                 img_changed();
             }
         }
@@ -534,7 +550,7 @@ void UIState::render(sf::RenderTarget& renderer)
     if (img_files.size() > 0)
     {
         std::string s = img_files[index_img].extension();
-        if (s == std::string("mp4"))
+        if ((s == "mp4") || (s == "avi"))
         {
             _mode = display_mode::show_movie;
         }
@@ -544,7 +560,9 @@ void UIState::render(sf::RenderTarget& renderer)
         }
     }
 
+    // main_view
     m_pGame->getWindow().setView(main_view);
+    minimap.render(renderer);
 
     if (_mode == display_mode::show_img)
     {
@@ -563,7 +581,8 @@ void UIState::render(sf::RenderTarget& renderer)
             {
                 if (index_img < img_files.size())
                 {
-                    button_msg.setText(std::string(img_files[index_img].filename()));
+                    button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                                         img_files[index_img].filename() );
                 }
 
                 sprite_canva.reset();
@@ -576,6 +595,7 @@ void UIState::render(sf::RenderTarget& renderer)
             }
         }
  
+        // view_minimap
         if (img_texture.size() > 0)
         {
             if (img_texture[index_img].get() != nullptr)
@@ -594,6 +614,7 @@ void UIState::render(sf::RenderTarget& renderer)
         }
     }
 
+    // main_view
     if (_mode == display_mode::show_movie)
     {
         //if (is_pause == false)
@@ -606,7 +627,8 @@ void UIState::render(sf::RenderTarget& renderer)
                     {
                         if (index_img < img_files.size())
                         {
-                            button_msg.setText(std::string(img_files[index_img].filename()));
+                            button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                                                img_files[index_img].filename());
                         }
 
                         _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
@@ -650,11 +672,26 @@ void UIState::render(sf::RenderTarget& renderer)
                             sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
                             canvas_bounds = sprite_canva->getGlobalBounds();
                             renderer.draw(*(sprite_canva.get()));
+     
+                            // view_minimap
+                            {
+                                sprite_canva.reset();
+                                sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(texture));
+
+                                sf::FloatRect acanvas_bounds = sprite_canva->getLocalBounds();
+                                view_minimap.setCenter((acanvas_bounds.width) / 2.0f, (acanvas_bounds.height) / 2.0f);
+                                view_minimap.setSize(acanvas_bounds.width, acanvas_bounds.height);
+
+                                m_pGame->getWindow().setView(view_minimap);
+                                renderer.draw(*(sprite_canva.get()));
+                                m_pGame->getWindow().setView(main_view);
+                            }
                         }
 
                         double np = _vc->vc.get(CV_CAP_PROP_POS_FRAMES); // retrieves the current frame number
                         double nc = _vc->vc.get(CV_CAP_PROP_FRAME_COUNT);
-                        button_msg.setText(img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc));
+                        button_msg.setText( "["+std::to_string(1+(long)index_img) + "/" + std::to_string(1+(long)img_files.size())+"] "+
+                                            img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc));
                     }
                 }
                 else
@@ -673,8 +710,6 @@ void UIState::render(sf::RenderTarget& renderer)
     button_menu[2][1]->render(renderer);
     button_menu[3][0]->render(renderer);
     button_menu[3][1]->render(renderer);
-
-    minimap.render(renderer);
 
     button_name.render(renderer);
     button_parts.render(renderer);
