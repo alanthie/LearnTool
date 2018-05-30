@@ -575,10 +575,7 @@ void UIState::render(sf::RenderTarget& renderer)
                 renderer.draw(*(sprite_canva.get()));
             }
         }
-    }
-
-    if (_mode == display_mode::show_img)
-    {
+ 
         if (img_texture.size() > 0)
         {
             if (img_texture[index_img].get() != nullptr)
@@ -599,7 +596,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
     if (_mode == display_mode::show_movie)
     {
-        if (is_pause == false)
+        //if (is_pause == false)
         {
             if (_vc == nullptr)
             {
@@ -624,11 +621,21 @@ void UIState::render(sf::RenderTarget& renderer)
 
             if (_vc != nullptr)
             {
-                if (_vc->readNextFrame())
+                bool done = false;
+                if (is_pause == false)
+                {
+                    if (_vc->readNextFrame() == false)
+                    {
+                        done = true;
+                    }
+                }
+
+                if (done == false)
                 {
                     cv::Mat frameRGBA;
                     sf::Image image;
                     sf::Texture texture;
+
                     cv::Mat frameRGB = _vc->getFrame();
                     if (!frameRGB.empty())
                     {
