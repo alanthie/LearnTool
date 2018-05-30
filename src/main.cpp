@@ -38,7 +38,7 @@
 //  h=800
 //  zoom=1.50
 //  exclude_folder=.Thumbs;.dummy
-//  img=jpg;png;gif;jpeg;bmp
+//  img=jpg;png;gif;jpeg;bmp;mp4;avi
 //-----------------------------------------
 
 int main(int argc, char *argv[])
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    std::cerr << "Ressource Path:" << path_folder.make_absolute().str() << std::endl;
+    std::cout << "Ressource Path:" << path_folder.make_absolute().str() << std::endl;
 
     UImain ui(cfg);
     ui.run();

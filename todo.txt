@@ -1,7 +1,7 @@
 TODO list
 
 [Simple]        Put config parameters validations in class Config - not in main.cpp
-[Complex]       Read videos (mp4) images with OpenCV
+[DONE]          Read videos (mp4) images with OpenCV
 [Complex]       Extract videos sound and play it (what library to use - Bento4?)
 [Simple]        Add default speed for images in class Config
 [Simple]        Add button to increase/decrease image speed

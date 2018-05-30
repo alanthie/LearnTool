@@ -1,17 +1,21 @@
-//
+//=================================================================================================
+//                  Copyright (C) 2018 Alain Lanthier - All Rights Reserved  
+//                  License: MIT License
+//=================================================================================================
 #pragma once
 #include <string>
 
 class Config
 {
 public:
-    std::string title = "Learning Tool";
-    int default_w = 900;
-    int default_h = 600;
-    std::string path_dir = ".\\";
-    float zoom = 1.25;
+    std::string     title = "Learning Tool";
+    int             default_w = 900;
+    int             default_h = 600;
+    std::string     path_dir = ".\\";
+    float           zoom = 1.25;
+
     std::vector<std::string> exclude_folder = { ".Thumbs" };
-    std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp" };
+    std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi" };
 
     Config() = default;
 

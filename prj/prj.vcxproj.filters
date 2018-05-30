@@ -146,5 +146,8 @@
     <ClInclude Include="..\src\SFML_SDK\GUI\Minimap.h">
       <Filter>Source Files\SFML_SDK</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\VideoCapture.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
