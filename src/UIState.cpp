@@ -1,5 +1,7 @@
-//
-//
+//=================================================================================================
+//                  Copyright (C) 2018 Alain Lanthier - All Rights Reserved  
+//                  License: MIT License
+//=================================================================================================
 #include "UIState.h"
 #include "SFML_SDK/Game.h"
 #include "SFML_SDK/GUI/Button.h"
