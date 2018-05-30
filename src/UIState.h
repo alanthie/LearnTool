@@ -47,6 +47,7 @@ public:
 
     long                                        index_img = 0;
     long                                        cnt_loop = 0;
+	long							            vitesse = 1;
     std::vector<filesystem::path>               img_files;
     std::vector<std::shared_ptr<sf::Texture>>   img_texture;
 

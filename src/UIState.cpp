@@ -78,37 +78,49 @@ void UIState::b_click(std::string& b_name)
         canvas_scale = canvas_scale / ui.cfg.zoom;
         minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
+	else if (b_name == "b_speed_slow")
+	{
+		vitesse++;
+	}
+	else if (b_name == "b_speed_fast")
+	{
+		vitesse--;
+	}
 }
 
 
 UIState::UIState(UImain& g) : StateBase(g),
-    ui(g),
-    button_name("b_name",   gui::ButtonSize::Small),
-    button_parts("b_parts", gui::ButtonSize::Wide),
-    button_msg("b_msg",     gui::ButtonSize::Wide),
-    minimap("mmap", 50, 50)
+ui(g),
+button_name("b_name", gui::ButtonSize::Small),
+button_parts("b_parts", gui::ButtonSize::Wide),
+button_msg("b_msg", gui::ButtonSize::Wide),
+minimap("mmap", 50, 50)
 {
-    button_name.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
-    button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
-    button_msg.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+	button_name.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+	button_msg.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
 
-    button_msg.m_text.setOrigin(0.0f, 0.0f);
+	button_msg.m_text.setOrigin(0.0f, 0.0f);
 
-    button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
-    button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
-    button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
-    button_menu[2][0] = new gui::Button("b_zoom_plus", gui::ButtonSize::Small);
-    button_menu[2][1] = new gui::Button("b_zoom_less", gui::ButtonSize::Small);
-    button_menu[3][0] = new gui::Button("b_topic_prev", gui::ButtonSize::Small);
-    button_menu[3][1] = new gui::Button("b_topic_next", gui::ButtonSize::Small);
+	button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
+	button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
+	button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
+	button_menu[2][0] = new gui::Button("b_zoom_plus", gui::ButtonSize::Small);
+	button_menu[2][1] = new gui::Button("b_zoom_less", gui::ButtonSize::Small);
+	button_menu[3][0] = new gui::Button("b_topic_prev", gui::ButtonSize::Small);
+	button_menu[3][1] = new gui::Button("b_topic_next", gui::ButtonSize::Small);
+	button_menu[4][0] = new gui::Button("b_speed_slow", gui::ButtonSize::Small);
+	button_menu[4][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
 
-    button_menu[0][0]->setText("pause");
-    button_menu[1][0]->setText("<");
-    button_menu[1][1]->setText(">");
-    button_menu[2][0]->setText("+");
-    button_menu[2][1]->setText("-");
-    button_menu[3][0]->setText("<<");
-    button_menu[3][1]->setText(">>");
+	button_menu[0][0]->setText("pause");
+	button_menu[1][0]->setText("<");
+	button_menu[1][1]->setText(">");
+	button_menu[2][0]->setText("+");
+	button_menu[2][1]->setText("-");
+	button_menu[3][0]->setText("<<");
+	button_menu[3][1]->setText(">>");
+	button_menu[4][0]->setText("slow");
+	button_menu[4][1]->setText("fast");
     
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -118,6 +130,8 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_menu[2][1]->m_rect.setSize({ b_w , b_h });
     button_menu[3][0]->m_rect.setSize({ b_w , b_h });
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
+	button_menu[4][0]->m_rect.setSize({ b_w , b_h });
+	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
 
@@ -128,6 +142,8 @@ UIState::UIState(UImain& g) : StateBase(g),
     button_menu[2][1]->setFunction(&StateBase::b_click);
     button_menu[3][0]->setFunction(&StateBase::b_click);
     button_menu[3][1]->setFunction(&StateBase::b_click);
+	button_menu[4][0]->setFunction(&StateBase::b_click);
+	button_menu[4][1]->setFunction(&StateBase::b_click);
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
 
@@ -461,6 +477,8 @@ void UIState::handleEvent(sf::Event e)
     button_menu[2][1]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[3][0]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[3][1]->handleEvent(e, m_pGame->getWindow(), *this);
+	button_menu[4][0]->handleEvent(e, m_pGame->getWindow(), *this);
+	button_menu[4][1]->handleEvent(e, m_pGame->getWindow(), *this);
 
     button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
@@ -479,7 +497,7 @@ void UIState::update(sf::Time deltaTime)
     if (is_pause == false)
     {
         cnt_loop++;
-        if (cnt_loop > 60 * 1) // 1 sec
+        if (cnt_loop > 60 * vitesse) // 1 sec
         {
             index_img++;
             if (index_img > img_files.size() - 1)
@@ -538,6 +556,8 @@ void UIState::render(sf::RenderTarget& renderer)
     button_menu[2][1]->render(renderer);
     button_menu[3][0]->render(renderer);
     button_menu[3][1]->render(renderer);
+	button_menu[4][0]->render(renderer);
+	button_menu[4][1]->render(renderer);
 
     minimap.render(renderer);
 
@@ -583,6 +603,8 @@ void UIState::refresh_size()
     button_menu[2][1]->m_rect.setSize({ b_w , b_h });
     button_menu[3][0]->m_rect.setSize({ b_w , b_h });
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
+	button_menu[4][0]->m_rect.setSize({ b_w , b_h });
+	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[1][0]->setPosition({ canvas_w, b_h });
     button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
@@ -590,6 +612,8 @@ void UIState::refresh_size()
     button_menu[2][1]->setPosition({ canvas_w + b_w, 2*b_h });
     button_menu[3][0]->setPosition({ canvas_w, 3 * b_h });
     button_menu[3][1]->setPosition({ canvas_w + b_w, 3 * b_h });
+	button_menu[4][0]->setPosition({ canvas_w, 7 * b_h });
+	button_menu[4][1]->setPosition({ canvas_w + b_w, 7 * b_h });
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , mmap_w, });
