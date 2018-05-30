@@ -8,6 +8,12 @@
 #include "SFML_SDK/GUI/StackMenu.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
+
+#include "opencv2/imgproc.hpp"
+#include "opencv2/core/utility.hpp"
+#include "opencv2/imgproc/imgproc_c.h"
+#include "opencv2/highgui.hpp"
+
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -19,6 +25,12 @@ void UIState::img_changed()
 {
     minimap.reset();
     canvas_scale = { 1.0f, 1.0f };
+
+    if (_vc != nullptr)
+    {
+        delete _vc;
+        _vc = nullptr;
+    }
 }
 
 void UIState::minmap_change(std::string& b_name) 
@@ -148,6 +160,22 @@ UIState::UIState(UImain& g) : StateBase(g),
     {
         load_path(current_path);
     }
+
+    std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
+    std::cout << cv::getBuildInformation();
+
+    // Test
+    //_vc = new VideoCapturing("E:\\000 plant\\p\\000 video\\JerusalemArtichokes.mp4");
+    ////_vc = new VideoCapturing("C:\\work\\LearnTool\\prj\\box.mp4");
+    //if (_vc->open() == false)
+    //{
+    //    delete _vc;
+    //    _vc = nullptr;
+    //}
+    //else
+    //{
+    //    _mode = display_mode::show_movie;
+    //}
 }
 
 void UIState::load_root()
@@ -476,18 +504,21 @@ void UIState::handleInput()
 
 void UIState::update(sf::Time deltaTime) 
 {
-    if (is_pause == false)
+    if (_mode == display_mode::show_img)
     {
-        cnt_loop++;
-        if (cnt_loop > 60 * 1) // 1 sec
+        if (is_pause == false)
         {
-            index_img++;
-            if (index_img > img_files.size() - 1)
+            cnt_loop++;
+            if (cnt_loop > 60 * 1) // 1 sec
             {
-                next_path();
+                index_img++;
+                if (index_img > img_files.size() - 1)
+                {
+                    next_path();
+                }
+                cnt_loop = 0;
+                img_changed();
             }
-            cnt_loop = 0;
-            img_changed();
         }
     }
 }
@@ -500,34 +531,131 @@ void UIState::fixedUpdate(sf::Time deltaTime)
 void UIState::render(sf::RenderTarget& renderer) 
 {
     refresh_size();
+    if (img_files.size() > 0)
+    {
+        std::string s = img_files[index_img].extension();
+        if (s == std::string("mp4"))
+        {
+            _mode = display_mode::show_movie;
+        }
+        else
+        {
+            _mode = display_mode::show_img;
+        }
+    }
 
     m_pGame->getWindow().setView(main_view);
 
-    if (img_files.size() > 0)
+    if (_mode == display_mode::show_img)
     {
-        assert(index_img >= 0);
-        assert(index_img <= img_files.size() - 1);
-
-        if (img_texture[index_img].get() == nullptr)
+        if (img_files.size() > 0)
         {
-            img_texture[index_img] = std::shared_ptr<sf::Texture>(new sf::Texture);
-            img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
-        }
+            assert(index_img >= 0);
+            assert(index_img <= img_files.size() - 1);
 
-        if (img_texture[index_img].get() != nullptr)
-        {
-            if (index_img < img_files.size())
+            if (img_texture[index_img].get() == nullptr)
             {
-                button_msg.setText(std::string(img_files[index_img].filename()));
+                img_texture[index_img] = std::shared_ptr<sf::Texture>(new sf::Texture);
+                img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
             }
 
-            sprite_canva.reset();
-            sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
-            sprite_canva->scale(scale(sprite_canva));
-            sprite_canva->scale(canvas_scale);
-            sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
-            canvas_bounds = sprite_canva->getGlobalBounds();
-            renderer.draw(*(sprite_canva.get()));
+            if (img_texture[index_img].get() != nullptr)
+            {
+                if (index_img < img_files.size())
+                {
+                    button_msg.setText(std::string(img_files[index_img].filename()));
+                }
+
+                sprite_canva.reset();
+                sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
+                sprite_canva->scale(scale(sprite_canva));
+                sprite_canva->scale(canvas_scale);
+                sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
+                canvas_bounds = sprite_canva->getGlobalBounds();
+                renderer.draw(*(sprite_canva.get()));
+            }
+        }
+    }
+
+    if (_mode == display_mode::show_img)
+    {
+        if (img_texture.size() > 0)
+        {
+            if (img_texture[index_img].get() != nullptr)
+            {
+                sprite_canva.reset();
+                sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
+
+                sf::FloatRect acanvas_bounds = sprite_canva->getLocalBounds();
+                view_minimap.setCenter((acanvas_bounds.width) / 2.0f, (acanvas_bounds.height) / 2.0f);
+                view_minimap.setSize(acanvas_bounds.width, acanvas_bounds.height);
+
+                m_pGame->getWindow().setView(view_minimap);
+                renderer.draw(*(sprite_canva.get()));
+                m_pGame->getWindow().setView(main_view);
+            }
+        }
+    }
+
+    if (_mode == display_mode::show_movie)
+    {
+        if (is_pause == false)
+        {
+            if (_vc == nullptr)
+            {
+                if (img_files.size() > 0)
+                {
+                    if (img_files[index_img].empty() == false)
+                    {
+                        if (index_img < img_files.size())
+                        {
+                            button_msg.setText(std::string(img_files[index_img].filename()));
+                        }
+
+                        _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
+                        if (_vc->open() == false)
+                        {
+                            delete _vc;
+                            _vc = nullptr;
+                        }
+                    }
+                }
+            }
+
+            if (_vc != nullptr)
+            {
+                if (_vc->readNextFrame())
+                {
+                    cv::Mat frameRGBA;
+                    sf::Image image;
+                    sf::Texture texture;
+                    cv::Mat frameRGB = _vc->getFrame();
+                    if (!frameRGB.empty())
+                    {
+                        cv::cvtColor(frameRGB, frameRGBA, cv::COLOR_BGR2RGBA);
+                        image.create(frameRGBA.cols, frameRGBA.rows, frameRGBA.ptr());
+                        if (texture.loadFromImage(image))
+                        {
+                            sprite_canva.reset();
+                            sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(texture));
+                            sprite_canva->scale(scale(sprite_canva));
+                            sprite_canva->scale(canvas_scale);
+                            sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
+                            canvas_bounds = sprite_canva->getGlobalBounds();
+                            renderer.draw(*(sprite_canva.get()));
+                        }
+
+                        double np = _vc->vc.get(CV_CAP_PROP_POS_FRAMES); // retrieves the current frame number
+                        double nc = _vc->vc.get(CV_CAP_PROP_FRAME_COUNT);
+                        button_msg.setText(img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc));
+                    }
+                }
+                else
+                {
+                    delete _vc;
+                    _vc = nullptr;
+                }
+            }
         }
     }
 
@@ -545,24 +673,8 @@ void UIState::render(sf::RenderTarget& renderer)
     button_parts.render(renderer);
     button_msg.render(renderer);
 
-    if (img_texture.size() > 0)
-    {
-        if (img_texture[index_img].get() != nullptr)
-        {
-            sprite_canva.reset();
-            sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
-
-            sf::FloatRect acanvas_bounds = sprite_canva->getLocalBounds();
-            view_minimap.setCenter((acanvas_bounds.width ) / 2.0f, (acanvas_bounds.height ) / 2.0f);
-            view_minimap.setSize(acanvas_bounds.width , acanvas_bounds.height );
-           
-            m_pGame->getWindow().setView(view_minimap);
-            renderer.draw(*(sprite_canva.get()));
-            m_pGame->getWindow().setView(main_view);
-        }
-    }
-
     renderer.draw(minimap.m_drag_rect);
+
 }
 
 void UIState::refresh_size()

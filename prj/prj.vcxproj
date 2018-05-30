@@ -86,10 +86,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\000Lib\SFML-2.5.0-windows-vc15-64-bit\SFML-2.5.0\include;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\000Lib\SFML-2.5.0-windows-vc15-64-bit\SFML-2.5.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;lib\Debug\opencv_imgproc400d.lib;3rdparty\lib\Debug\ippiwd.lib;3rdparty\ippicv\ippicv_win\lib\intel64\ippicvmt.lib;lib\Debug\opencv_core400d.lib;lib\Debug\opencv_ts400d.lib;lib\Debug\opencv_highgui400d.lib;lib\Debug\opencv_videoio400d.lib;lib\Debug\opencv_imgcodecs400d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\000Lib\SFML-2.5.0-windows-vc15-64-bit\SFML-2.5.0\lib;..\..\opencv\builds;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -162,6 +163,7 @@
     <ClInclude Include="..\src\SFML_SDK\Util\NonMoveable.h" />
     <ClInclude Include="..\src\SFML_SDK\Util\Random.h" />
     <ClInclude Include="..\src\SFML_SDK\Util\ToggleKey.h" />
+    <ClInclude Include="..\src\VideoCapture.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
