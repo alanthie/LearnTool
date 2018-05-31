@@ -30,6 +30,9 @@ public:
     sf::View                    main_view;
     display_mode                _mode = display_mode::show_img;
 
+    sf::SoundBuffer buffer;
+    sf::Sound sound;
+
     VideoCapturing*             _vc = nullptr;
 
     gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };

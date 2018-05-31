@@ -10,6 +10,7 @@
 #include "SFML_SDK/GUI/StackMenu.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 #include "opencv2/imgproc.hpp"
 #include "opencv2/core/utility.hpp"
@@ -200,6 +201,13 @@ UIState::UIState(UImain& g) :
 
     std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
     std::cout << cv::getBuildInformation();
+
+    
+    if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\test.wav"))
+    {
+        sound.setBuffer(buffer);
+        sound.play();
+    }
 }
 
 void UIState::load_root()
