@@ -48,10 +48,28 @@ void UIState::b_click(std::string& b_name)
     if (b_name == "b_pause")
     {
         is_pause = !is_pause;
-		if (is_pause)
+        if (is_pause)
+        {
             button_menu[0][0]->setText("continue");
-		else
+            if (_vc != nullptr)
+            {
+                if (_vc->has_sound)
+                {
+                    _vc->sound.stop();
+                }
+            }
+        }
+        else
+        {
             button_menu[0][0]->setText("pause");
+            if (_vc != nullptr)
+            {
+                if (_vc->has_sound)
+                {
+                    _vc->sound.play();
+                }
+            }
+        }
     }
 
     else if (b_name == "b_img_next")
@@ -217,12 +235,13 @@ UIState::UIState(UImain& g) :
     std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
     std::cout << cv::getBuildInformation();
 
-    //
+    
     //if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\test.wav"))
-    //{
-    //    sound.setBuffer(buffer);
-    //    sound.play();
-    //}
+//    if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\0001.wav"))
+//    {
+//        sound.setBuffer(buffer);
+//        sound.play();
+//    }
 }
 
 void UIState::load_root()

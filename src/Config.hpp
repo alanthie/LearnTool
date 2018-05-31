@@ -44,7 +44,6 @@ public:
 		                if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
 		                {
 		                    this->path_dir = path_folder.make_absolute().str();
-		                    // this->path_dir = path_folder.make_absolute().str();
 		                }
 		            }
 		            catch (...)
@@ -103,7 +102,8 @@ public:
 		        }
 		    }
 			
-		  }
+	    }
+
 		filesystem::path path_folder(this->path_dir);
 		if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
 		{

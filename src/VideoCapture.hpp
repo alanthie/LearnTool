@@ -13,26 +13,53 @@
 class VideoCapturing
 {
 public:
-    VideoCapturing(const std::string& file) : _file(file), vc(file)
+    VideoCapturing(const std::string& file) : _file(file), vc(file), sound_file()
     {
+        filesystem::path p(file+".wav");
+        if ( (p.empty() == false) && (p.exists()) && (p.is_file()) )
+        {
+            has_sound = true;
+            sound_file = p.make_absolute().str();
+        }
+    }
+
+    ~VideoCapturing()
+    {
+        if (has_sound)
+        {
+            sound.stop();
+        }
     }
 
     std::string         _file;
     cv::VideoCapture    vc;
     cv::Mat             frame;
 
+    bool                has_sound = false;
+    bool                sound_loaded = false;
+    std::string         sound_file;
+    sf::SoundBuffer     buffer;
+    sf::Sound           sound;
+
     bool open()
     {
         if (_file.empty())
             return false;
 
-        //if (!vc.isOpened())     // if this fails, try to open as a video camera, through the use of an integer param
-        //    vc.open(atoi(_file.c_str()));
-
         if (!vc.isOpened()) 
         {
             std::cerr << "Failed to open the video device, video file or image sequence!\n" << std::endl;
             return false;
+        }
+
+        if (has_sound)
+        {
+            if (buffer.loadFromFile(sound_file))
+            {
+                sound_loaded = true;
+                sound.setBuffer(buffer);
+                sound.play();
+            }
         }
 
         return true;

@@ -30,8 +30,8 @@ public:
     sf::View                    main_view;
     display_mode                _mode = display_mode::show_img;
 
-    sf::SoundBuffer buffer;
-    sf::Sound sound;
+    //sf::SoundBuffer buffer;
+    //sf::Sound sound;
 
     VideoCapturing*             _vc = nullptr;
 
