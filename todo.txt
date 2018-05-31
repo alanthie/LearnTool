@@ -1,7 +1,7 @@
 TODO list
 
 [Simple]        Put config parameters validations in class Config - not in main.cpp
-[Complex]       Read videos (mp4) images with OpenCV
+[DONE]          Read videos (mp4) images with OpenCV
 [Complex]       Extract videos sound and play it (what library to use - Bento4?)
 [Simple]        Add default speed for images in class Config
 [Simple]        Add button to increase/decrease image speed
@@ -22,5 +22,7 @@ TODO list
 [Complex]       Create a config/build to automatically get all latest source library and compile them
 [Average]       Do a demo learning survival kit [plant<Edible, Medicinal, OtherUsage>, trap, bushcraft<Navigation, Fire, Water, ...>, ...]
 [Average]       Do a demo learning C++ kit
-[Simple]        Add a fading transition between images
+[Simple]        Add a fading transition between images (optional - set in config file)
 [Very Complex]  Add dynamic SFML small game *.game.dll - Define game virtual interface [load/play/stop/unload/...] - Use Boost.DLL
+[Simple]        Add button to save an image from the video into a file in current path (generate unique name)
+[Average]       Add a navigation bar (line+drag_circle) for the video. Add buttons to change video speed (+/-).

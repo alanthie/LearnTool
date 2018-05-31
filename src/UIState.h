@@ -1,5 +1,7 @@
-//
-//
+//=================================================================================================
+//                  Copyright (C) 2018 Alain Lanthier - All Rights Reserved  
+//                  License: MIT License
+//=================================================================================================
 #pragma once
 
 #include "UIMain.h"
@@ -14,15 +16,21 @@
 #include "filesystem/path.h"
 #include "filesystem/resolver.h"
 #include "ini_parser/ini_parser.hpp"
+#include "VideoCapture.hpp"
 #include <memory>
 #include <iostream>
 
 //
+enum class display_mode {show_img, show_movie};
+
 class UIState : public StateBase
 {
 public:
     UImain&                     ui;
     sf::View                    main_view;
+    display_mode                _mode = display_mode::show_img;
+
+    VideoCapturing*             _vc = nullptr;
 
     gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
@@ -32,10 +40,7 @@ public:
     gui::Minimap                minimap;
     sf::View                    view_minimap;
 
-    //std::string txt_content;
-    //gui::TextBox txt;
-
-    bool is_pause = false;
+    bool                        is_pause = false;
 
     filesystem::path            root;
     std::vector<std::string>    root_files;
