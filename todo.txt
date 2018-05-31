@@ -1,10 +1,10 @@
 TODO list
 
-[Simple]        Put config parameters validations in class Config - not in main.cpp
+[DONE]          Put config parameters validations in class Config - not in main.cpp
 [DONE]          Read videos (mp4) images with OpenCV
-[Complex]       Extract videos sound and play it (what library to use - Bento4?)
-[Simple]        Add default speed for images in class Config
-[Simple]        Add button to increase/decrease image speed
+[InProgress]    Extract videos sound and play it (ffmpeg.exe to extract sound into a wav file)
+[Simple]        Add default speed for images/video in class Config
+[DONE]          Add button to increase/decrease image/video speed
 [Simple]        Move files manipulation (next_path, ...) into a helper class like FolderNavigation
 [Simple]        Add texture to buttons, add some defaults to Config
 [Simple]        Add more fonts and add a default font in Config
@@ -15,13 +15,10 @@ TODO list
 [Average]       Add an option to shows multiple images simultaneously on screen
 [Simple]        Add NanoLog for logging
 [Average]       Add multiple root path in Config and buttons to navigate them
-[Simple]        Play sound file if present in images folder. Default sound filename(s) to use is in Config
 [Average]       Add Catch.hpp for unit testing and create unit tests
 [Average]       Random quiz of N topics with/without scores
 [Average]       Put back changed library code into own maintained library [Filesystem, SFML_SDK, ini_parser, ...]
 [Complex]       Create a config/build to automatically get all latest source library and compile them
-[Average]       Do a demo learning survival kit [plant<Edible, Medicinal, OtherUsage>, trap, bushcraft<Navigation, Fire, Water, ...>, ...]
-[Average]       Do a demo learning C++ kit
 [Simple]        Add a fading transition between images (optional - set in config file)
 [Very Complex]  Add dynamic SFML small game *.game.dll - Define game virtual interface [load/play/stop/unload/...] - Use Boost.DLL
 [Simple]        Add button to save an image from the video into a file in current path (generate unique name)

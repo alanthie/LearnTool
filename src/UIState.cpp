@@ -234,14 +234,6 @@ UIState::UIState(UImain& g) :
 
     std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
     std::cout << cv::getBuildInformation();
-
-    
-    //if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\test.wav"))
-//    if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\0001.wav"))
-//    {
-//        sound.setBuffer(buffer);
-//        sound.play();
-//    }
 }
 
 void UIState::load_root()
