@@ -1,5 +1,5 @@
 //=================================================================================================
-//                  Copyright (C) 2018 Alain Lanthier - All Rights Reserved  
+//                  Copyright (C) 2018 Alain Lanthier, Samuel Lanthier - All Rights Reserved  
 //                  License: MIT License
 //=================================================================================================
 #include <SFML/Graphics/Export.hpp>
