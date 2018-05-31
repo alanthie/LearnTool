@@ -48,6 +48,14 @@ int main(int argc, char *argv[])
     if (argc >= 2)
     {
         std::string config_file = std::string(argv[1]);
+
+        if (cfg.setup(config_file) == true)
+        {
+        }
+        else
+        {
+        }
+
         if (config_file.size() > 0)
         {
             filesystem::path p(config_file);
@@ -64,6 +72,7 @@ int main(int argc, char *argv[])
                         if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
                         {
                             cfg.path_dir = path_folder.make_absolute().str();
+                            // this->path_dir = path_folder.make_absolute().str();
                         }
                     }
                     catch (...)
