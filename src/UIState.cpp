@@ -112,13 +112,27 @@ void UIState::b_click(std::string& b_name)
     }
 	else if (b_name == "b_speed_slow")
 	{
-		vitesse += 1.0f;	// TODO mettre vitesse_increment dans Config, LearnTool.ini
+        if (_mode == display_mode::show_img)
+        {
+            vitesse_img_sec += 1.0f;	// TODO mettre vitesse_img_sec_increment dans Config, LearnTool.ini
+        }
+        else
+        {
+            vitesse_video_factor /= 1.25f;
+        }
 	}
 	else if (b_name == "b_speed_fast")
 	{
-		vitesse -= 1.0f;
-		if (vitesse <= 0.5)	// TODO mettre vitesse_minimum dans Config, LearnTool.ini
-			vitesse = 0.5f;
+        if (_mode == display_mode::show_img)
+        {
+            vitesse_img_sec -= 1.0f;
+            if (vitesse_img_sec <= 0.5)	// TODO mettre vitesse_img_sec_minimum dans Config, LearnTool.ini
+                vitesse_img_sec = 0.5f;
+        }
+        else
+        {
+            vitesse_video_factor *= 1.25f;
+        }
 	}
 }
 
@@ -131,7 +145,7 @@ UIState::UIState(UImain& g) :
 	button_msg("b_msg", gui::ButtonSize::Wide),
 	minimap("mmap", 50, 50)
 {
-	vitesse = 3.0f; // TODO mettre vitesse_initial dans Config, LearnTool.ini
+	// TODO mettre vitesse_img_sec_initial dans Config, LearnTool.ini
 
 	button_name.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
 	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
@@ -183,6 +197,7 @@ UIState::UIState(UImain& g) :
 	button_menu[4][1]->setFunction(&StateBase::b_click);
     button_name.setFunction(    &StateBase::b_click);
     button_parts.setFunction(   &StateBase::b_click);
+    button_msg.setFunction(     &StateBase::b_click);
 
     minimap.setFunction(&StateBase::minmap_change);
 
@@ -202,12 +217,12 @@ UIState::UIState(UImain& g) :
     std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
     std::cout << cv::getBuildInformation();
 
-    
-    if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\test.wav"))
-    {
-        sound.setBuffer(buffer);
-        sound.play();
-    }
+    //
+    //if (buffer.loadFromFile("C:\\work\\LearnTool\\prj\\test.wav"))
+    //{
+    //    sound.setBuffer(buffer);
+    //    sound.play();
+    //}
 }
 
 void UIState::load_root()
@@ -543,7 +558,7 @@ void UIState::update(sf::Time deltaTime)
         if (is_pause == false)
         {
             cnt_loop++;
-            if (cnt_loop > 60 * vitesse) // 1 sec * vitesse
+            if (cnt_loop > 60 * vitesse_img_sec) // 1 sec * vitesse_img_sec
             {
                 index_img++;
                 if (index_img > img_files.size() - 1)
@@ -615,7 +630,8 @@ void UIState::render(sf::RenderTarget& renderer)
                 if (index_img < img_files.size())
                 {
                     button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
-                                         img_files[index_img].filename() );
+                                         img_files[index_img].filename() +
+                                         "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
                 }
 
                 sprite_canva.reset();
@@ -661,7 +677,8 @@ void UIState::render(sf::RenderTarget& renderer)
                         if (index_img < img_files.size())
                         {
                             button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
-                                                img_files[index_img].filename());
+                                                img_files[index_img].filename() +
+                                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
                         }
 
                         _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
@@ -679,6 +696,36 @@ void UIState::render(sf::RenderTarget& renderer)
                 bool done = false;
                 if (is_pause == false)
                 {
+                    int skip_n = 0;
+                    int pass_n = 0;
+                    if (vitesse_video_factor > 1.0) // skip some frame
+                    {
+                        skip_n = -1 + (int)vitesse_video_factor;
+                    }
+
+                    if (vitesse_video_factor < 1.0) // stay with frame longer
+                    {
+                        pass_n = -1 + (int)(1.0 / vitesse_video_factor);
+                    }
+
+                    if ((vitesse_video_factor > 1.0) && (skip_n > 0))
+                    {
+                        while (skip_n > 0)
+                        {
+                            skip_n--;
+                            if (_vc->readNextFrame() == false)
+                            {
+                                done = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ((vitesse_video_factor < 1.0) && (pass_n > 0))
+                    {
+                        //...
+                    }
+
                     if (_vc->readNextFrame() == false)
                     {
                         done = true;
@@ -723,8 +770,9 @@ void UIState::render(sf::RenderTarget& renderer)
 
                         double np = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES); // retrieves the current frame number
                         double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
-                        button_msg.setText( "["+std::to_string(1+(long)index_img) + "/" + std::to_string(1+(long)img_files.size())+"] "+
-                                            img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc));
+                        button_msg.setText("[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                            img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
+                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
                     }
                 }
                 else

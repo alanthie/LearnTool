@@ -55,7 +55,8 @@ public:
 
     long                                        index_img = 0;
     long                                        cnt_loop = 0;
-	float							            vitesse = 1;
+	float							            vitesse_img_sec         = 3.0f;         // SEC
+    float							            vitesse_video_factor    = 1.0f;
     std::vector<filesystem::path>               img_files;
     std::vector<std::shared_ptr<sf::Texture>>   img_texture;
 
