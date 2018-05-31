@@ -111,22 +111,27 @@ void UIState::b_click(std::string& b_name)
     }
 	else if (b_name == "b_speed_slow")
 	{
-		vitesse++;
+		vitesse += 1.0f;	// TODO mettre vitesse_increment dans Config, LearnTool.ini
 	}
 	else if (b_name == "b_speed_fast")
 	{
-		vitesse--;
+		vitesse -= 1.0f;
+		if (vitesse <= 0.5)	// TODO mettre vitesse_minimum dans Config, LearnTool.ini
+			vitesse = 0.5f;
 	}
 }
 
 
-UIState::UIState(UImain& g) : StateBase(g),
-ui(g),
-button_name("b_name", gui::ButtonSize::Small),
-button_parts("b_parts", gui::ButtonSize::Wide),
-button_msg("b_msg", gui::ButtonSize::Wide),
-minimap("mmap", 50, 50)
+UIState::UIState(UImain& g) : 
+	StateBase(g),
+	ui(g),
+	button_name("b_name", gui::ButtonSize::Small),
+	button_parts("b_parts", gui::ButtonSize::Wide),
+	button_msg("b_msg", gui::ButtonSize::Wide),
+	minimap("mmap", 50, 50)
 {
+	vitesse = 3.0f; // TODO mettre vitesse_initial dans Config, LearnTool.ini
+
 	button_name.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
 	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
 	button_msg.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
@@ -150,8 +155,8 @@ minimap("mmap", 50, 50)
 	button_menu[2][1]->setText("-");
 	button_menu[3][0]->setText("<<");
 	button_menu[3][1]->setText(">>");
-	button_menu[4][0]->setText("slow");
-	button_menu[4][1]->setText("fast");
+	button_menu[4][0]->setText("slower");
+	button_menu[4][1]->setText("faster");
     
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -708,8 +713,8 @@ void UIState::render(sf::RenderTarget& renderer)
                             }
                         }
 
-                        double np = _vc->vc.get(CV_CAP_PROP_POS_FRAMES); // retrieves the current frame number
-                        double nc = _vc->vc.get(CV_CAP_PROP_FRAME_COUNT);
+                        double np = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES); // retrieves the current frame number
+                        double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
                         button_msg.setText( "["+std::to_string(1+(long)index_img) + "/" + std::to_string(1+(long)img_files.size())+"] "+
                                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc));
                     }
@@ -768,11 +773,11 @@ void UIState::refresh_size()
     button_menu[2][1]->setPosition({ canvas_w + b_w, 2*b_h });
     button_menu[3][0]->setPosition({ canvas_w, 3 * b_h });
     button_menu[3][1]->setPosition({ canvas_w + b_w, 3 * b_h });
-	button_menu[4][0]->setPosition({ canvas_w, 7 * b_h });
-	button_menu[4][1]->setPosition({ canvas_w + b_w, 7 * b_h });
+	button_menu[4][0]->setPosition({ canvas_w, 8 * b_h });
+	button_menu[4][1]->setPosition({ canvas_w + b_w, 8 * b_h });
 
     float mmap_w = 2 * b_w;
-    minimap.m_rect.setSize({ mmap_w , mmap_w, });
+    minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
     if (minimap.moving == false)
     {
         minimap.setPosition({ canvas_w, 4 * b_h });

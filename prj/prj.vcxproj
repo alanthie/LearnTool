@@ -85,7 +85,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\000Lib\SFML-2.5.0-windows-vc15-64-bit\SFML-2.5.0\include;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\000Lib\SFML-2.5.0-windows-vc15-64-bit\SFML-2.5.0\include;..\src;..\..\opencv\modules\imgcodecs\include;..\..\opencv\modules\videoio\include;..\..\opencv\modules\highgui\include;..\..\opencv\modules\core\include;..\..\opencv\builds;..\..\opencv\modules\imgproc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
