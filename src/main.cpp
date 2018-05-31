@@ -51,100 +51,18 @@ int main(int argc, char *argv[])
 
         if (cfg.setup(config_file) == true)
         {
+			
         }
         else
         {
-        }
-
-        if (config_file.size() > 0)
-        {
-            filesystem::path p(config_file);
-            if ((p.empty() == false) && (p.exists() == true) && (p.is_file() == true))
-            {
-                std::shared_ptr<ini_parser> cfg_ini = std::shared_ptr<ini_parser>(new ini_parser(p.make_absolute().str()));
-                if (cfg_ini)
-                {
-                    std::string path_dir_temp;
-                    try
-                    {
-                        path_dir_temp = cfg_ini->get_string("path_folder", "main");
-                        filesystem::path path_folder(path_dir_temp);
-                        if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
-                        {
-                            cfg.path_dir = path_folder.make_absolute().str();
-                            // this->path_dir = path_folder.make_absolute().str();
-                        }
-                    }
-                    catch (...)
-                    {
-                    }
-
-                    try
-                    {
-                        cfg.title = cfg_ini->get_string("title", "main");
-                    }
-                    catch (...)
-                    {
-                    }
-
-                    try
-                    {
-                        cfg.default_w = cfg_ini->get_int("w", "main");
-                    }
-                    catch (...)
-                    {
-                    }
-
-                    try
-                    {
-                        cfg.default_h = cfg_ini->get_int("h", "main");
-                    }
-                    catch (...)
-                    {
-                    }
-
-                    try
-                    {
-                        cfg.zoom = std::max(1.05f, cfg_ini->get_float("zoom", "main") );
-                    }
-                    catch (...)
-                    {
-                    }
-
-                    try
-                    {
-                        std::string s_excl = cfg_ini->get_string("exclude_folder", "main");
-                        cfg.exclude_folder = Config::split(s_excl, ';');
-                    }
-                    catch (...)
-                    {
-                    }
-
-                    try
-                    {
-                        std::string s_img = cfg_ini->get_string("img", "main");
-                        cfg.img = Config::split(s_img, ';');
-                    }
-                    catch (...)
-                    {
-                    }
-                }
-            }
+			std::cerr << "Invalid config file." << std::endl;
+			return -1;
         }
     }
 
-    filesystem::path path_folder(cfg.path_dir);
-    if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
-    {
-        // ok
-    }
-    else
-    {
-        std::cerr << "Invalid config file." << std::endl;
-        return -1;
-    }
+   
 
-    std::cout << "Ressource Path:" << path_folder.make_absolute().str() << std::endl;
+    std::cout << "Ressource Path:" << cfg.path_dir << std::endl;
 
     UImain ui(cfg);
     ui.run();
