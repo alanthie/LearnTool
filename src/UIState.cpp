@@ -32,8 +32,33 @@ void UIState::img_changed()
 
     if (_vc != nullptr)
     {
-        delete _vc;
+        v_vc.push_back(new VideoCapturingDeleter(_vc));
+        //delete _vc;
         _vc = nullptr;
+    }
+
+    if (v_vc.size() > 0)
+    {
+        bool all_done = true;
+        for( const auto item : v_vc)
+        {
+            if (item != nullptr)
+            {
+                if (item->_p != nullptr)
+                {
+                    if (item->is_done.load() == false)
+                    {
+                        all_done = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (all_done)
+        {
+            v_vc.clear();
+        }
     }
 }
 
@@ -137,6 +162,12 @@ void UIState::b_click(std::string& b_name)
         else
         {
             vitesse_video_factor /= 1.25f;
+
+            if (vitesse_video_factor < 1.0) // stay with frame longer
+            {
+                if (_vc)
+                    _vc->pass_n = -1 + (int)(1.0 / vitesse_video_factor);
+            }
         }
 	}
 	else if (b_name == "b_speed_fast")
@@ -685,39 +716,55 @@ void UIState::render(sf::RenderTarget& renderer)
                 {
                     if (img_files[index_img].empty() == false)
                     {
+                        std::string msg;
                         if (index_img < img_files.size())
                         {
-                            button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
-                                                img_files[index_img].filename() +
-                                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
+                            msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                                img_files[index_img].filename() +
+                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
                         }
 
                         _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
                         if (_vc->open() == false)
                         {
-                            delete _vc;
+                            v_vc.push_back(new VideoCapturingDeleter(_vc));
+                            //delete _vc;
                             _vc = nullptr;
                         }
+                        else
+                        {
+                            if (_vc->has_sound)
+                            {
+                                _vc->load_sound();
+                                msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                            }
+                            else
+                            {
+                                msg = msg + " no sound...";
+                            }
+                        }
+
+                        button_msg.setText(msg);
                     }
                 }
             }
 
-            if (_vc != nullptr)
+            if (_vc != nullptr) /*&& ((!_vc->has_sound) || (_vc->has_sound)&&(_vc->sound_loaded == true) ) )*/
             {
                 bool done = false;
                 if (is_pause == false)
                 {
                     int skip_n = 0;
-                    int pass_n = 0;
+                    /*int pass_n = 0;*/
                     if (vitesse_video_factor > 1.0) // skip some frame
                     {
                         skip_n = -1 + (int)vitesse_video_factor;
                     }
 
-                    if (vitesse_video_factor < 1.0) // stay with frame longer
-                    {
-                        pass_n = -1 + (int)(1.0 / vitesse_video_factor);
-                    }
+                    //if (vitesse_video_factor < 1.0) // stay with frame longer
+                    //{
+                    //    pass_n = -1 + (int)(1.0 / vitesse_video_factor);
+                    //}
 
                     if ((vitesse_video_factor > 1.0) && (skip_n > 0))
                     {
@@ -732,14 +779,28 @@ void UIState::render(sf::RenderTarget& renderer)
                         }
                     }
 
-                    if ((vitesse_video_factor < 1.0) && (pass_n > 0))
+                    bool skip = false;
+                    if ((vitesse_video_factor < 1.0) && (_vc->pass_n > 0))
                     {
-                        //...
+                        _vc->pass_n--;
+                        skip = true;
                     }
 
-                    if (_vc->readNextFrame() == false)
+                    if ((vitesse_video_factor < 1.0) && (_vc->pass_n <= 0))
                     {
-                        done = true;
+                        // reset for next iter
+                        _vc->pass_n = -1 + (int)(1.0 / vitesse_video_factor);
+                        if (_vc->pass_n <= 0)
+                            _vc->pass_n = 1;
+                        skip = false;
+                    }
+
+                    if (skip == false)
+                    {
+                        if (_vc->readNextFrame() == false)
+                        {
+                            done = true;
+                        }
                     }
                 }
 
@@ -783,12 +844,14 @@ void UIState::render(sf::RenderTarget& renderer)
                         double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
                         button_msg.setText("[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
-                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
+                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
+                            + (_vc->sound_isloading.load() ? " loading sound..." : ""));
                     }
                 }
                 else
                 {
-                    delete _vc;
+                    v_vc.push_back(new VideoCapturingDeleter(_vc));
+                    //delete _vc;
                     _vc = nullptr;
                 }
             }

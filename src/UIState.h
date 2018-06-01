@@ -33,7 +33,8 @@ public:
     //sf::SoundBuffer buffer;
     //sf::Sound sound;
 
-    VideoCapturing*             _vc = nullptr;
+    VideoCapturing*                     _vc = nullptr;
+    std::vector<VideoCapturingDeleter*>  v_vc;
 
     gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
