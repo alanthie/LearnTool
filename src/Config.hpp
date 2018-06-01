@@ -3,14 +3,18 @@
 //                  License: MIT License
 //=================================================================================================
 #pragma once
+
+#include "filesystem/path.h"
+#include "filesystem/resolver.h"
+#include "ini_parser/ini_parser.hpp"
+#include <algorithm>
+#include <iterator>
+#include <cassert>
 #include <string>
 #include <chrono>
 #include <thread>
 #include <iostream>
 #include <memory>
-#include "filesystem/path.h"
-#include "filesystem/resolver.h"
-#include "ini_parser/ini_parser.hpp"
 
 class Config
 {
@@ -76,7 +80,7 @@ public:
 
 		            try
 		            {
-						this->zoom = std::max(1.05f, cfg_ini->get_float("zoom", "main") );
+						this->zoom = std::max<float>(1.05f, cfg_ini->get_float("zoom", "main") );
 		            }
 		            catch (...)
 		            {

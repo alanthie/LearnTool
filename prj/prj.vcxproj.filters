@@ -72,6 +72,9 @@
     <ClCompile Include="..\src\SFML_SDK\GUI\Minimap.cpp">
       <Filter>Source Files\SFML_SDK</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\FolderNavigation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Config.hpp">
@@ -147,6 +150,15 @@
       <Filter>Source Files\SFML_SDK</Filter>
     </ClInclude>
     <ClInclude Include="..\src\VideoCapture.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\FolderNavigation.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UIState.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UIMain.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

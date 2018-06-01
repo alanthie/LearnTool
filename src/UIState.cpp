@@ -33,7 +33,6 @@ void UIState::img_changed()
     if (_vc != nullptr)
     {
         v_vc.push_back(new VideoCapturingDeleter(_vc));
-        //delete _vc;
         _vc = nullptr;
     }
 
@@ -62,7 +61,7 @@ void UIState::img_changed()
     }
 }
 
-void UIState::minmap_change(std::string& b_name) 
+void UIState::minmap_changed(std::string& b_name) 
 {
     //...
 }
@@ -189,16 +188,15 @@ void UIState::b_click(std::string& b_name)
 UIState::UIState(UImain& g) : 
 	StateBase(g),
 	ui(g),
-	button_name("b_name", gui::ButtonSize::Small),
-	button_parts("b_parts", gui::ButtonSize::Wide),
-	button_msg("b_msg", gui::ButtonSize::Wide),
-	minimap("mmap", 50, 50)
+    _fnav(*this, ui.cfg.path_dir, ui.cfg.exclude_folder, ui.cfg.img),
+	button_name(    "b_name",   gui::ButtonSize::Small),
+	button_parts(   "b_parts",  gui::ButtonSize::Wide),
+	button_msg(     "b_msg",    gui::ButtonSize::Wide),
+	minimap(        "mmap",     50, 50)
 {
-	// TODO mettre vitesse_img_sec_initial dans Config, LearnTool.ini
-
-	button_name.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+	button_name.m_text.setFont( ResourceHolder::get().fonts.get("arial"));
 	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
-	button_msg.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
+	button_msg.m_text.setFont(  ResourceHolder::get().fonts.get("arial"));
 
 	button_msg.m_text.setOrigin(0.0f, 0.0f);
 
@@ -248,19 +246,11 @@ UIState::UIState(UImain& g) :
     button_parts.setFunction(   &StateBase::b_click);
     button_msg.setFunction(     &StateBase::b_click);
 
-    minimap.setFunction(&StateBase::minmap_change);
+    minimap.setFunction(&StateBase::minmap_changed);
 
-    //root = filesystem::path("..\\res\\topic");
-    root = filesystem::path(ui.cfg.path_dir);
-
-    root_files = filesystem::path::get_directory_file(root, false, true);
-
-    current_parent  = filesystem::path(root);
-    current_path    = find_next_folder(root, filesystem::path());
-
-    if (current_path.empty() == false)
+    if (_fnav.current_path.empty() == false)
     {
-        load_path(current_path);
+        load_path(_fnav.current_path);
     }
 
     std::cout <<"Using OpenCV version " << CV_VERSION << "\n" << std::endl;
@@ -269,289 +259,32 @@ UIState::UIState(UImain& g) :
 
 void UIState::load_root()
 {
-    // Restart
-    current_parent = filesystem::path(root);
-    current_path = find_next_folder(root, filesystem::path());
-
-    if (current_path.empty() == false)
-    {
-        load_path(current_path);
-    }
-    else
-    {
-        assert(false);
-    }
+    _fnav.load_root();
 }
 
 void UIState::next_path(bool no_deepening)
 {
-    filesystem::path save_current_path = current_path;
-    filesystem::path save_current_parent = save_current_path.parent_path();
-
-    assert(save_current_parent.empty() == false);
-
-    current_path = find_next_folder(save_current_parent, save_current_path, no_deepening);
-    if (current_path.empty() == false)
-    {
-        if (current_parent != current_path.parent_path())
-        {
-            current_parent = current_path.parent_path();
-        }
-
-        if (current_path.empty() == false)
-        {
-            load_path(current_path);
-        }
-        else
-        {
-            assert(false);
-        }
-    }
-    else if (save_current_parent.make_absolute().str() == root.make_absolute().str())
-    {
-         // Restart
-        load_root();
-        return;
-    }
-    else
-    {
-        current_path    = save_current_parent;
-        current_parent  = save_current_parent.parent_path();
-        if (current_path.make_absolute().str() == root.make_absolute().str())
-        {
-            // Restart
-            load_root();
-            return;
-        }
-
-        current_path = find_next_folder(current_parent, current_path, true);
-        while (current_path.empty() == true)
-        {
-            current_path = save_current_parent.parent_path();
-            current_parent = save_current_parent.parent_path().parent_path();
-
-            if (current_path.make_absolute().str() == root.make_absolute().str())
-            {
-                // Restart
-                load_root();
-                return;
-            }
-
-            next_path(true);
-        }
-        
-        if (current_path.empty() == false)
-        {
-            load_path(current_path);
-        }
-        else
-        {
-            assert(false);
-        }
-    }
+    _fnav.next_path(no_deepening);
 }
 
 void UIState::prev_path(bool no_deepening)
 {
-    filesystem::path save_current_path = current_path;
-    filesystem::path save_current_parent = save_current_path.parent_path();
-
-    current_path = find_prev_folder(save_current_parent, save_current_path, no_deepening);
-    if (current_path.empty() == false)
-    {
-        current_parent = current_path.parent_path();
-        if (current_path.make_absolute().str() == root.make_absolute().str())
-        {
-            // Restart
-            load_root();
-            return;
-        }
-        else
-        {
-            if (current_path.empty() == false)
-            {
-                load_path(current_path);
-            }
-            else
-            {
-                assert(false);
-            }
-        }
-    }
-    else
-    {
-        current_path = save_current_parent;
-        current_parent = save_current_parent.parent_path();
-
-        if ((current_path.empty() == true) || (current_path.make_absolute().str() == root.make_absolute().str()))
-        {
-            // Restart
-            load_root();
-            return;
-        }
-
-        if (current_path.empty() == false)
-        {
-            current_parent = current_path.parent_path();
-            load_path(current_path);
-        }
-        else
-        {
-            assert(false);
-        }
-    }
+    _fnav.prev_path(no_deepening);
 }
 
-filesystem::path UIState::find_next_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening)
+filesystem::path UIState::find_next_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening)
 {
-    filesystem::path p;
-    if (last_folder.empty())
-    {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
-        for (size_t i = 0; i < v.size(); i++)
-        {
-            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
-            {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-                if (vf.size() > 0)
-                {
-                    p = filesystem::path(v[i]);
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
-        int k = 0;
-        for (int i = 0; i < v.size(); i++)
-        {
-            if (v[i] == last_folder.make_absolute().str())
-            {
-                k = i;
-                break;
-            }
-        }
-
-        if (no_deepening == false)
-        {
-            std::vector<std::string> v_sub = filesystem::path::get_directory_file(last_folder, false, true);
-            for (size_t j = 0; j < v_sub.size(); j++)
-            {
-                if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == ui.cfg.exclude_folder.end())
-                {
-                    std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
-                    if (vf_sub.size() > 0)
-                    {
-                        p = filesystem::path(v_sub[j]);
-                        return p;
-                    }
-                }
-            }
-        }
-
-        for (int i = k+1; i < v.size(); i++)
-        {
-            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
-            {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-                if (vf.size() > 0)
-                {
-                    p = filesystem::path(v[i]);
-                    break;
-                }
-            }
-
-            std::vector<std::string> v_sub = filesystem::path::get_directory_file(filesystem::path(v[i]), false, true);
-            for (size_t j = 0; j < v_sub.size(); j++)
-            {
-                if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == ui.cfg.exclude_folder.end())
-                {
-                    std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
-                    if (vf_sub.size() > 0)
-                    {
-                        p = filesystem::path(v_sub[j]);
-                        return p;
-                    }
-                }
-            }
-        }
-
-    }
-
-    return p;
+    return _fnav.find_next_folder(parent_folder, last_folder, no_deepening);
 }
 
-filesystem::path UIState::find_last_folder(filesystem::path parent_folder)
+filesystem::path UIState::find_last_folder(filesystem::path& parent_folder)
 {
-    filesystem::path p;
-
-    std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
-    for (size_t i = v.size() - 1; i >= 0; i--)
-    { 
-        if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
-        {
-            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-            if (vf.size() > 0)
-            {
-                p = filesystem::path(v[i]);
-                break;
-            }
-        }
-    }
-    return p;
+    return _fnav.find_last_folder(parent_folder);
 }
 
-filesystem::path UIState::find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening)
+filesystem::path UIState::find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening)
 {
-    filesystem::path p;
-    if (last_folder.empty())
-    {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
-        for (size_t i = 0; i < v.size(); i++)
-        {
-            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
-            {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-                if (vf.size() > 0)
-                {
-                    p = filesystem::path(v[i]);
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
-        int k = 0;
-        for (int i = 0; i < v.size(); i++)
-        {
-            if (v[i] == last_folder.make_absolute().str())
-            {
-                k = i;
-                break;
-            }
-        }
-
-        for (int i = k-1; i >= 0; i--)
-        {
-            if (std::find(ui.cfg.exclude_folder.begin(), ui.cfg.exclude_folder.end(), filesystem::path(v[i]).filename()) == ui.cfg.exclude_folder.end())
-            {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
-                if (vf.size() > 0)
-                {
-                    p = filesystem::path(v[i]);
-                    break;
-                }
-            }
-        }
-        
-        // at root
-    }
-
-    return p;
+    return _fnav.find_prev_folder(parent_folder, last_folder, no_deepening);
 }
 
 void UIState::handleEvent(sf::Event e) 
@@ -563,7 +296,7 @@ void UIState::handleEvent(sf::Event e)
 
     case sf::Event::Resized:
         //m_pGame->getWindow().setView(sf::View(sf::FloatRect(0, 0, (float)e.size.width, (float)e.size.height)));
-        refresh_size();
+        recalc_size();
 
         break;
 
@@ -587,7 +320,6 @@ void UIState::handleEvent(sf::Event e)
 
     minimap.handleEvent(e, m_pGame->getWindow(), *this);
 }
-
 
 void UIState::handleInput() 
 {
@@ -636,7 +368,7 @@ void UIState::fixedUpdate(sf::Time deltaTime)
 
 void UIState::render(sf::RenderTarget& renderer) 
 {
-    refresh_size();
+    recalc_size();
     if (img_files.size() > 0)
     {
         std::string s = img_files[index_img].extension();
@@ -678,7 +410,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
                 sprite_canva.reset();
                 sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
-                sprite_canva->scale(scale(sprite_canva));
+                sprite_canva->scale(scale_sprite(sprite_canva));
                 sprite_canva->scale(canvas_scale);
                 sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
                 canvas_bounds = sprite_canva->getGlobalBounds();
@@ -728,7 +460,6 @@ void UIState::render(sf::RenderTarget& renderer)
                         if (_vc->open() == false)
                         {
                             v_vc.push_back(new VideoCapturingDeleter(_vc));
-                            //delete _vc;
                             _vc = nullptr;
                         }
                         else
@@ -760,11 +491,6 @@ void UIState::render(sf::RenderTarget& renderer)
                     {
                         skip_n = -1 + (int)vitesse_video_factor;
                     }
-
-                    //if (vitesse_video_factor < 1.0) // stay with frame longer
-                    //{
-                    //    pass_n = -1 + (int)(1.0 / vitesse_video_factor);
-                    //}
 
                     if ((vitesse_video_factor > 1.0) && (skip_n > 0))
                     {
@@ -819,7 +545,7 @@ void UIState::render(sf::RenderTarget& renderer)
                         {
                             sprite_canva.reset();
                             sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(texture));
-                            sprite_canva->scale(scale(sprite_canva));
+                            sprite_canva->scale(scale_sprite(sprite_canva));
                             sprite_canva->scale(canvas_scale);
                             sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
                             canvas_bounds = sprite_canva->getGlobalBounds();
@@ -851,7 +577,6 @@ void UIState::render(sf::RenderTarget& renderer)
                 else
                 {
                     v_vc.push_back(new VideoCapturingDeleter(_vc));
-                    //delete _vc;
                     _vc = nullptr;
                 }
             }
@@ -876,7 +601,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
 }
 
-void UIState::refresh_size()
+void UIState::recalc_size()
 {
     w = (float)ui.getWindow().getSize().x;
     h = (float)ui.getWindow().getSize().y;
@@ -931,31 +656,11 @@ void UIState::refresh_size()
     view_minimap.setViewport(sf::FloatRect(minimap.m_rect.getPosition().x / w , minimap.m_rect.getPosition().y / h, minimap.m_rect.getSize().x / w, minimap.m_rect.getSize().y / h));
 }
 
-sf::Vector2f UIState::scale(std::shared_ptr<sf::Sprite> sprite)
+sf::Vector2f UIState::scale_sprite(std::shared_ptr<sf::Sprite> sprite)
 {
     float sx = (canvas_w) / (float)sprite->getTextureRect().width;
     float sy = (canvas_h) / (float)sprite->getTextureRect().height;
     return sf::Vector2f{ std::min(sx, sy), std::min(sx, sy) };
-}
-
-std::vector<std::string> UIState::get_img_files(filesystem::path& p)
-{
-    std::vector<std::string> imgfiles;
-    std::vector<std::string> files = filesystem::path::get_directory_file(p, false);
-    for (size_t i = 0; i < files.size(); i++)
-    {
-        filesystem::path pv = files.at(i);
-        if (pv.is_file())
-        {
-            std::string s = pv.extension();
-            std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-            if (std::find(ui.cfg.img.begin(), ui.cfg.img.end(), s) != ui.cfg.img.end())
-            {
-                imgfiles.push_back(pv.make_absolute().str());
-            }
-        }
-    }
-    return imgfiles;
 }
 
 void UIState::load_path(filesystem::path& p)
@@ -968,18 +673,11 @@ void UIState::load_path(filesystem::path& p)
     cnt_loop = 0;
     ini.reset();
 
-    {
-        button_msg.setText("loading...");
-        button_name.setText("");
-        button_parts.setText("");
-
-        //ui.getWindow().clear();
-        //render(ui.getWindow());
-        //ui.getWindow().display();
-    }
+    button_name.setText("");
+    button_parts.setText("");
 
     std::string fullname = p.make_absolute().str();
-    std::string name = fullname.substr(fullname.find(root.make_absolute().str()) + root.make_absolute().str().size());
+    std::string name = fullname.substr(fullname.find(_fnav.root.make_absolute().str()) + _fnav.root.make_absolute().str().size());
     std::string desc;
 
     std::cout << "Name:" << name << std::endl;

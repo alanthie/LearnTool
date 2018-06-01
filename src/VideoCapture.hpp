@@ -25,6 +25,11 @@ public:
             has_sound = true;
             sound_file = p.make_absolute().str();
         }
+        else
+        {
+            // if option... make/save *.wav file in background - launch system command
+            //...
+        }
     }
 
     ~VideoCapturing()
@@ -37,7 +42,7 @@ public:
         // wait thread loading...
         if (t != nullptr)
         {
-            //...
+            //...in case...
             stop_thread.store(false);
             t->join();
             delete t;
@@ -153,7 +158,7 @@ public:
         }
     }
 
-    ~VideoCapturingDeleter()
+    ~VideoCapturingDeleter() 
     {
         if (_p)
         {

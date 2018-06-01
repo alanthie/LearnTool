@@ -13,9 +13,8 @@
 #include "SFML_SDK/GUI/Minimap.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
-#include "filesystem/path.h"
-#include "filesystem/resolver.h"
-#include "ini_parser/ini_parser.hpp"
+
+#include "FolderNavigation.h"
 #include "VideoCapture.hpp"
 #include <memory>
 #include <iostream>
@@ -23,15 +22,14 @@
 //
 enum class display_mode {show_img, show_movie};
 
+
 class UIState : public StateBase
 {
 public:
     UImain&                     ui;
     sf::View                    main_view;
     display_mode                _mode = display_mode::show_img;
-
-    //sf::SoundBuffer buffer;
-    //sf::Sound sound;
+    FolderNavigation            _fnav;
 
     VideoCapturing*                     _vc = nullptr;
     std::vector<VideoCapturingDeleter*>  v_vc;
@@ -45,11 +43,6 @@ public:
     sf::View                    view_minimap;
 
     bool                        is_pause = false;
-
-    filesystem::path            root;
-    std::vector<std::string>    root_files;
-    filesystem::path            current_parent;
-    filesystem::path            current_path;
 
     std::string                 ini_filename;
     std::shared_ptr<ini_parser> ini;
@@ -80,22 +73,20 @@ public:
     void fixedUpdate(sf::Time deltaTime) override;
     void render(sf::RenderTarget& renderer) override;
 
-    void            refresh_size();
-    sf::Vector2f    scale(std::shared_ptr<sf::Sprite> sprite);
+    void            recalc_size();
+    sf::Vector2f    scale_sprite(std::shared_ptr<sf::Sprite> sprite);
     sf::Vector2f    canvas_scale = { 1.0f, 1.0f };
 
     void load_path(filesystem::path& p);
     void load_root();
 
     void b_click(std::string& b_name) override;
-    void minmap_change(std::string& b_name) override;
+    void minmap_changed(std::string& b_name) override;
 
-    filesystem::path find_next_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening = false);
-    filesystem::path find_prev_folder(filesystem::path parent_folder, filesystem::path last_folder, bool no_deepening = false);
-    filesystem::path find_last_folder(filesystem::path parent_folder);
+    filesystem::path find_next_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
+    filesystem::path find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
+    filesystem::path find_last_folder(filesystem::path& parent_folder);
 
     void next_path(bool no_deepening = false);
     void prev_path(bool no_deepening = false);
-
-    std::vector<std::string> get_img_files(filesystem::path& p);
 };
