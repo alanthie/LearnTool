@@ -318,14 +318,21 @@ void UIState::update(sf::Time deltaTime)
     {
         if (is_pause == false)
         {
-            if (_vc == nullptr)
+            //if (_vc == nullptr)
             {
-                index_img++;
-                if (index_img > img_files.size() - 1)
+                if (cnt_loop > 0)   // 0 means first time
                 {
-                    _fnav.next_path();
+                    if (_vc == nullptr)
+                    {
+                        index_img++;
+                        if (index_img > img_files.size() - 1)
+                        {
+                            _fnav.next_path();
+                        }
+                        img_changed();
+                    }
                 }
-                img_changed();
+                cnt_loop++;
             }
         }
     }
@@ -373,7 +380,7 @@ void UIState::render(sf::RenderTarget& renderer)
             {
                 if (index_img < img_files.size())
                 {
-                    button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                    button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string((long)img_files.size()) + "] " +
                                          img_files[index_img].filename() +
                                          "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
                 }
@@ -408,6 +415,7 @@ void UIState::render(sf::RenderTarget& renderer)
     }
 
     // main_view
+    bool done = false;
     if (_mode == display_mode::show_movie)
     {
         //if (is_pause == false)
@@ -421,7 +429,7 @@ void UIState::render(sf::RenderTarget& renderer)
                         std::string msg;
                         if (index_img < img_files.size())
                         {
-                            msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                            msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
                                 img_files[index_img].filename() +
                                 "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
                         }
@@ -440,8 +448,16 @@ void UIState::render(sf::RenderTarget& renderer)
                                 msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
                             }
                             else
-                            {
-                                msg = msg + " no sound...";
+                            {                     
+                                if (ui.cfg.mak_wav_file == 1)
+                                {
+                                    v_extract_sound.push_back(new ExtractSound(img_files[index_img].make_absolute().str()));
+                                    msg = msg + " extracting sound...";
+                                }
+                                else
+                                {
+                                    msg = msg + " no sound...";
+                                }
                             }
                         }
 
@@ -452,7 +468,34 @@ void UIState::render(sf::RenderTarget& renderer)
 
             if (_vc != nullptr) /*&& ((!_vc->has_sound) || (_vc->has_sound)&&(_vc->sound_loaded == true) ) )*/
             {
-                bool done = false;
+                if (ui.cfg.mak_wav_file == 1)
+                {
+                    if (_vc->has_sound == false)
+                    {
+                        _vc->recheck_sound();
+                    }
+                }
+
+                if (_vc->has_sound == true)
+                {
+                    if (_vc->playing_request == false)
+                    {
+                        if ((_vc->sound_loaded == false) && (_vc->sound_isloading.load() == false))
+                        {
+                            _vc->load_sound();
+
+                            std::string msg;
+                            msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
+                                img_files[index_img].filename() +
+                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                            msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+
+                            button_msg.setText(msg);
+                        }
+                    }
+                }
+
+               // bool done = false;
                 if (is_pause == false)
                 {
                     int skip_n = 0;
@@ -538,7 +581,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
                         double np = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES); // retrieves the current frame number
                         double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
-                        button_msg.setText("[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(1 + (long)img_files.size()) + "] " +
+                        button_msg.setText("[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
                             + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
                             + (_vc->sound_isloading.load() ? " loading sound..." : ""));
@@ -546,6 +589,7 @@ void UIState::render(sf::RenderTarget& renderer)
                 }
                 else
                 {
+                    // done
                     v_vc.push_back(new VideoCapturingDeleter(_vc));
                     _vc = nullptr;
                 }

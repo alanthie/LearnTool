@@ -1,1 +1,0 @@
-ffmpeg -i 0002.mp4 0002.wav

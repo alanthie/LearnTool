@@ -7,10 +7,17 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
+#include "filesystem/path.h"
+#include "filesystem/resolver.h"
+#include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
 #include <iostream>
 #include <stdio.h>
 #include <atomic>
 #include <future>
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 class VideoCapturingDeleter;
 
@@ -29,6 +36,16 @@ public:
         {
             // if option... make/save *.wav file in background - launch system command
             //...
+        }
+    }
+
+    void recheck_sound()
+    {
+        filesystem::path p(_file + ".wav");
+        if ((p.empty() == false) && (p.exists()) && (p.is_file()))
+        {
+            has_sound = true;
+            sound_file = p.make_absolute().str();
         }
     }
 
@@ -65,6 +82,7 @@ public:
     std::thread*        t = nullptr;
     std::atomic<bool>   stop_thread = false;
     int                 pass_n = 0;
+    bool playing_request = false;
 
     bool open()
     {
@@ -97,6 +115,7 @@ public:
                         delete t;
                         t = nullptr;
                     }
+                    stop_thread.store(false);
 
                     // ASYNCH THREAD
                     t = new std::thread(&VideoCapturing::asych_load_sound, this);
@@ -114,6 +133,22 @@ public:
                 sound_loaded = true;
                 sound.setBuffer(buffer);
             }
+            else
+            {
+                // too fast - file not fully saved...
+                // retry
+                std::this_thread::sleep_for(100ms);
+                if (buffer.loadFromFile(sound_file))
+                {
+                    sound_loaded = true;
+                    sound.setBuffer(buffer);
+                }
+                else
+                {
+                    int err = 1;
+                }
+
+            }
             sound_isloading.store(false);
 
             play_sound();
@@ -122,11 +157,15 @@ public:
 
     void play_sound()
     {
-        if ((has_sound)&& (sound_isloading.load()==false))
+        if ((has_sound) && (sound_isloading.load()==false) && (sound_loaded))
         {
             if (stop_thread.load() == false)
             {
-                sound.play();
+                if (playing_request == false)
+                {
+                    playing_request = true;
+                    sound.play();
+                }
             }
         }
     }
@@ -199,5 +238,53 @@ public:
 
     VideoCapturing* _p;
     std::thread*    t = nullptr;
+    std::atomic<bool> is_done = false;
+};
+
+class ExtractSound
+{
+public:
+    ExtractSound(const std::string& mp4_file) : _file(mp4_file)
+    {
+        filesystem::path p(mp4_file);
+        if ((p.empty() == false) && (p.exists()) && (p.is_file()))
+        {
+            _thread = new std::thread(&ExtractSound::run, this);
+        }
+    }
+
+    ~ExtractSound()
+    {
+        is_done.store(true);
+        if (_thread)
+        {
+            _thread->join();
+
+            delete _thread;
+            _thread = nullptr;
+        }
+    }
+
+    void run()
+    {
+        // ffmpeg -i 0001.mp4 0001.mp4.wav
+        filesystem::path cmd_path("..\\tools");
+        std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -i \"" + _file + "\" \"" + _file + ".wav\"";
+        int r = system(cmd.c_str());
+
+        std::cout << cmd << std::endl;
+
+        filesystem::path wav_path(_file + ".wav");
+        while (wav_path.exists() == false)
+        {
+            if (is_done.load() == true)
+                break;
+            std::this_thread::sleep_for(1ms);
+        }
+        is_done.store(true);
+    }
+
+    std::string     _file;
+    std::thread*    _thread = nullptr;
     std::atomic<bool> is_done = false;
 };

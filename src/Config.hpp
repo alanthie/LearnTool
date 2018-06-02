@@ -24,6 +24,7 @@ public:
     int             default_h = 600;
     std::string     path_dir = ".\\";
     float           zoom = 1.25;
+    int             mak_wav_file = 0;
 
     std::vector<std::string> exclude_folder = { ".Thumbs" };
     std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi" };
@@ -103,6 +104,14 @@ public:
 		            catch (...)
 		            {
 		            }
+
+                    try
+                    {
+                        this->mak_wav_file = cfg_ini->get_int("mak_wav_file", "main");
+                    }
+                    catch (...)
+                    {
+                    }
 		        }
 		    }
 			
