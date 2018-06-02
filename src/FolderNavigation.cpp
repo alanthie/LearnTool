@@ -338,3 +338,90 @@ filesystem::path FolderNavigation::find_prev_folder(filesystem::path& parent_fol
 }
 
 
+filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
+{
+    filesystem::path ret_path;
+    filesystem::path save_current_path      = current_path;
+    filesystem::path save_current_parent    = save_current_path.parent_path();
+
+    assert(save_current_parent.empty() == false);
+
+    current_path = find_next_folder(save_current_parent, save_current_path, no_deepening);
+    if (current_path.empty() == false)
+    {
+        if (current_parent != current_path.parent_path())
+        {
+            current_parent = current_path.parent_path();
+        }
+
+        if (current_path.empty() == false)
+        {
+            ret_path        = current_path;
+            current_path    = save_current_path;
+            current_parent = save_current_parent;
+            return ret_path;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    else if (save_current_parent.make_absolute().str() == root.make_absolute().str())
+    {
+        // Restart
+        //load_root();
+        ret_path        = find_next_folder(root, filesystem::path());
+        current_path    = save_current_path;
+        current_parent  = save_current_parent;
+        return ret_path;
+    }
+    else
+    {
+        current_path = save_current_parent;
+        current_parent = save_current_parent.parent_path();
+        if (current_path.make_absolute().str() == root.make_absolute().str())
+        {
+            // Restart
+            //load_root();
+            ret_path        = find_next_folder(root, filesystem::path());
+            current_path    = save_current_path;
+            current_parent  = save_current_parent;
+            return ret_path;
+        }
+
+        current_path = find_next_folder(current_parent, current_path, true);
+        while (current_path.empty() == true)
+        {
+            current_path = save_current_parent.parent_path();
+            current_parent = save_current_parent.parent_path().parent_path();
+
+            if (current_path.make_absolute().str() == root.make_absolute().str())
+            {
+                // Restart
+                //load_root();
+                ret_path        = find_next_folder(root, filesystem::path());
+                current_path    = save_current_path;
+                current_parent  = save_current_parent;
+                return ret_path;
+            }
+
+            ret_path        = preview_next_path(true);
+            current_path    = save_current_path;
+            current_parent = save_current_parent;
+            return ret_path;
+        }
+
+        if (current_path.empty() == false)
+        {
+            ret_path        = current_path;
+            current_path    = save_current_path;
+            current_parent  = save_current_parent;
+            return ret_path;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    return ret_path;
+}

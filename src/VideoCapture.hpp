@@ -9,7 +9,7 @@
 #include <opencv2/highgui.hpp>
 #include "filesystem/path.h"
 #include "filesystem/resolver.h"
-#include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
+#include <stdlib.h>
 #include <iostream>
 #include <stdio.h>
 #include <atomic>
@@ -333,3 +333,84 @@ public:
     std::thread*    _thread = nullptr;
     std::atomic<bool> is_done = false;
 };
+
+//---------------------------------------------------------------------------
+// Create a SoundBufferManager class
+//  Tracking preloading of soundbuffer
+//  If sound is playing, continu preload reading
+//  else only current sound should load (CPU intense), pause preload reading
+//--------------------------------------------------------------------------
+
+
+
+//-------------------------------------------
+// Make another sf::SoundFileReaderWav
+// + abort_read() [add atomic<bool> abort_flag in class]
+// + pause_read()
+// + continu_read()
+// + notify_read_frame()
+// + 
+//-------------------------------------------
+/*
+Uint64 SoundFileReaderWav::read(Int16* samples, Uint64 maxCount)
+{
+    assert(m_stream);
+
+    Uint64 count = 0;
+    while ((count < maxCount) && (static_cast<Uint64>(m_stream->tell()) < m_dataEnd))
+    {
+        switch (m_bytesPerSample)
+        {
+        case 1:
+        {
+            Uint8 sample = 0;
+            if (decode(*m_stream, sample))
+                *samples++ = (static_cast<Int16>(sample) - 128) << 8;
+            else
+                return count;
+            break;
+        }
+
+        case 2:
+        {
+            Int16 sample = 0;
+            if (decode(*m_stream, sample))
+                *samples++ = sample;
+            else
+                return count;
+            break;
+        }
+
+        case 3:
+        {
+            Uint32 sample = 0;
+            if (decode24bit(*m_stream, sample))
+                *samples++ = sample >> 8;
+            else
+                return count;
+            break;
+        }
+
+        case 4:
+        {
+            Uint32 sample = 0;
+            if (decode(*m_stream, sample))
+                *samples++ = sample >> 16;
+            else
+                return count;
+            break;
+        }
+
+        default:
+        {
+            assert(false);
+            return 0;
+        }
+        }
+
+        ++count;
+    }
+
+    return count;
+}
+*/

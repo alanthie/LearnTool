@@ -532,9 +532,9 @@ void UIState::render(sf::RenderTarget& renderer)
                             v_vc.push_back(_vc);
                         }
 
+                        int k_preloaded = 0;
                         if ((index_img < img_files.size() - 1) && ( ui.cfg.preload_N_sound_file > 0))
                         {
-                            int k = 0;
                             int n = index_img + 1;
                             while ((n < img_files.size()) && (img_files[n].empty() == false))
                             {
@@ -543,7 +543,7 @@ void UIState::render(sf::RenderTarget& renderer)
                                 if ((rr==nullptr) && (img_files[n].extension() == "mp4"))
                                 {
                                     // preload
-                                    k++;
+                                    k_preloaded++;
                                     r = new VideoCapturing(img_files[n].make_absolute().str(), false);
                                     v_vc.push_back(r);
 
@@ -559,13 +559,20 @@ void UIState::render(sf::RenderTarget& renderer)
                                         }
                                     }
 
-                                    if (k >= ui.cfg.preload_N_sound_file) // preload n if possible
+                                    if (k_preloaded >= ui.cfg.preload_N_sound_file) // preload n if possible
                                     {
                                         break;
                                     }
                                 }
                                 n++;
                             }
+                        }
+
+                        if (k_preloaded < ui.cfg.preload_N_sound_file)
+                        {
+                            // try preload from next topic
+                            filesystem::path p_next = _fnav.preview_next_path();
+                            // ....
                         }
 
                         if (_vc->open() == false)
@@ -744,6 +751,8 @@ void UIState::render(sf::RenderTarget& renderer)
                 }
                 else
                 {
+                    // TODO - keep it a little longer, dont delete immediately...
+
                     // done
                     v_vcd.push_back(new VideoCapturingDeleter(_vc));
                     VideoCapturing::clear(_vc->_file, v_vc);

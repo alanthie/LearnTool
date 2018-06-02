@@ -41,5 +41,7 @@ public:
     filesystem::path find_next_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
     filesystem::path find_last_folder(filesystem::path& parent_folder);
     filesystem::path find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
+
+    filesystem::path preview_next_path(bool no_deepening = false);
 };
 
