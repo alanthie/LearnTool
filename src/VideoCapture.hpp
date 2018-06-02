@@ -24,7 +24,7 @@ class VideoCapturingDeleter;
 class VideoCapturing
 {
 public:
-    VideoCapturing(const std::string& file) : _file(file), vc(file), sound_file()
+    VideoCapturing(const std::string& file, bool _auto_play = true) : _file(file), vc(file), sound_file(), auto_play(_auto_play)
     {
         filesystem::path p(file+".wav");
         if ( (p.empty() == false) && (p.exists()) && (p.is_file()) )
@@ -35,6 +35,38 @@ public:
         else
         {
             //...
+        }
+    }
+
+    static VideoCapturing* find(const std::string& f, const std::vector<VideoCapturing*>& vvc)
+    {
+        VideoCapturing* r = nullptr;
+        for (size_t i = 0; i < vvc.size(); i++)
+        {
+            if (vvc[i] != nullptr)
+            {
+                if (vvc[i]->_file == f)
+                {
+                    r = vvc[i];
+                    break;
+                }
+            }
+        }
+        return r;
+    }
+
+    static void clear(const std::string& f, std::vector<VideoCapturing*>& vvc)
+    {
+        for (size_t i = 0; i < vvc.size(); i++)
+        {
+            if (vvc[i] != nullptr)
+            {
+                if (vvc[i]->_file == f)
+                {
+                    vvc[i] = nullptr;
+                    break;
+                }
+            }
         }
     }
 
@@ -82,6 +114,7 @@ public:
     std::thread*        t = nullptr;
     std::atomic<bool>   stop_thread = false;
     bool                playing_request = false;
+    bool                auto_play = true;
 
     bool open()
     {
@@ -129,8 +162,8 @@ public:
         {
             if (buffer.loadFromFile(sound_file)) // can not  be stop - will wait terminate in VideoCapturingDeleter thread
             {
-                sound_loaded = true;
                 sound.setBuffer(buffer);
+                sound_loaded = true;
             }
             else
             {
@@ -150,7 +183,10 @@ public:
             }
             sound_isloading.store(false);
 
-            play_sound();
+            if (auto_play)
+            {
+                play_sound();
+            }
         }
     }
 
@@ -204,6 +240,12 @@ public:
         {
             _p->stop_thread.store(true);
             _p->sound.stop();
+
+            if (t)
+            {
+                t->join();
+            }
+
             delete _p;
             _p = nullptr;
         }
@@ -266,6 +308,8 @@ public:
 
     void run()
     {
+        // Create process...
+
         // ffmpeg -i 0001.mp4 0001.mp4.wav
         filesystem::path cmd_path("..\\tools");
         std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -i \"" + _file + "\" \"" + _file + ".wav\"";
@@ -276,6 +320,8 @@ public:
         filesystem::path wav_path(_file + ".wav");
         while (wav_path.exists() == false)
         {
+            // check size...
+
             if (is_done.load() == true)
                 break;
             std::this_thread::sleep_for(1ms);

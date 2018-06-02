@@ -32,15 +32,17 @@ void UIState::img_changed()
 
     if (_vc != nullptr)
     {
-        v_vc.push_back(new VideoCapturingDeleter(_vc));
+        v_vcd.push_back(new VideoCapturingDeleter(_vc));
+        VideoCapturing::clear(_vc->_file, v_vc);
         _vc = nullptr;
     }
 
-    if (v_vc.size() > 0)
+    if (v_vcd.size() > 0)
     {
         bool all_done = true;
-        for( const auto item : v_vc)
+        for( size_t i=0; i< v_vcd.size(); i++)
         {
+            VideoCapturingDeleter* item = v_vcd[i];
             if (item != nullptr)
             {
                 if (item->_p != nullptr)
@@ -50,13 +52,44 @@ void UIState::img_changed()
                         all_done = false;
                         break;
                     }
+                    else
+                    {
+                        delete item;
+                        v_vcd[i] = nullptr;
+                    }
+                }
+                else
+                {
+                    delete item;
+                    v_vcd[i] = nullptr;
                 }
             }
         }
 
         if (all_done)
         {
-            v_vc.clear();
+            v_vcd.clear();
+        }
+    }
+
+    if (v_extract_sound.size() > 0)
+    {
+        bool all_done = true;
+        for (const auto item : v_extract_sound)
+        {
+            if (item != nullptr)
+            {
+                if (item->is_done.load() == false)
+                {
+                    all_done = false;
+                    break;
+                }
+            }
+        }
+
+        if (all_done)
+        {
+            v_extract_sound.clear();
         }
     }
 }
@@ -365,9 +398,9 @@ void UIState::update(sf::Time deltaTime)
                 {
                     sf::Time t = _vc->sound.getPlayingOffset();
                     float tsec = t.asSeconds();;
-                    if (std::abs(tsec - (np / fps)) > 10.0f)
+                    if (std::abs(tsec - (np / fps)) > 2.0f)
                     {
-                         _vc->sound.setPlayingOffset( sf::seconds(np/ fps)); // if fps frame/sec
+                         _vc->sound.setPlayingOffset( sf::seconds((float) (np/fps) )); // if fps frame/sec
                     }
                 }
             }
@@ -488,10 +521,57 @@ void UIState::render(sf::RenderTarget& renderer)
                                 "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
                         }
 
-                        _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
+                        VideoCapturing* r = VideoCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
+                        if (r != nullptr)
+                        {
+                            _vc = r;
+                        }
+                        else
+                        {
+                            _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
+                            v_vc.push_back(_vc);
+                        }
+
+                        if ((index_img < img_files.size() - 1) && ( ui.cfg.preload_N_sound_file > 0))
+                        {
+                            int k = 0;
+                            int n = index_img + 1;
+                            while ((n < img_files.size()) && (img_files[n].empty() == false))
+                            {
+                                VideoCapturing* rr = VideoCapturing::find(img_files[n].make_absolute().str(), v_vc);
+
+                                if ((rr==nullptr) && (img_files[n].extension() == "mp4"))
+                                {
+                                    // preload
+                                    k++;
+                                    r = new VideoCapturing(img_files[n].make_absolute().str(), false);
+                                    v_vc.push_back(r);
+
+                                    if (r->open() == true)
+                                    {
+                                        if (r->has_sound)
+                                        {
+                                            if (ui.cfg.load_sound_file == 1)
+                                            {
+                                                r->load_sound();
+                                                msg = msg + (r->sound_isloading.load() ? " pre_loading sound..." : "");
+                                            }
+                                        }
+                                    }
+
+                                    if (k >= ui.cfg.preload_N_sound_file) // preload n if possible
+                                    {
+                                        break;
+                                    }
+                                }
+                                n++;
+                            }
+                        }
+
                         if (_vc->open() == false)
                         {
-                            v_vc.push_back(new VideoCapturingDeleter(_vc));
+                            v_vcd.push_back(new VideoCapturingDeleter(_vc));
+                            VideoCapturing::clear(_vc->_file, v_vc);
                             _vc = nullptr;
                         }
                         else
@@ -548,6 +628,18 @@ void UIState::render(sf::RenderTarget& renderer)
                                     img_files[index_img].filename() +
                                     "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
                                 msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+
+                                button_msg.setText(msg);
+                            }
+                            else if (_vc->sound_loaded == true)
+                            {
+                                _vc->play_sound();
+
+                                std::string msg;
+                                msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
+                                    img_files[index_img].filename() +
+                                    "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                                msg = msg + (_vc->sound_isloading.load() ? " playing preloaded ound..." : "");
 
                                 button_msg.setText(msg);
                             }
@@ -653,7 +745,8 @@ void UIState::render(sf::RenderTarget& renderer)
                 else
                 {
                     // done
-                    v_vc.push_back(new VideoCapturingDeleter(_vc));
+                    v_vcd.push_back(new VideoCapturingDeleter(_vc));
+                    VideoCapturing::clear(_vc->_file, v_vc);
                     _vc = nullptr;
                 }
             }

@@ -26,6 +26,7 @@ public:
     float           zoom = 1.25;
     int             mak_wav_file = 0;
     int             load_sound_file = 0;
+    int             preload_N_sound_file = 1;
 
     std::vector<std::string> exclude_folder = { ".Thumbs" };
     std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi" };
@@ -117,6 +118,14 @@ public:
                     try
                     {
                         this->load_sound_file = cfg_ini->get_int("load_sound_file", "main");
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    try
+                    {
+                        this->preload_N_sound_file = cfg_ini->get_int("preload_N_sound_file", "main");
                     }
                     catch (...)
                     {

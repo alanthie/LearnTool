@@ -26,8 +26,10 @@ public:
     display_mode                _mode = display_mode::show_img;
     FolderNavigation            _fnav;
 
-    VideoCapturing*                     _vc = nullptr;
-    std::vector<VideoCapturingDeleter*>  v_vc;
+    VideoCapturing*                     _vc = nullptr;  // current
+    std::vector<VideoCapturing*>        v_vc;           // preload
+
+    std::vector<VideoCapturingDeleter*>  v_vcd;
     std::vector<ExtractSound*>           v_extract_sound;
 
     gui::Button*                button_menu[6][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr } };
