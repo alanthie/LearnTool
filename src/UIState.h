@@ -13,15 +13,10 @@
 #include "SFML_SDK/GUI/Minimap.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
-
 #include "FolderNavigation.h"
 #include "VideoCapture.hpp"
-#include <memory>
-#include <iostream>
 
-//
 enum class display_mode {show_img, show_movie};
-
 
 class UIState : public StateBase
 {
@@ -78,15 +73,7 @@ public:
     sf::Vector2f    canvas_scale = { 1.0f, 1.0f };
 
     void load_path(filesystem::path& p);
-    void load_root();
 
-    void b_click(std::string& b_name) override;
-    void minmap_changed(std::string& b_name) override;
-
-    filesystem::path find_next_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
-    filesystem::path find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
-    filesystem::path find_last_folder(filesystem::path& parent_folder);
-
-    void next_path(bool no_deepening = false);
-    void prev_path(bool no_deepening = false);
+    void widget_clicked(std::string& b_name) override;
+    void widget_changed(std::string& b_name) override;
 };

@@ -97,7 +97,9 @@ public:
                         delete t;
                         t = nullptr;
                     }
-                     t = new std::thread(&VideoCapturing::asych_load_sound, this);
+
+                    // ASYNCH THREAD
+                    t = new std::thread(&VideoCapturing::asych_load_sound, this);
                 }
             }
         }

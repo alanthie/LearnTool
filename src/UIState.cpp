@@ -61,14 +61,13 @@ void UIState::img_changed()
     }
 }
 
-void UIState::minmap_changed(std::string& b_name) 
+void UIState::widget_changed(std::string& b_name)
 {
-    //...
+    //...minimap changed
 }
 
-void UIState::b_click(std::string& b_name)
+void UIState::widget_clicked(std::string& b_name)
 {
-    std::cout << "button" << b_name << " clicked!" << '\n';
     if (b_name == "b_pause")
     {
         is_pause = !is_pause;
@@ -100,7 +99,7 @@ void UIState::b_click(std::string& b_name)
     {
         if (index_img == img_files.size() - 1)
         {
-            next_path();
+            _fnav.next_path();
             img_changed();
         }
         else
@@ -117,7 +116,7 @@ void UIState::b_click(std::string& b_name)
     {
         if (index_img == 0)
         {
-            prev_path();
+            _fnav.prev_path();
             img_changed();
         }
         else
@@ -133,12 +132,12 @@ void UIState::b_click(std::string& b_name)
 
     else if (b_name == "b_topic_prev")
     {
-        prev_path();
+        _fnav.prev_path();
         img_changed();
     }
     else if (b_name == "b_topic_next")
     {
-        next_path();
+        _fnav.next_path();
         img_changed();
     }
 
@@ -233,20 +232,20 @@ UIState::UIState(UImain& g) :
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
 
-    button_menu[0][0]->setFunction(&StateBase::b_click);
-    button_menu[1][0]->setFunction(&StateBase::b_click);
-    button_menu[1][1]->setFunction(&StateBase::b_click);
-    button_menu[2][0]->setFunction(&StateBase::b_click);
-    button_menu[2][1]->setFunction(&StateBase::b_click);
-    button_menu[3][0]->setFunction(&StateBase::b_click);
-    button_menu[3][1]->setFunction(&StateBase::b_click);
-	button_menu[4][0]->setFunction(&StateBase::b_click);
-	button_menu[4][1]->setFunction(&StateBase::b_click);
-    button_name.setFunction(    &StateBase::b_click);
-    button_parts.setFunction(   &StateBase::b_click);
-    button_msg.setFunction(     &StateBase::b_click);
+    button_menu[0][0]->setFunction(&StateBase::widget_clicked);
+    button_menu[1][0]->setFunction(&StateBase::widget_clicked);
+    button_menu[1][1]->setFunction(&StateBase::widget_clicked);
+    button_menu[2][0]->setFunction(&StateBase::widget_clicked);
+    button_menu[2][1]->setFunction(&StateBase::widget_clicked);
+    button_menu[3][0]->setFunction(&StateBase::widget_clicked);
+    button_menu[3][1]->setFunction(&StateBase::widget_clicked);
+	button_menu[4][0]->setFunction(&StateBase::widget_clicked);
+	button_menu[4][1]->setFunction(&StateBase::widget_clicked);
+    button_name.setFunction(    &StateBase::widget_clicked);
+    button_parts.setFunction(   &StateBase::widget_clicked);
+    button_msg.setFunction(     &StateBase::widget_clicked);
 
-    minimap.setFunction(&StateBase::minmap_changed);
+    minimap.setFunction(&StateBase::widget_changed);
 
     if (_fnav.current_path.empty() == false)
     {
@@ -257,35 +256,6 @@ UIState::UIState(UImain& g) :
     std::cout << cv::getBuildInformation();
 }
 
-void UIState::load_root()
-{
-    _fnav.load_root();
-}
-
-void UIState::next_path(bool no_deepening)
-{
-    _fnav.next_path(no_deepening);
-}
-
-void UIState::prev_path(bool no_deepening)
-{
-    _fnav.prev_path(no_deepening);
-}
-
-filesystem::path UIState::find_next_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening)
-{
-    return _fnav.find_next_folder(parent_folder, last_folder, no_deepening);
-}
-
-filesystem::path UIState::find_last_folder(filesystem::path& parent_folder)
-{
-    return _fnav.find_last_folder(parent_folder);
-}
-
-filesystem::path UIState::find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening)
-{
-    return _fnav.find_prev_folder(parent_folder, last_folder, no_deepening);
-}
 
 void UIState::handleEvent(sf::Event e) 
 {
@@ -337,7 +307,7 @@ void UIState::update(sf::Time deltaTime)
                 index_img++;
                 if (index_img > img_files.size() - 1)
                 {
-                    next_path();
+                    _fnav.next_path();
                 }
                 img_changed();
             }
@@ -353,7 +323,7 @@ void UIState::update(sf::Time deltaTime)
                 index_img++;
                 if (index_img > img_files.size() - 1)
                 {
-                    next_path();
+                    _fnav.next_path();
                 }
                 img_changed();
             }
@@ -598,7 +568,6 @@ void UIState::render(sf::RenderTarget& renderer)
     button_msg.render(renderer);
 
     renderer.draw(minimap.m_drag_rect);
-
 }
 
 void UIState::recalc_size()
