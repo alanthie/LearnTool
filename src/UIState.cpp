@@ -180,7 +180,7 @@ void UIState::widget_clicked(std::string& b_name)
 	{
         if (_mode == display_mode::show_img)
         {
-            vitesse_img_sec += 1.0f;	// TODO mettre vitesse_img_sec_increment dans Config, LearnTool.ini
+            vitesse_img_sec += 1.0f;
         }
         else
         {
@@ -188,8 +188,7 @@ void UIState::widget_clicked(std::string& b_name)
 
             if (vitesse_video_factor < 1.0) // stay with frame longer
             {
-                if (_vc)
-                    _vc->pass_n = -1 + (int)(1.0 / vitesse_video_factor);
+                //...
             }
         }
 	}
@@ -198,8 +197,8 @@ void UIState::widget_clicked(std::string& b_name)
         if (_mode == display_mode::show_img)
         {
             vitesse_img_sec -= 1.0f;
-            if (vitesse_img_sec <= 0.5)	// TODO mettre vitesse_img_sec_minimum dans Config, LearnTool.ini
-                vitesse_img_sec = 0.5f;
+            if (vitesse_img_sec <= 0.25)
+                vitesse_img_sec = 0.25f;
         }
         else
         {
@@ -354,7 +353,26 @@ void UIState::update(sf::Time deltaTime)
     {
         if (is_pause == false)
         {
-            //if (_vc == nullptr)
+            if ((_vc != nullptr) && (_vc->has_sound) && (_vc->playing_request))
+            {
+                double np = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+                double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
+                double fps = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FPS);
+                
+                fps = fps * vitesse_video_factor;
+
+                if ((np > 0) && (nc > 0))
+                {
+                    sf::Time t = _vc->sound.getPlayingOffset();
+                    float tsec = t.asSeconds();;
+                    if (std::abs(tsec - (np / fps)) > 10.0f)
+                    {
+                         _vc->sound.setPlayingOffset( sf::seconds(np/ fps)); // if fps frame/sec
+                    }
+                }
+            }
+
+
             {
                 if (cnt_loop > 0)   // 0 means first time
                 {
@@ -537,43 +555,46 @@ void UIState::render(sf::RenderTarget& renderer)
                     }
                 }
 
-               // bool done = false;
                 if (is_pause == false)
                 {
-                    int skip_n = 0;
-                    /*int pass_n = 0;*/
-                    if (vitesse_video_factor > 1.0) // skip some frame
-                    {
-                        skip_n = -1 + (int)vitesse_video_factor;
-                    }
+                    long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+                    long nc = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
+                    double fps = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FPS);
 
-                    if ((vitesse_video_factor > 1.0) && (skip_n > 0))
+                    fps = fps * vitesse_video_factor;
+
+                    bool skip = false;
+                    int skip_n = 0;
+                    if (np == 0)
                     {
-                        while (skip_n > 0)
+                        _vc->start = std::chrono::system_clock::now();
+                    }
+                    else           
+                    {
+                        auto end = std::chrono::system_clock::now();
+                        std::chrono::duration<double> diff_sec = end - _vc->start;
+
+                        long target = (long) ( fps * diff_sec.count() );
+                        if (target > np + 1)
                         {
-                            skip_n--;
-                            if (_vc->readNextFrame() == false)
-                            {
-                                done = true;
-                                break;
-                            }
+                            // read more
+                            skip_n = target -( np + 1);
+                        }
+                        else if (target < np - 1)
+                        {
+                            // read less
+                            skip = true;
                         }
                     }
 
-                    bool skip = false;
-                    if ((vitesse_video_factor < 1.0) && (_vc->pass_n > 0))
+                    while (skip_n > 0)
                     {
-                        _vc->pass_n--;
-                        skip = true;
-                    }
-
-                    if ((vitesse_video_factor < 1.0) && (_vc->pass_n <= 0))
-                    {
-                        // reset for next iter
-                        _vc->pass_n = -1 + (int)(1.0 / vitesse_video_factor);
-                        if (_vc->pass_n <= 0)
-                            _vc->pass_n = 1;
-                        skip = false;
+                        skip_n--;
+                        if (_vc->readNextFrame() == false)
+                        {
+                            done = true;
+                            break;
+                        }
                     }
 
                     if (skip == false)

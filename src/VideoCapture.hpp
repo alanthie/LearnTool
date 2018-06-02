@@ -34,7 +34,6 @@ public:
         }
         else
         {
-            // if option... make/save *.wav file in background - launch system command
             //...
         }
     }
@@ -72,6 +71,7 @@ public:
     std::string         _file;
     cv::VideoCapture    vc;
     cv::Mat             frame;
+    std::chrono::time_point<std::chrono::system_clock> start;
 
     bool                has_sound = false;
     bool                sound_loaded = false;
@@ -81,8 +81,7 @@ public:
     sf::Sound           sound;
     std::thread*        t = nullptr;
     std::atomic<bool>   stop_thread = false;
-    int                 pass_n = 0;
-    bool playing_request = false;
+    bool                playing_request = false;
 
     bool open()
     {
