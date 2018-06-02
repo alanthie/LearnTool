@@ -30,7 +30,7 @@ public:
     std::vector<VideoCapturingDeleter*>  v_vc;
     std::vector<ExtractSound*>           v_extract_sound;
 
-    gui::Button*                button_menu[5][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } };
+    gui::Button*                button_menu[6][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
     gui::Button                 button_msg;

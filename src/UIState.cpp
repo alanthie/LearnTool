@@ -95,6 +95,31 @@ void UIState::widget_clicked(std::string& b_name)
         }
     }
 
+    else if (b_name == "b_shot")
+    {
+        if ((_mode == display_mode::show_movie) && (_vc != nullptr))
+        {
+            cv::Mat frameRGBA;
+            cv::Mat frameRGB = _vc->getFrame();
+            if (!frameRGB.empty())
+            {
+                cv::cvtColor(frameRGB, frameRGBA, cv::COLOR_BGR2RGBA);
+                {
+                    std::vector<int> compression_params;
+                    compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+                    compression_params.push_back(100);
+
+                    {
+                        long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+                        std::string filePath = _fnav.current_path.make_absolute().str()  + "\\" + img_files[index_img].filename()
+                                                + "_" + to_string(static_cast<long long>(np)) + ".jpg";                      
+                        cv::imwrite(filePath, frameRGB, compression_params);
+                    }
+                }
+            }
+        }
+    }
+
     else if (b_name == "b_img_next")
     {
         if (index_img == img_files.size() - 1)
@@ -208,6 +233,8 @@ UIState::UIState(UImain& g) :
 	button_menu[3][1] = new gui::Button("b_topic_next", gui::ButtonSize::Small);
 	button_menu[4][0] = new gui::Button("b_speed_slow", gui::ButtonSize::Small);
 	button_menu[4][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
+    button_menu[5][0] = new gui::Button("b_shot", gui::ButtonSize::Small);
+    //button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
 
 	button_menu[0][0]->setText("pause");
 	button_menu[1][0]->setText("<");
@@ -218,6 +245,8 @@ UIState::UIState(UImain& g) :
 	button_menu[3][1]->setText(">>");
 	button_menu[4][0]->setText("slower");
 	button_menu[4][1]->setText("faster");
+    button_menu[5][0]->setText("shot");
+    //button_menu[5][1]->setText("shot");
     
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -229,6 +258,8 @@ UIState::UIState(UImain& g) :
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
 	button_menu[4][0]->m_rect.setSize({ b_w , b_h });
 	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[5][0]->m_rect.setSize({ 2 * b_w , b_h });
+   // button_menu[4][1]->m_rect.setSize({ b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
 
@@ -241,6 +272,9 @@ UIState::UIState(UImain& g) :
     button_menu[3][1]->setFunction(&StateBase::widget_clicked);
 	button_menu[4][0]->setFunction(&StateBase::widget_clicked);
 	button_menu[4][1]->setFunction(&StateBase::widget_clicked);
+    button_menu[5][0]->setFunction(&StateBase::widget_clicked);
+    //button_menu[5][1]->setFunction(&StateBase::widget_clicked);
+
     button_name.setFunction(    &StateBase::widget_clicked);
     button_parts.setFunction(   &StateBase::widget_clicked);
     button_msg.setFunction(     &StateBase::widget_clicked);
@@ -283,6 +317,8 @@ void UIState::handleEvent(sf::Event e)
     button_menu[3][1]->handleEvent(e, m_pGame->getWindow(), *this);
 	button_menu[4][0]->handleEvent(e, m_pGame->getWindow(), *this);
 	button_menu[4][1]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[5][0]->handleEvent(e, m_pGame->getWindow(), *this);
+    //button_menu[5][1]->handleEvent(e, m_pGame->getWindow(), *this);
 
     button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
@@ -444,8 +480,11 @@ void UIState::render(sf::RenderTarget& renderer)
                         {
                             if (_vc->has_sound)
                             {
-                                _vc->load_sound();
-                                msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                                if (ui.cfg.load_sound_file == 1)
+                                {
+                                    _vc->load_sound();
+                                    msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                                }
                             }
                             else
                             {                     
@@ -468,29 +507,32 @@ void UIState::render(sf::RenderTarget& renderer)
 
             if (_vc != nullptr) /*&& ((!_vc->has_sound) || (_vc->has_sound)&&(_vc->sound_loaded == true) ) )*/
             {
-                if (ui.cfg.mak_wav_file == 1)
+                if (ui.cfg.load_sound_file == 1)
                 {
-                    if (_vc->has_sound == false)
+                    if (ui.cfg.mak_wav_file == 1)
                     {
-                        _vc->recheck_sound();
-                    }
-                }
-
-                if (_vc->has_sound == true)
-                {
-                    if (_vc->playing_request == false)
-                    {
-                        if ((_vc->sound_loaded == false) && (_vc->sound_isloading.load() == false))
+                        if (_vc->has_sound == false)
                         {
-                            _vc->load_sound();
+                            _vc->recheck_sound();
+                        }
+                    }
 
-                            std::string msg;
-                            msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
-                                img_files[index_img].filename() +
-                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
-                            msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                    if (_vc->has_sound == true)
+                    {
+                        if (_vc->playing_request == false)
+                        {
+                            if ((_vc->sound_loaded == false) && (_vc->sound_isloading.load() == false))
+                            {
+                                _vc->load_sound();
 
-                            button_msg.setText(msg);
+                                std::string msg;
+                                msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
+                                    img_files[index_img].filename() +
+                                    "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                                msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+
+                                button_msg.setText(msg);
+                            }
                         }
                     }
                 }
@@ -606,6 +648,8 @@ void UIState::render(sf::RenderTarget& renderer)
     button_menu[3][1]->render(renderer);
 	button_menu[4][0]->render(renderer);
 	button_menu[4][1]->render(renderer);
+    button_menu[5][0]->render(renderer);
+    //button_menu[5][1]->render(renderer);
 
     button_name.render(renderer);
     button_parts.render(renderer);
@@ -634,6 +678,8 @@ void UIState::recalc_size()
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
 	button_menu[4][0]->m_rect.setSize({ b_w , b_h });
 	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[5][0]->m_rect.setSize({ 2 * b_w , b_h });
+    //button_menu[5][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[1][0]->setPosition({ canvas_w, b_h });
     button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
@@ -643,6 +689,8 @@ void UIState::recalc_size()
     button_menu[3][1]->setPosition({ canvas_w + b_w, 3 * b_h });
 	button_menu[4][0]->setPosition({ canvas_w, 8 * b_h });
 	button_menu[4][1]->setPosition({ canvas_w + b_w, 8 * b_h });
+    button_menu[5][0]->setPosition({ canvas_w, 9 * b_h });
+    // button_menu[5][1]->setPosition({ canvas_w + b_w, 8 * b_h });
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
