@@ -137,6 +137,7 @@ void UIState::widget_clicked(std::string& b_name)
         if (is_pause)
         {
 			button_menu[0][0]->setText("continue");
+			button_menu[0][0]->m_rect.setFillColor(sf::Color::Red);
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
@@ -149,6 +150,7 @@ void UIState::widget_clicked(std::string& b_name)
         else
         {
             button_menu[0][0]->setText("pause");
+			button_menu[0][0]->m_rect.setFillColor(sf::Color::Green);
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
