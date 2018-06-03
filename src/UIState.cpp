@@ -137,7 +137,7 @@ void UIState::widget_clicked(std::string& b_name)
         if (is_pause)
         {
 			button_menu[0][0]->setText("continue");
-			button_menu[0][0]->m_rect.setFillColor(sf::Color::Red);
+			//button_menu[0][0]->m_rect.setFillColor(sf::Color::Red);
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
@@ -150,7 +150,7 @@ void UIState::widget_clicked(std::string& b_name)
         else
         {
             button_menu[0][0]->setText("pause");
-			button_menu[0][0]->m_rect.setFillColor(sf::Color::Green);
+			//button_menu[0][0]->m_rect.setFillColor(sf::Color::Green);
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
@@ -306,54 +306,34 @@ UIState::UIState(UImain& g) :
 
 	button_msg.m_text.setOrigin(0.0f, 0.0f);
 	button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
-	button_menu[0][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[0][0]->m_rect.setOutlineColor(sf::Color::Black);
-
 	button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
-	button_menu[1][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[1][0]->m_rect.setOutlineColor(sf::Color::Black);
-
 	button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
-	button_menu[1][1]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[1][1]->m_rect.setOutlineColor(sf::Color::Black);
-
 	button_menu[2][0] = new gui::Button("b_zoom_plus", gui::ButtonSize::Small);
-	button_menu[2][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[2][0]->m_rect.setOutlineColor(sf::Color::Black);
-
 	button_menu[2][1] = new gui::Button("b_zoom_less", gui::ButtonSize::Small);
-	button_menu[2][1]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[2][1]->m_rect.setOutlineColor(sf::Color::Black);
-	
-
 	button_menu[3][0] = new gui::Button("b_topic_prev", gui::ButtonSize::Small);
-	button_menu[3][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[3][0]->m_rect.setOutlineColor(sf::Color::Black);
-
 	button_menu[3][1] = new gui::Button("b_topic_next", gui::ButtonSize::Small);
-	button_menu[3][1]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[3][1]->m_rect.setOutlineColor(sf::Color::Black);
-
-	button_menu[4][0] = new gui::Button("b_speed_slow", gui::ButtonSize::Small);
-	button_menu[4][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[4][0]->m_rect.setOutlineColor(sf::Color::Black);
-
-	button_menu[4][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
-	button_menu[4][1]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[4][1]->m_rect.setOutlineColor(sf::Color::Black);
-
-    button_menu[5][0] = new gui::Button("b_shot", gui::ButtonSize::Small);
-	button_menu[5][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[5][0]->m_rect.setOutlineColor(sf::Color::Black);
-
-    //button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
+    button_menu[4][0] = new gui::Button("b_shot", gui::ButtonSize::Small);
+    button_menu[4][1] = nullptr;
+	button_menu[5][0] = new gui::Button("b_speed_slow", gui::ButtonSize::Small);
+	button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
     button_menu[6][0] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
-	button_menu[6][0]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[6][0]->m_rect.setOutlineColor(sf::Color::Black);
-
     button_menu[6][1] = new gui::Button("b_vol_less", gui::ButtonSize::Small);
-	button_menu[6][1]->m_rect.setFillColor(sf::Color::Green);
-	button_menu[6][1]->m_rect.setOutlineColor(sf::Color::Black);
+
+    float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (button_menu[i][j] != nullptr)
+            {
+                button_menu[i][j]->m_rect.setFillColor(sf::Color::Black);
+                button_menu[i][j]->m_rect.setOutlineColor(sf::Color::Black);
+
+                button_menu[i][j]->setFunction(&StateBase::widget_clicked);
+                button_menu[i][j]->m_rect.setSize({ b_w , b_h });
+            }
+        }
+    }
 
 	button_menu[0][0]->setText("pause");
 	button_menu[1][0]->setText("<");
@@ -362,43 +342,17 @@ UIState::UIState(UImain& g) :
 	button_menu[2][1]->setText("-");
 	button_menu[3][0]->setText("<<");
 	button_menu[3][1]->setText(">>");
-	button_menu[4][0]->setText("slower");
-	button_menu[4][1]->setText("faster");
-    button_menu[5][0]->setText("shot");
-    //button_menu[5][1]->setText("shot");
+    button_menu[4][0]->setText("shot");
+    //button_menu[4][1
+	button_menu[5][0]->setText("slower");
+	button_menu[5][1]->setText("faster");
     button_menu[6][0]->setText("vol +");
     button_menu[6][1]->setText("vol -");
     
-    float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
-    button_menu[1][0]->m_rect.setSize({ b_w , b_h });
-    button_menu[1][1]->m_rect.setSize({ b_w , b_h });
-    button_menu[2][0]->m_rect.setSize({ b_w , b_h });
-    button_menu[2][1]->m_rect.setSize({ b_w , b_h });
-    button_menu[3][0]->m_rect.setSize({ b_w , b_h });
-    button_menu[3][1]->m_rect.setSize({ b_w , b_h });
-	button_menu[4][0]->m_rect.setSize({ b_w , b_h });
-	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
-    button_menu[5][0]->m_rect.setSize({ 2 * b_w , b_h });
-   // button_menu[4][1]->m_rect.setSize({ b_w , b_h });
-    button_menu[6][0]->m_rect.setSize({ b_w , b_h });
-    button_menu[6][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[4][0]->m_rect.setSize({ 2 * b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
-
-    button_menu[0][0]->setFunction(&StateBase::widget_clicked);
-    button_menu[1][0]->setFunction(&StateBase::widget_clicked);
-    button_menu[1][1]->setFunction(&StateBase::widget_clicked);
-    button_menu[2][0]->setFunction(&StateBase::widget_clicked);
-    button_menu[2][1]->setFunction(&StateBase::widget_clicked);
-    button_menu[3][0]->setFunction(&StateBase::widget_clicked);
-    button_menu[3][1]->setFunction(&StateBase::widget_clicked);
-	button_menu[4][0]->setFunction(&StateBase::widget_clicked);
-	button_menu[4][1]->setFunction(&StateBase::widget_clicked);
-    button_menu[5][0]->setFunction(&StateBase::widget_clicked);
-    //button_menu[5][1]->setFunction(&StateBase::widget_clicked);
-    button_menu[6][0]->setFunction(&StateBase::widget_clicked);
-    button_menu[6][1]->setFunction(&StateBase::widget_clicked);
 
     button_name.setFunction(    &StateBase::widget_clicked);
     button_parts.setFunction(   &StateBase::widget_clicked);
@@ -433,19 +387,16 @@ void UIState::handleEvent(sf::Event e)
         break;
     }
 
-    button_menu[0][0]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[1][0]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[1][1]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[2][0]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[2][1]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[3][0]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[3][1]->handleEvent(e, m_pGame->getWindow(), *this);
-	button_menu[4][0]->handleEvent(e, m_pGame->getWindow(), *this);
-	button_menu[4][1]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[5][0]->handleEvent(e, m_pGame->getWindow(), *this);
-    //button_menu[5][1]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[6][0]->handleEvent(e, m_pGame->getWindow(), *this);
-    button_menu[6][1]->handleEvent(e, m_pGame->getWindow(), *this);
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (button_menu[i][j] != nullptr)
+            {
+                button_menu[i][j]->handleEvent(e, m_pGame->getWindow(), *this);
+            }
+        }
+    }
 
     button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
@@ -902,19 +853,27 @@ void UIState::render(sf::RenderTarget& renderer)
         }
     }
 
-    button_menu[0][0]->render(renderer);
-    button_menu[1][0]->render(renderer);
-    button_menu[1][1]->render(renderer);
-    button_menu[2][0]->render(renderer);
-    button_menu[2][1]->render(renderer);
-    button_menu[3][0]->render(renderer);
-    button_menu[3][1]->render(renderer);
-	button_menu[4][0]->render(renderer);
-	button_menu[4][1]->render(renderer);
-    button_menu[5][0]->render(renderer);
-    //button_menu[5][1]->render(renderer);
-    button_menu[6][0]->render(renderer);
-    button_menu[6][1]->render(renderer);
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (button_menu[i][j] != nullptr)
+            {
+                if (button_menu[i][j]->hasMouse(ui.getWindow()))
+                {
+                    button_menu[i][j]->m_rect.setFillColor(sf::Color::Green);
+                    button_menu[i][j]->m_rect.setOutlineColor(sf::Color::Black);
+                }
+                else
+                {
+                    button_menu[i][j]->m_rect.setFillColor(sf::Color::Black);
+                    button_menu[i][j]->m_rect.setOutlineColor(sf::Color::Green);
+                }
+
+                button_menu[i][j]->render(renderer);
+            }
+        }
+    }
 
     button_name.render(renderer);
     button_parts.render(renderer);
@@ -945,10 +904,10 @@ void UIState::recalc_size()
     button_menu[2][1]->m_rect.setSize({ b_w , b_h });
     button_menu[3][0]->m_rect.setSize({ b_w , b_h });
     button_menu[3][1]->m_rect.setSize({ b_w , b_h });
-	button_menu[4][0]->m_rect.setSize({ b_w , b_h });
-	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
-    button_menu[5][0]->m_rect.setSize({ 2 * b_w , b_h });
-    //button_menu[5][1]->m_rect.setSize({ b_w , b_h });
+	button_menu[4][0]->m_rect.setSize({ 2 * b_w , b_h });
+	//button_menu[4][1]
+    button_menu[5][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[5][1]->m_rect.setSize({ b_w , b_h });
     button_menu[6][0]->m_rect.setSize({ b_w , b_h });
     button_menu[6][1]->m_rect.setSize({ b_w , b_h });
 
@@ -958,10 +917,10 @@ void UIState::recalc_size()
     button_menu[2][1]->setPosition({ canvas_w + b_w, 2*b_h });
     button_menu[3][0]->setPosition({ canvas_w, 3 * b_h });
     button_menu[3][1]->setPosition({ canvas_w + b_w, 3 * b_h });
-	button_menu[4][0]->setPosition({ canvas_w, 8 * b_h });
-	button_menu[4][1]->setPosition({ canvas_w + b_w, 8 * b_h });
-    button_menu[5][0]->setPosition({ canvas_w, 9 * b_h });
-    // button_menu[5][1]->setPosition({ canvas_w + b_w, 8 * b_h });
+    button_menu[4][0]->setPosition({ canvas_w, 8 * b_h });
+    // button_menu[4][1]
+	button_menu[5][0]->setPosition({ canvas_w, 9 * b_h });
+	button_menu[5][1]->setPosition({ canvas_w + b_w, 9 * b_h });
     button_menu[6][0]->setPosition({ canvas_w, 10 * b_h });
     button_menu[6][1]->setPosition({ canvas_w + b_w, 10 * b_h });
 

@@ -31,6 +31,12 @@ void Button::setTexture (const sf::Texture& tex)
     m_rect.setTexture(&tex);
 }
 
+bool Button::hasMouse(const sf::RenderWindow& window)
+{
+    auto pos = sf::Mouse::getPosition(window);
+    return m_rect.getGlobalBounds().contains((float)pos.x, (float)pos.y);
+}
+
 void Button::handleEvent(sf::Event e, const sf::RenderWindow& window, StateBase& current_state)
 {
     auto pos = sf::Mouse::getPosition(window);

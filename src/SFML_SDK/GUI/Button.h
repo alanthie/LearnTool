@@ -28,6 +28,7 @@ namespace gui
             sf::Vector2f getSize() const    override;
 
             void updateText();
+            bool hasMouse(const sf::RenderWindow& window);
 
             sf::Vector2f    m_position;
             Rectangle       m_rect;
