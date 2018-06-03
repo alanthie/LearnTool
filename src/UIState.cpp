@@ -136,7 +136,7 @@ void UIState::widget_clicked(std::string& b_name)
         is_pause = !is_pause;
         if (is_pause)
         {
-            button_menu[0][0]->setText("continue");
+			button_menu[0][0]->setText("continue");
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
@@ -161,6 +161,7 @@ void UIState::widget_clicked(std::string& b_name)
 
     else if (b_name == "b_shot")
     {
+		
         if ((_mode == display_mode::show_movie) && (_vc != nullptr))
         {
             cv::Mat frameRGBA;
@@ -302,20 +303,55 @@ UIState::UIState(UImain& g) :
 	button_msg.m_text.setFont(  ResourceHolder::get().fonts.get("arial"));
 
 	button_msg.m_text.setOrigin(0.0f, 0.0f);
-
 	button_menu[0][0] = new gui::Button("b_pause", gui::ButtonSize::Small);
+	button_menu[0][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[0][0]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[1][0] = new gui::Button("b_img_prev", gui::ButtonSize::Small);
+	button_menu[1][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[1][0]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[1][1] = new gui::Button("b_img_next", gui::ButtonSize::Small);
+	button_menu[1][1]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[1][1]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[2][0] = new gui::Button("b_zoom_plus", gui::ButtonSize::Small);
+	button_menu[2][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[2][0]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[2][1] = new gui::Button("b_zoom_less", gui::ButtonSize::Small);
+	button_menu[2][1]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[2][1]->m_rect.setOutlineColor(sf::Color::Black);
+	
+
 	button_menu[3][0] = new gui::Button("b_topic_prev", gui::ButtonSize::Small);
+	button_menu[3][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[3][0]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[3][1] = new gui::Button("b_topic_next", gui::ButtonSize::Small);
+	button_menu[3][1]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[3][1]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[4][0] = new gui::Button("b_speed_slow", gui::ButtonSize::Small);
+	button_menu[4][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[4][0]->m_rect.setOutlineColor(sf::Color::Black);
+
 	button_menu[4][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
+	button_menu[4][1]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[4][1]->m_rect.setOutlineColor(sf::Color::Black);
+
     button_menu[5][0] = new gui::Button("b_shot", gui::ButtonSize::Small);
+	button_menu[5][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[5][0]->m_rect.setOutlineColor(sf::Color::Black);
+
     //button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
     button_menu[6][0] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
+	button_menu[6][0]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[6][0]->m_rect.setOutlineColor(sf::Color::Black);
+
     button_menu[6][1] = new gui::Button("b_vol_less", gui::ButtonSize::Small);
+	button_menu[6][1]->m_rect.setFillColor(sf::Color::Green);
+	button_menu[6][1]->m_rect.setOutlineColor(sf::Color::Black);
 
 	button_menu[0][0]->setText("pause");
 	button_menu[1][0]->setText("<");
