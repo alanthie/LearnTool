@@ -18,7 +18,7 @@ VideoSoundCapturingDeleter::VideoSoundCapturingDeleter(VideoSoundCapturing* v) :
     if (vs_cap != nullptr)
     {
         vs_cap->stop_thread.store(true);
-        vs_cap->music.stop();
+        vs_cap->music.pause();
         thread_watch_loading_sound = new std::thread(&VideoSoundCapturingDeleter::run, this);
     }
 }
@@ -75,6 +75,8 @@ VideoSoundCapturing::VideoSoundCapturing(const std::string& file, bool _auto_pla
     {
         has_sound = true;
         sound_file = p.make_absolute().str();
+
+        //load_sound(); // now music
     }
     else
     {
@@ -121,8 +123,13 @@ void VideoSoundCapturing::recheck_sound()
     filesystem::path p(_file + ".wav");
     if ((p.empty() == false) && (p.exists()) && (p.is_file()))
     {
-        has_sound = true;
-        sound_file = p.make_absolute().str();
+        if (has_sound == false)
+        {
+            has_sound = true;
+            sound_file = p.make_absolute().str();
+            
+            load_sound();
+        }
     }
 }
 
@@ -193,15 +200,23 @@ void VideoSoundCapturing::asych_load_sound()
 {
     if (stop_thread.load() == false)
     {
-        if (music.openFromFile(sound_file))
+        int n = 0;
+        while (music.openFromFile(sound_file) == false) // TODO file being build...
         {
-            sound_loaded = true;
-        }
-        else
-        {
+            n++;
+            std::this_thread::sleep_for(500ms);
+            if (n > 60)
+            {
+                // quit
+                sound_loaded = false;
+                sound_isloading.store(false);
+                return;
+            }
         }
 
+        sound_loaded = true;
         sound_isloading.store(false);
+
         if (auto_play)
         {
             play_sound();

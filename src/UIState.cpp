@@ -32,7 +32,7 @@ void UIState::img_changed()
 
     if (_vc != nullptr)
     {
-        _vc->music.stop();
+        _vc->music.pause();
         _vc->playing_request = false;
         
         // keep in v_vc
@@ -123,7 +123,7 @@ void UIState::widget_clicked(std::string& b_name)
             {
                 if (_vc->has_sound)
                 {
-                    _vc->music.stop();
+                    _vc->music.pause();
                     _vc->playing_request = false;
                 }
             }
@@ -135,7 +135,8 @@ void UIState::widget_clicked(std::string& b_name)
             {
                 if (_vc->has_sound)
                 {
-                    _vc->play_sound();
+                    _vc->music.play();
+                    //_vc->play_sound();
                 }
             }
         }
@@ -428,7 +429,7 @@ void UIState::update(sf::Time deltaTime)
                     sf::Time t2 = _vc->music.getDuration();
                     float t2sec = t2.asSeconds();
 
-                    if (std::abs(tsec - (np / fps)) > 2.0f)
+                    if (std::abs(tsec - (np / fps)) > 0.5f)
                     {
                         if ((np / fps) < t2sec)
                         {
@@ -667,7 +668,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
                         if (_vc->open() == false)
                         {
-                            _vc->music.stop();
+                            _vc->music.pause();
                             _vc->playing_request = false;
                             VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
                             _vc = nullptr;
@@ -717,25 +718,27 @@ void UIState::render(sf::RenderTarget& renderer)
                             {
                                 if (count_sound_preloading() < ui.cfg.preload_N_sound_file)
                                 {
-                                        _vc->load_sound();
+                                    _vc->load_sound();
 
-                                        std::string msg;
-                                        msg =   "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
-                                                img_files[index_img].filename() +
-                                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
-                                        msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                                    std::string msg;
+                                    msg =   "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
+                                            img_files[index_img].filename() +
+                                            "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                                    msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
 
-                                        button_msg.setText(msg);
+                                    button_msg.setText(msg);
                                 }
                                 else
                                 {
                                     // Too many preloading in progress...
                                     //.....
+                                    _vc->load_sound(); // now music
                                 }
                             }
                             else if (_vc->sound_loaded == true)
                             {
-                                _vc->play_sound();
+                                if (is_pause == false)
+                                    _vc->play_sound();
 
                                 std::string msg;
                                 msg =   "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
@@ -859,7 +862,7 @@ void UIState::render(sf::RenderTarget& renderer)
                 else
                 {
                     // done
-                    _vc->music.stop();
+                    _vc->music.pause();
                     _vc->playing_request = false;
 
                     // keep for a awhile
