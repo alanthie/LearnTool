@@ -454,10 +454,17 @@ void UIState::update(sf::Time deltaTime)
                 if ((np > 0) && (nc > 0))
                 {
                     sf::Time t = _vc->sound.getPlayingOffset();
-                    float tsec = t.asSeconds();;
+                    float tsec = t.asSeconds();
+
+                    sf::Time t2 = _vc->buffer.getDuration();
+                    float t2sec = t2.asSeconds();
+
                     if (std::abs(tsec - (np / fps)) > 2.0f)
                     {
-                         _vc->sound.setPlayingOffset( sf::seconds((float) (np/fps) )); // if fps frame/sec
+                        if ( (np / fps) < t2sec)
+                        {
+                            _vc->sound.setPlayingOffset(sf::seconds((float)(np / fps))); // if fps frame/sec
+                        }
                     }
                 }
             }
@@ -586,8 +593,8 @@ void UIState::render(sf::RenderTarget& renderer)
                             // VideoSoundCapturing already in cache
                             //----------------------------------
                             _vc = r;
-                            _vc->sound.setVolume(sound_volume);
                             _vc->play_sound(); //...
+                            _vc->sound.setVolume(sound_volume);
                         }
                         else
                         {
@@ -598,7 +605,7 @@ void UIState::render(sf::RenderTarget& renderer)
                             _vc->sound.setVolume(sound_volume);
                             v_vc.push_back(_vc);
                         }
-
+                        
                         new_entry = true;
 
                         //----------------------------------
@@ -745,9 +752,9 @@ void UIState::render(sf::RenderTarget& renderer)
                         // reset frame
                         np = 0;
                         _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
-                        _vc->sound.setPlayingOffset(sf::seconds((float)(np / fps))); // if fps frame/sec
                         _vc->done = false;
                         _vc->play_sound();
+                        _vc->sound.setPlayingOffset(sf::seconds((float)0)); // if fps frame/sec
                     }
 
                     fps = fps * vitesse_video_factor;
