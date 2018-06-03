@@ -140,6 +140,7 @@
     <ClCompile Include="..\src\SFML_SDK\Util\ToggleKey.cpp" />
     <ClCompile Include="..\src\UIMain.cpp" />
     <ClCompile Include="..\src\UIState.cpp" />
+    <ClCompile Include="..\src\VideoCapture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Config.hpp" />

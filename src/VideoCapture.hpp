@@ -9,6 +9,7 @@
 #include <opencv2/highgui.hpp>
 #include "filesystem/path.h"
 #include "filesystem/resolver.h"
+#include <SFML/Audio.hpp>
 #include <stdlib.h>
 #include <iostream>
 #include <stdio.h>
@@ -19,91 +20,36 @@
 
 using namespace std::chrono_literals;
 
-class VideoCapturingDeleter;
+class VideoSoundCapturing;
 
-class VideoCapturing
+class VideoSoundCapturingDeleter
 {
 public:
-    VideoCapturing(const std::string& file, bool _auto_play = true) : _file(file), vc(file), sound_file(), auto_play(_auto_play)
-    {
-        filesystem::path p(file+".wav");
-        if ( (p.empty() == false) && (p.exists()) && (p.is_file()) )
-        {
-            has_sound = true;
-            sound_file = p.make_absolute().str();
-        }
-        else
-        {
-            //...
-        }
-    }
+    VideoSoundCapturingDeleter(VideoSoundCapturing* v);
+    ~VideoSoundCapturingDeleter();
 
-    static VideoCapturing* find(const std::string& f, const std::vector<VideoCapturing*>& vvc)
-    {
-        VideoCapturing* r = nullptr;
-        for (size_t i = 0; i < vvc.size(); i++)
-        {
-            if (vvc[i] != nullptr)
-            {
-                if (vvc[i]->_file == f)
-                {
-                    r = vvc[i];
-                    break;
-                }
-            }
-        }
-        return r;
-    }
+    void run();
 
-    static void clear(const std::string& f, std::vector<VideoCapturing*>& vvc)
-    {
-        for (size_t i = 0; i < vvc.size(); i++)
-        {
-            if (vvc[i] != nullptr)
-            {
-                if (vvc[i]->_file == f)
-                {
-                    vvc[i] = nullptr;
-                    break;
-                }
-            }
-        }
-    }
+    VideoSoundCapturing*    vs_cap;
+    std::thread*            thread_watch_loading_sound = nullptr;
+    std::atomic<bool>       is_done = false;
+};
 
-    void recheck_sound()
-    {
-        filesystem::path p(_file + ".wav");
-        if ((p.empty() == false) && (p.exists()) && (p.is_file()))
-        {
-            has_sound = true;
-            sound_file = p.make_absolute().str();
-        }
-    }
 
-    ~VideoCapturing()
-    {
-        if (has_sound)
-        {
-            sound.stop();
-        }
+class VideoSoundCapturing
+{
+public:
+    VideoSoundCapturing(const std::string& file, bool _auto_play = false);
+    ~VideoSoundCapturing();
 
-        // wait thread loading...
-        if (t != nullptr)
-        {
-            //...in case...
-            stop_thread.store(false);
-            t->join();
-            delete t;
-            t = nullptr;
-        }
-
-        stop_thread.store(false);
-    }
-
+    static VideoSoundCapturing*  find( const std::string& f, const std::vector<VideoSoundCapturing*>& vvc);
+    static void                  clear(const std::string& f, std::vector<VideoSoundCapturing*>& vvc, std::vector<VideoSoundCapturingDeleter*>& v_vcd);
+    
     std::string         _file;
     cv::VideoCapture    vc;
     cv::Mat             frame;
     std::chrono::time_point<std::chrono::system_clock> start;
+    bool                done = false;
 
     bool                has_sound = false;
     bool                sound_loaded = false;
@@ -111,176 +57,20 @@ public:
     std::string         sound_file;
     sf::SoundBuffer     buffer;
     sf::Sound           sound;
-    std::thread*        t = nullptr;
+    std::thread*        thread_load_sound = nullptr;
     std::atomic<bool>   stop_thread = false;
     bool                playing_request = false;
-    bool                auto_play = true;
+    bool                auto_play = false;
 
-    bool open()
-    {
-        if (_file.empty())
-            return false;
-
-        if (!vc.isOpened())
-        {
-            std::cerr << "Failed to open the video device, video file or image sequence!\n" << std::endl;
-            return false;
-        }
-        return true;
-    }
-
-    void load_sound()
-    {
-        if (has_sound)
-        {
-            if (sound_loaded == false)
-            {
-                if (sound_isloading.load() == false)
-                {
-                    // asych
-                    sound_isloading.store(true);
-                    if (t != nullptr)
-                    {
-                        // in case ...
-                        stop_thread.store(true);
-                        t->join();
-                        delete t;
-                        t = nullptr;
-                    }
-                    stop_thread.store(false);
-
-                    // ASYNCH THREAD
-                    t = new std::thread(&VideoCapturing::asych_load_sound, this);
-                }
-            }
-        }
-    }
-
-    void asych_load_sound()
-    {
-        if (stop_thread.load() == false)
-        {
-            if (buffer.loadFromFile(sound_file)) // can not  be stop - will wait terminate in VideoCapturingDeleter thread
-            {
-                sound.setBuffer(buffer);
-                sound_loaded = true;
-            }
-            else
-            {
-                // too fast - file not fully saved...
-                // retry
-                std::this_thread::sleep_for(100ms);
-                if (buffer.loadFromFile(sound_file))
-                {
-                    sound_loaded = true;
-                    sound.setBuffer(buffer);
-                }
-                else
-                {
-                    int err = 1;
-                }
-
-            }
-            sound_isloading.store(false);
-
-            if (auto_play)
-            {
-                play_sound();
-            }
-        }
-    }
-
-    void play_sound()
-    {
-        if ((has_sound) && (sound_isloading.load()==false) && (sound_loaded))
-        {
-            if (stop_thread.load() == false)
-            {
-                if (playing_request == false)
-                {
-                    playing_request = true;
-                    sound.play();
-                }
-            }
-        }
-    }
-
-    bool readNextFrame()
-    {
-        vc >> frame;
-        if (frame.empty())
-        {
-            return false;
-        }
-        return true;
-    }
-
-    cv::Mat& getFrame() 
-    {
-        return frame; 
-    }
+    bool open();
+    void load_sound();
+    void asych_load_sound();
+    void play_sound();
+    void recheck_sound();
+    bool readNextFrame();
+    cv::Mat& getFrame();
 };
 
-class VideoCapturingDeleter
-{
-public:
-    VideoCapturingDeleter(VideoCapturing* v) : _p(v)
-    {
-        if (_p != nullptr)
-        {
-            _p->stop_thread.store(true);
-            _p->sound.stop();
-            t = new std::thread(&VideoCapturingDeleter::run, this);
-        }
-    }
-
-    ~VideoCapturingDeleter() 
-    {
-        if (_p)
-        {
-            _p->stop_thread.store(true);
-            _p->sound.stop();
-
-            if (t)
-            {
-                t->join();
-            }
-
-            delete _p;
-            _p = nullptr;
-        }
-
-        if (t)
-        {
-            delete t;
-            t = nullptr;
-        }
-    }
-
-    void run()
-    {
-        while (true)
-        {
-            if (_p != nullptr)
-            {
-                if (_p->t)
-                {
-                    if (_p->sound_isloading.load() == false)
-                        break;
-                }
-                else
-                    break;
-            }
-            else
-                break;
-        }
-        is_done.store(true);
-    }
-
-    VideoCapturing* _p;
-    std::thread*    t = nullptr;
-    std::atomic<bool> is_done = false;
-};
 
 class ExtractSound
 {

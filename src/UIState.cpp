@@ -32,8 +32,11 @@ void UIState::img_changed()
 
     if (_vc != nullptr)
     {
-        v_vcd.push_back(new VideoCapturingDeleter(_vc));
-        VideoCapturing::clear(_vc->_file, v_vc);
+        _vc->sound.stop();
+        _vc->playing_request = false;
+        
+        // keep in v_vc
+        // VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
         _vc = nullptr;
     }
 
@@ -42,25 +45,20 @@ void UIState::img_changed()
         bool all_done = true;
         for( size_t i=0; i< v_vcd.size(); i++)
         {
-            VideoCapturingDeleter* item = v_vcd[i];
-            if (item != nullptr)
+            VideoSoundCapturingDeleter* item_deleter = v_vcd[i];
+            if (item_deleter != nullptr)
             {
-                if (item->_p != nullptr)
+                if (item_deleter->vs_cap != nullptr)
                 {
-                    if (item->is_done.load() == false)
+                    if (item_deleter->is_done.load() == false)
                     {
                         all_done = false;
                         break;
                     }
-                    else
-                    {
-                        delete item;
-                        v_vcd[i] = nullptr;
-                    }
                 }
                 else
                 {
-                    delete item;
+                    delete item_deleter;
                     v_vcd[i] = nullptr;
                 }
             }
@@ -92,6 +90,38 @@ void UIState::img_changed()
             v_extract_sound.clear();
         }
     }
+
+    if (v_vc.size() > 0)
+    {
+        for (size_t i = 0; i< v_vc.size(); i++)
+        {
+            int n = 0; 
+            for (size_t j = i+1; j < v_vc.size(); j++)
+            { 
+                if (v_vc[j] != nullptr)
+                {
+                    //if (v_vc[j]->vc.)
+                    n++;
+                }
+            }
+
+            VideoSoundCapturing* item_vc = v_vc[i];
+            if (item_vc != nullptr)
+            {
+                //...locate...
+                if (n > 10)
+                {
+                   /* if (i < v_vc.size() - 10)*/
+                    {
+                        VideoSoundCapturing::clear(item_vc->_file, v_vc, v_vcd);
+                    }
+                }
+            }
+            else
+            {
+            }
+        }
+    }
 }
 
 void UIState::widget_changed(std::string& b_name)
@@ -112,6 +142,7 @@ void UIState::widget_clicked(std::string& b_name)
                 if (_vc->has_sound)
                 {
                     _vc->sound.stop();
+                    _vc->playing_request = false;
                 }
             }
         }
@@ -122,7 +153,7 @@ void UIState::widget_clicked(std::string& b_name)
             {
                 if (_vc->has_sound)
                 {
-                    _vc->sound.play();
+                    _vc->play_sound();
                 }
             }
         }
@@ -209,6 +240,7 @@ void UIState::widget_clicked(std::string& b_name)
         canvas_scale = canvas_scale / ui.cfg.zoom;
         minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
+
 	else if (b_name == "b_speed_slow")
 	{
         if (_mode == display_mode::show_img)
@@ -238,6 +270,21 @@ void UIState::widget_clicked(std::string& b_name)
             vitesse_video_factor *= 1.25f;
         }
 	}
+
+    else if (b_name == "b_vol_plus")
+    {
+        sound_volume *= 1.10f; 
+        if (sound_volume > 100.0) sound_volume = 100.0f;
+    }
+    else if (b_name == "b_vol_less")
+    {
+        sound_volume /= 1.10f;
+        if (sound_volume < 0.0) sound_volume = 0.0f;
+    }
+    if (_vc)
+    {
+        _vc->sound.setVolume(sound_volume);
+    }
 }
 
 
@@ -267,6 +314,8 @@ UIState::UIState(UImain& g) :
 	button_menu[4][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
     button_menu[5][0] = new gui::Button("b_shot", gui::ButtonSize::Small);
     //button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
+    button_menu[6][0] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
+    button_menu[6][1] = new gui::Button("b_vol_less", gui::ButtonSize::Small);
 
 	button_menu[0][0]->setText("pause");
 	button_menu[1][0]->setText("<");
@@ -279,6 +328,8 @@ UIState::UIState(UImain& g) :
 	button_menu[4][1]->setText("faster");
     button_menu[5][0]->setText("shot");
     //button_menu[5][1]->setText("shot");
+    button_menu[6][0]->setText("vol +");
+    button_menu[6][1]->setText("vol -");
     
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -292,6 +343,8 @@ UIState::UIState(UImain& g) :
 	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
     button_menu[5][0]->m_rect.setSize({ 2 * b_w , b_h });
    // button_menu[4][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[6][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[6][1]->m_rect.setSize({ b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
 
@@ -306,6 +359,8 @@ UIState::UIState(UImain& g) :
 	button_menu[4][1]->setFunction(&StateBase::widget_clicked);
     button_menu[5][0]->setFunction(&StateBase::widget_clicked);
     //button_menu[5][1]->setFunction(&StateBase::widget_clicked);
+    button_menu[6][0]->setFunction(&StateBase::widget_clicked);
+    button_menu[6][1]->setFunction(&StateBase::widget_clicked);
 
     button_name.setFunction(    &StateBase::widget_clicked);
     button_parts.setFunction(   &StateBase::widget_clicked);
@@ -351,6 +406,8 @@ void UIState::handleEvent(sf::Event e)
 	button_menu[4][1]->handleEvent(e, m_pGame->getWindow(), *this);
     button_menu[5][0]->handleEvent(e, m_pGame->getWindow(), *this);
     //button_menu[5][1]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[6][0]->handleEvent(e, m_pGame->getWindow(), *this);
+    button_menu[6][1]->handleEvent(e, m_pGame->getWindow(), *this);
 
     button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
@@ -503,6 +560,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
     // main_view
     bool done = false;
+    bool new_entry = false;
     if (_mode == display_mode::show_movie)
     {
         //if (is_pause == false)
@@ -521,64 +579,86 @@ void UIState::render(sf::RenderTarget& renderer)
                                 "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
                         }
 
-                        VideoCapturing* r = VideoCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
+                        VideoSoundCapturing* r = VideoSoundCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
                         if (r != nullptr)
                         {
+                            //----------------------------------
+                            // VideoSoundCapturing already in cache
+                            //----------------------------------
                             _vc = r;
+                            _vc->sound.setVolume(sound_volume);
+                            _vc->play_sound(); //...
                         }
                         else
                         {
-                            _vc = new VideoCapturing(img_files[index_img].make_absolute().str());
+                            //----------------------------------
+                            // new VideoSoundCapturing
+                            // ----------------------------------
+                            _vc = new VideoSoundCapturing(img_files[index_img].make_absolute().str());
+                            _vc->sound.setVolume(sound_volume);
                             v_vc.push_back(_vc);
                         }
 
-                        int k_preloaded = 0;
-                        if ((index_img < img_files.size() - 1) && ( ui.cfg.preload_N_sound_file > 0))
+                        new_entry = true;
+
+                        //----------------------------------
+                        // preloading 
+                        // ----------------------------------
+                        if (count_sound_preloading() < ui.cfg.preload_N_sound_file)
                         {
-                            int n = index_img + 1;
-                            while ((n < img_files.size()) && (img_files[n].empty() == false))
+                            int k_preloaded = 0;
+                            if ((index_img < img_files.size() - 1) && (ui.cfg.preload_N_sound_file > 0))
                             {
-                                VideoCapturing* rr = VideoCapturing::find(img_files[n].make_absolute().str(), v_vc);
-
-                                if ((rr==nullptr) && (img_files[n].extension() == "mp4"))
+                                int n = index_img + 1;
+                                while ((n < img_files.size()) && (img_files[n].empty() == false))
                                 {
-                                    // preload
-                                    k_preloaded++;
-                                    r = new VideoCapturing(img_files[n].make_absolute().str(), false);
-                                    v_vc.push_back(r);
+                                    VideoSoundCapturing* rr = VideoSoundCapturing::find(img_files[n].make_absolute().str(), v_vc);
 
-                                    if (r->open() == true)
+                                    if ((rr == nullptr) && (img_files[n].extension() == "mp4"))
                                     {
-                                        if (r->has_sound)
+                                        // preload
+                                        k_preloaded++;
+                                        //----------------------------------
+                                        // new VideoSoundCapturing
+                                        // ----------------------------------
+                                        r = new VideoSoundCapturing(img_files[n].make_absolute().str(), false);
+                                        v_vc.push_back(r);
+
+                                        if (r->open() == true)
                                         {
-                                            if (ui.cfg.load_sound_file == 1)
+                                            if (r->has_sound)
                                             {
-                                                r->load_sound();
-                                                msg = msg + (r->sound_isloading.load() ? " pre_loading sound..." : "");
+                                                if (ui.cfg.load_sound_file == 1)
+                                                {
+                                                    r->load_sound();
+                                                    msg = msg + (r->sound_isloading.load() ? " pre_loading sound..." : "");
+                                                }
                                             }
                                         }
-                                    }
 
-                                    if (k_preloaded >= ui.cfg.preload_N_sound_file) // preload n if possible
-                                    {
-                                        break;
+                                        if (k_preloaded >= ui.cfg.preload_N_sound_file) // preload n if possible
+                                        {
+                                            break;
+                                        }
                                     }
+                                    n++;
                                 }
-                                n++;
                             }
-                        }
 
-                        if (k_preloaded < ui.cfg.preload_N_sound_file)
-                        {
-                            // try preload from next topic
-                            filesystem::path p_next = _fnav.preview_next_path();
-                            // ....
+                            if (k_preloaded < ui.cfg.preload_N_sound_file)
+                            {
+                                // try preload from next topic
+                                //filesystem::path p_next = _fnav.preview_next_path();
+                                // ....
+                            }
                         }
 
                         if (_vc->open() == false)
                         {
-                            v_vcd.push_back(new VideoCapturingDeleter(_vc));
-                            VideoCapturing::clear(_vc->_file, v_vc);
+                            //v_vcd.push_back(new VideoSoundCapturingDeleter(_vc));
+                            _vc->sound.stop();
+                            _vc->playing_request = false;
+                            VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
                             _vc = nullptr;
                         }
                         else
@@ -660,6 +740,16 @@ void UIState::render(sf::RenderTarget& renderer)
                     long nc = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
                     double fps = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FPS);
 
+                    if ( (new_entry == true) && (_vc->done == true) )
+                    {
+                        // reset frame
+                        np = 0;
+                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
+                        _vc->sound.setPlayingOffset(sf::seconds((float)(np / fps))); // if fps frame/sec
+                        _vc->done = false;
+                        _vc->play_sound();
+                    }
+
                     fps = fps * vitesse_video_factor;
 
                     bool skip = false;
@@ -667,6 +757,7 @@ void UIState::render(sf::RenderTarget& renderer)
                     if (np == 0)
                     {
                         _vc->start = std::chrono::system_clock::now();
+                        _vc->sound.setVolume(sound_volume);
                     }
                     else           
                     {
@@ -692,6 +783,7 @@ void UIState::render(sf::RenderTarget& renderer)
                         if (_vc->readNextFrame() == false)
                         {
                             done = true;
+                            _vc->done = true;
                             break;
                         }
                     }
@@ -701,6 +793,7 @@ void UIState::render(sf::RenderTarget& renderer)
                         if (_vc->readNextFrame() == false)
                         {
                             done = true;
+                            _vc->done = true;
                         }
                     }
                 }
@@ -751,11 +844,13 @@ void UIState::render(sf::RenderTarget& renderer)
                 }
                 else
                 {
-                    // TODO - keep it a little longer, dont delete immediately...
-
                     // done
-                    v_vcd.push_back(new VideoCapturingDeleter(_vc));
-                    VideoCapturing::clear(_vc->_file, v_vc);
+                    //v_vcd.push_back(new VideoSoundCapturingDeleter(_vc));
+                    _vc->sound.stop();
+                    _vc->playing_request = false;
+
+                    // keep for a awhile
+                    //VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd); 
                     _vc = nullptr;
                 }
             }
@@ -773,9 +868,15 @@ void UIState::render(sf::RenderTarget& renderer)
 	button_menu[4][1]->render(renderer);
     button_menu[5][0]->render(renderer);
     //button_menu[5][1]->render(renderer);
+    button_menu[6][0]->render(renderer);
+    button_menu[6][1]->render(renderer);
 
     button_name.render(renderer);
     button_parts.render(renderer);
+
+    std::string s = button_msg.m_text.getString() + "[" + std::to_string(count_sound_preloading()) + "]";
+    button_msg.setText(s);
+
     button_msg.render(renderer);
 
     renderer.draw(minimap.m_drag_rect);
@@ -803,6 +904,8 @@ void UIState::recalc_size()
 	button_menu[4][1]->m_rect.setSize({ b_w , b_h });
     button_menu[5][0]->m_rect.setSize({ 2 * b_w , b_h });
     //button_menu[5][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[6][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[6][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[1][0]->setPosition({ canvas_w, b_h });
     button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
@@ -814,6 +917,8 @@ void UIState::recalc_size()
 	button_menu[4][1]->setPosition({ canvas_w + b_w, 8 * b_h });
     button_menu[5][0]->setPosition({ canvas_w, 9 * b_h });
     // button_menu[5][1]->setPosition({ canvas_w + b_w, 8 * b_h });
+    button_menu[6][0]->setPosition({ canvas_w, 10 * b_h });
+    button_menu[6][1]->setPosition({ canvas_w + b_w, 10 * b_h });
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
@@ -932,4 +1037,23 @@ void UIState::load_path(filesystem::path& p)
     button_name.setText(name);
     button_parts.setText(desc);
     button_msg.setText("");
+}
+
+int UIState::count_sound_preloading()
+{
+    int n = 0;
+    for (size_t i = 0; i < v_vc.size(); i++)
+    {
+        if (v_vc[i] != nullptr)
+        {
+            if (v_vc[i]->has_sound)
+            {
+                if (v_vc[i]->sound_loaded == false)
+                {
+                    n++;
+                }
+            }
+        }
+    }
+    return n;
 }

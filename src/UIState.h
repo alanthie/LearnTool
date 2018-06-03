@@ -26,13 +26,13 @@ public:
     display_mode                _mode = display_mode::show_img;
     FolderNavigation            _fnav;
 
-    VideoCapturing*                     _vc = nullptr;  // current
-    std::vector<VideoCapturing*>        v_vc;           // preload
+    VideoSoundCapturing*                     _vc = nullptr;  // current
+    std::vector<VideoSoundCapturing*>        v_vc;           // preload
+    std::vector<VideoSoundCapturingDeleter*> v_vcd;
+    std::vector<ExtractSound*>          v_extract_sound;
 
-    std::vector<VideoCapturingDeleter*>  v_vcd;
-    std::vector<ExtractSound*>           v_extract_sound;
-
-    gui::Button*                button_menu[6][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr } };
+    float                       sound_volume = 100.0;
+    gui::Button*                button_menu[7][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr },{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
     gui::Button                 button_msg;
@@ -79,4 +79,6 @@ public:
 
     void widget_clicked(std::string& b_name) override;
     void widget_changed(std::string& b_name) override;
+
+    int count_sound_preloading();
 };
