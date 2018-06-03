@@ -18,7 +18,7 @@ VideoSoundCapturingDeleter::VideoSoundCapturingDeleter(VideoSoundCapturing* v) :
     if (vs_cap != nullptr)
     {
         vs_cap->stop_thread.store(true);
-        vs_cap->sound.stop();
+        vs_cap->music.stop();
         thread_watch_loading_sound = new std::thread(&VideoSoundCapturingDeleter::run, this);
     }
 }
@@ -28,7 +28,7 @@ VideoSoundCapturingDeleter::~VideoSoundCapturingDeleter()
     if (vs_cap)
     {
         vs_cap->stop_thread.store(true);
-        vs_cap->sound.stop();
+        vs_cap->music.stop();
 
         if (thread_watch_loading_sound != nullptr)
         {
@@ -130,7 +130,7 @@ VideoSoundCapturing::~VideoSoundCapturing()
 {
     if (has_sound)
     {
-        sound.stop();
+        music.stop();
     }
 
     vc.release();
@@ -193,29 +193,15 @@ void VideoSoundCapturing::asych_load_sound()
 {
     if (stop_thread.load() == false)
     {
-        if (buffer.loadFromFile(sound_file)) // can not  be stop - will wait terminate in VideoSoundCapturingDeleter thread
+        if (music.openFromFile(sound_file))
         {
-            sound.setBuffer(buffer);
             sound_loaded = true;
         }
         else
         {
-            // too fast - file not fully saved...
-            // retry
-            std::this_thread::sleep_for(100ms);
-            if (buffer.loadFromFile(sound_file))
-            {
-                sound_loaded = true;
-                sound.setBuffer(buffer);
-            }
-            else
-            {
-                int err = 1;
-            }
-
         }
-        sound_isloading.store(false);
 
+        sound_isloading.store(false);
         if (auto_play)
         {
             play_sound();
@@ -232,7 +218,7 @@ void VideoSoundCapturing::play_sound()
             if (playing_request == false)
             {
                 playing_request = true;
-                sound.play();
+                music.play();
             }
         }
     }

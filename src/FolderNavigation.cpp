@@ -199,7 +199,24 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                 if (vf.size() > 0)
                 {
                     p = filesystem::path(v[i]);
-                    break;
+                    return p;
+                }
+                else
+                {
+                    // TODO...
+                    std::vector<std::string> v_sub = filesystem::path::get_directory_file(filesystem::path(v[i]), false, true);
+                    for (size_t j = 0; j < v_sub.size(); j++)
+                    {
+                        if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == exclude_folder.end())
+                        {
+                            std::vector<std::string> vf = get_img_files(filesystem::path(v_sub[j]));
+                            if (vf.size() > 0)
+                            {
+                                p = filesystem::path(v_sub[j]);
+                                return p;
+                            }
+                        }
+                    }
                 }
             }
         }

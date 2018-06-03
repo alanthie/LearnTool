@@ -32,7 +32,7 @@ void UIState::img_changed()
 
     if (_vc != nullptr)
     {
-        _vc->sound.stop();
+        _vc->music.stop();
         _vc->playing_request = false;
         
         // keep in v_vc
@@ -70,27 +70,9 @@ void UIState::img_changed()
         }
     }
 
-    if (v_extract_sound.size() > 0)
-    {
-        bool all_done = true;
-        for (const auto item : v_extract_sound)
-        {
-            if (item != nullptr)
-            {
-                if (item->is_done.load() == false)
-                {
-                    all_done = false;
-                    break;
-                }
-            }
-        }
 
-        if (all_done)
-        {
-            v_extract_sound.clear();
-        }
-    }
 
+    // v_vc
     if (v_vc.size() > 0)
     {
         for (size_t i = 0; i< v_vc.size(); i++)
@@ -137,12 +119,11 @@ void UIState::widget_clicked(std::string& b_name)
         if (is_pause)
         {
 			button_menu[0][0]->setText("continue");
-			//button_menu[0][0]->m_rect.setFillColor(sf::Color::Red);
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
                 {
-                    _vc->sound.stop();
+                    _vc->music.stop();
                     _vc->playing_request = false;
                 }
             }
@@ -150,7 +131,6 @@ void UIState::widget_clicked(std::string& b_name)
         else
         {
             button_menu[0][0]->setText("pause");
-			//button_menu[0][0]->m_rect.setFillColor(sf::Color::Green);
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
@@ -286,7 +266,7 @@ void UIState::widget_clicked(std::string& b_name)
     }
     if (_vc)
     {
-        _vc->sound.setVolume(sound_volume);
+        _vc->music.setVolume(sound_volume);
     }
 }
 
@@ -442,19 +422,20 @@ void UIState::update(sf::Time deltaTime)
 
                 if ((np > 0) && (nc > 0))
                 {
-                    sf::Time t = _vc->sound.getPlayingOffset();
+                    sf::Time t = _vc->music.getPlayingOffset();
                     float tsec = t.asSeconds();
 
-                    sf::Time t2 = _vc->buffer.getDuration();
+                    sf::Time t2 = _vc->music.getDuration();
                     float t2sec = t2.asSeconds();
 
                     if (std::abs(tsec - (np / fps)) > 2.0f)
                     {
-                        if ( (np / fps) < t2sec)
+                        if ((np / fps) < t2sec)
                         {
-                            _vc->sound.setPlayingOffset(sf::seconds((float)(np / fps))); // if fps frame/sec
+                            _vc->music.setPlayingOffset(sf::seconds((float)(np / fps))); // if fps frame/sec
                         }
                     }
+
                 }
             }
 
@@ -476,6 +457,93 @@ void UIState::update(sf::Time deltaTime)
             }
         }
     }
+
+    //---------------------------------
+    // sound making quota
+    //---------------------------------
+    if (ui.cfg.mak_wav_file == 1)
+    {
+        if (v_extract_sound.size() > 0)
+        {
+            int n_running = 0;
+            for (const auto item : v_extract_sound)
+            {
+                if (item != nullptr)
+                {
+                    if ((item->is_done.load() == false) && (item->is_started.load() == true))
+                    {
+                        n_running++;
+                    }
+                }
+            }
+
+            if ((n_running < ui.cfg.make_N_sound_file) && (v_extract_sound.size() > 0))
+            {
+                for (const auto item : v_extract_sound)
+                {
+                    if (item != nullptr)
+                    {
+                        if ((item->is_done.load() == false) && (item->is_started.load() == false))
+                        {
+                            item->is_started.store(true);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // cleanup
+            bool all_done = true;
+            for (const auto item : v_extract_sound)
+            {
+                if (item != nullptr)
+                {
+                    if (item->is_done.load() == false)
+                    {
+                        all_done = false;
+                        break;
+                    }
+                }
+            }
+
+            if (all_done)
+            {
+                v_extract_sound.clear();
+            }
+        }
+    }
+
+    //---------------------------------
+    // sound loading quota
+    //---------------------------------
+    if (ui.cfg.load_sound_file == 1)
+    {
+        if (count_sound_preloading() < ui.cfg.preload_N_sound_file)
+        {
+            int k = 0;
+            for (size_t i = 0; i < v_vc.size(); i++)
+            {
+                if (v_vc[i] != nullptr)
+                {
+                    if (v_vc[i]->has_sound)
+                    {
+                        if (v_vc[i]->sound_loaded == false)
+                        {
+                            if (v_vc[i]->thread_load_sound == nullptr)
+                            {
+                                v_vc[i]->load_sound();
+                                k++;
+
+                                if (k + count_sound_preloading() >= ui.cfg.preload_N_sound_file)
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 void UIState::fixedUpdate(sf::Time deltaTime) 
@@ -578,12 +646,12 @@ void UIState::render(sf::RenderTarget& renderer)
                         VideoSoundCapturing* r = VideoSoundCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
                         if (r != nullptr)
                         {
-                            //----------------------------------
+                            //-------------------------------------
                             // VideoSoundCapturing already in cache
-                            //----------------------------------
+                            //-------------------------------------
                             _vc = r;
                             _vc->play_sound(); //...
-                            _vc->sound.setVolume(sound_volume);
+                            _vc->music.setVolume(sound_volume);
                         }
                         else
                         {
@@ -591,68 +659,15 @@ void UIState::render(sf::RenderTarget& renderer)
                             // new VideoSoundCapturing
                             // ----------------------------------
                             _vc = new VideoSoundCapturing(img_files[index_img].make_absolute().str());
-                            _vc->sound.setVolume(sound_volume);
+                            _vc->music.setVolume(sound_volume);
                             v_vc.push_back(_vc);
                         }
                         
                         new_entry = true;
 
-                        //----------------------------------
-                        // preloading 
-                        // ----------------------------------
-                        if (count_sound_preloading() < ui.cfg.preload_N_sound_file)
-                        {
-                            int k_preloaded = 0;
-                            if ((index_img < img_files.size() - 1) && (ui.cfg.preload_N_sound_file > 0))
-                            {
-                                int n = index_img + 1;
-                                while ((n < img_files.size()) && (img_files[n].empty() == false))
-                                {
-                                    VideoSoundCapturing* rr = VideoSoundCapturing::find(img_files[n].make_absolute().str(), v_vc);
-
-                                    if ((rr == nullptr) && (img_files[n].extension() == "mp4"))
-                                    {
-                                        // preload
-                                        k_preloaded++;
-                                        //----------------------------------
-                                        // new VideoSoundCapturing
-                                        // ----------------------------------
-                                        r = new VideoSoundCapturing(img_files[n].make_absolute().str(), false);
-                                        v_vc.push_back(r);
-
-                                        if (r->open() == true)
-                                        {
-                                            if (r->has_sound)
-                                            {
-                                                if (ui.cfg.load_sound_file == 1)
-                                                {
-                                                    r->load_sound();
-                                                    msg = msg + (r->sound_isloading.load() ? " pre_loading sound..." : "");
-                                                }
-                                            }
-                                        }
-
-                                        if (k_preloaded >= ui.cfg.preload_N_sound_file) // preload n if possible
-                                        {
-                                            break;
-                                        }
-                                    }
-                                    n++;
-                                }
-                            }
-
-                            if (k_preloaded < ui.cfg.preload_N_sound_file)
-                            {
-                                // try preload from next topic
-                                //filesystem::path p_next = _fnav.preview_next_path();
-                                // ....
-                            }
-                        }
-
                         if (_vc->open() == false)
                         {
-                            //v_vcd.push_back(new VideoSoundCapturingDeleter(_vc));
-                            _vc->sound.stop();
+                            _vc->music.stop();
                             _vc->playing_request = false;
                             VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
                             _vc = nullptr;
@@ -661,22 +676,18 @@ void UIState::render(sf::RenderTarget& renderer)
                         {
                             if (_vc->has_sound)
                             {
-                                if (ui.cfg.load_sound_file == 1)
-                                {
-                                    _vc->load_sound();
-                                    msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
-                                }
+                                //if (ui.cfg.load_sound_file == 1)
+                                //{
+                                //    _vc->load_sound();
+                                //    msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                                //}
                             }
                             else
-                            {                     
+                            {   
+                                // Create sound file 
                                 if (ui.cfg.mak_wav_file == 1)
                                 {
                                     v_extract_sound.push_back(new ExtractSound(img_files[index_img].make_absolute().str()));
-                                    msg = msg + " extracting sound...";
-                                }
-                                else
-                                {
-                                    msg = msg + " no sound...";
                                 }
                             }
                         }
@@ -686,7 +697,7 @@ void UIState::render(sf::RenderTarget& renderer)
                 }
             }
 
-            if (_vc != nullptr) /*&& ((!_vc->has_sound) || (_vc->has_sound)&&(_vc->sound_loaded == true) ) )*/
+            if (_vc != nullptr)
             {
                 if (ui.cfg.load_sound_file == 1)
                 {
@@ -704,25 +715,32 @@ void UIState::render(sf::RenderTarget& renderer)
                         {
                             if ((_vc->sound_loaded == false) && (_vc->sound_isloading.load() == false))
                             {
-                                _vc->load_sound();
+                                if (count_sound_preloading() < ui.cfg.preload_N_sound_file)
+                                {
+                                        _vc->load_sound();
 
-                                std::string msg;
-                                msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
-                                    img_files[index_img].filename() +
-                                    "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
-                                msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
+                                        std::string msg;
+                                        msg =   "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
+                                                img_files[index_img].filename() +
+                                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                                        msg = msg + (_vc->sound_isloading.load() ? " loading sound..." : "");
 
-                                button_msg.setText(msg);
+                                        button_msg.setText(msg);
+                                }
+                                else
+                                {
+                                    // Too many preloading in progress...
+                                    //.....
+                                }
                             }
                             else if (_vc->sound_loaded == true)
                             {
                                 _vc->play_sound();
 
                                 std::string msg;
-                                msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
-                                    img_files[index_img].filename() +
-                                    "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
-                                msg = msg + (_vc->sound_isloading.load() ? " playing preloaded ound..." : "");
+                                msg =   "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
+                                        img_files[index_img].filename() +
+                                        "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
 
                                 button_msg.setText(msg);
                             }
@@ -743,7 +761,7 @@ void UIState::render(sf::RenderTarget& renderer)
                         _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
                         _vc->done = false;
                         _vc->play_sound();
-                        _vc->sound.setPlayingOffset(sf::seconds((float)0)); // if fps frame/sec
+                        _vc->music.setPlayingOffset(sf::seconds((float)0)); // if fps frame/sec
                     }
 
                     fps = fps * vitesse_video_factor;
@@ -753,7 +771,7 @@ void UIState::render(sf::RenderTarget& renderer)
                     if (np == 0)
                     {
                         _vc->start = std::chrono::system_clock::now();
-                        _vc->sound.setVolume(sound_volume);
+                        _vc->music.setVolume(sound_volume);
                     }
                     else           
                     {
@@ -841,8 +859,7 @@ void UIState::render(sf::RenderTarget& renderer)
                 else
                 {
                     // done
-                    //v_vcd.push_back(new VideoSoundCapturingDeleter(_vc));
-                    _vc->sound.stop();
+                    _vc->music.stop();
                     _vc->playing_request = false;
 
                     // keep for a awhile
@@ -878,7 +895,8 @@ void UIState::render(sf::RenderTarget& renderer)
     button_name.render(renderer);
     button_parts.render(renderer);
 
-    std::string s = button_msg.m_text.getString() + "[" + std::to_string(count_sound_preloading()) + "]";
+    std::string s = button_msg.m_text.getString() + "[L" + std::to_string(count_sound_preloading()) + "]";
+    s = s +"[W" + std::to_string(count_sound_making()) + "]";
     button_msg.setText(s);
 
     button_msg.render(renderer);
@@ -1054,8 +1072,28 @@ int UIState::count_sound_preloading()
             {
                 if (v_vc[i]->sound_loaded == false)
                 {
-                    n++;
+                    if (v_vc[i]->thread_load_sound != nullptr)
+                    {
+                        n++;
+                    }
                 }
+            }
+        }
+    }
+    return n;
+}
+
+
+int UIState::count_sound_making()
+{
+    int n = 0;
+    for (size_t i = 0; i < v_extract_sound.size(); i++)
+    {
+        if (v_extract_sound[i] != nullptr)
+        {
+            if ((v_extract_sound[i]->is_done.load() == false) && (v_extract_sound[i]->is_started.load() == true))
+            {
+                n++;
             }
         }
     }

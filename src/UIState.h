@@ -29,7 +29,7 @@ public:
     VideoSoundCapturing*                     _vc = nullptr;  // current
     std::vector<VideoSoundCapturing*>        v_vc;           // preload
     std::vector<VideoSoundCapturingDeleter*> v_vcd;
-    std::vector<ExtractSound*>          v_extract_sound;
+    std::vector<ExtractSound*>               v_extract_sound;
 
     float                       sound_volume = 100.0;
     gui::Button*                button_menu[7][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr },{ nullptr } };
@@ -81,4 +81,5 @@ public:
     void widget_changed(std::string& b_name) override;
 
     int count_sound_preloading();
+    int count_sound_making();
 };

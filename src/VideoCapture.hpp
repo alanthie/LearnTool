@@ -55,8 +55,7 @@ public:
     bool                sound_loaded = false;
     std::atomic<bool>   sound_isloading = false;
     std::string         sound_file;
-    sf::SoundBuffer     buffer;
-    sf::Sound           sound;
+    sf::Music           music;
     std::thread*        thread_load_sound = nullptr;
     std::atomic<bool>   stop_thread = false;
     bool                playing_request = false;
@@ -98,14 +97,16 @@ public:
 
     void run()
     {
-        // Create process...
+        while (is_started.load() == false)
+        {
+            std::this_thread::sleep_for(1000ms);
+        }
 
         // ffmpeg -i 0001.mp4 0001.mp4.wav
         filesystem::path cmd_path("..\\tools");
         std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -i \"" + _file + "\" \"" + _file + ".wav\"";
-        int r = system(cmd.c_str());
-
         std::cout << cmd << std::endl;
+        int r = system(cmd.c_str());
 
         filesystem::path wav_path(_file + ".wav");
         while (wav_path.exists() == false)
@@ -119,88 +120,8 @@ public:
         is_done.store(true);
     }
 
+    std::atomic<bool> is_started = false;
     std::string     _file;
     std::thread*    _thread = nullptr;
     std::atomic<bool> is_done = false;
 };
-
-//---------------------------------------------------------------------------
-// Create a SoundBufferManager class
-//  Tracking preloading of soundbuffer
-//  If sound is playing, continu preload reading
-//  else only current sound should load (CPU intense), pause preload reading
-//--------------------------------------------------------------------------
-
-
-
-//-------------------------------------------
-// Make another sf::SoundFileReaderWav
-// + abort_read() [add atomic<bool> abort_flag in class]
-// + pause_read()
-// + continu_read()
-// + notify_read_frame()
-// + 
-//-------------------------------------------
-/*
-Uint64 SoundFileReaderWav::read(Int16* samples, Uint64 maxCount)
-{
-    assert(m_stream);
-
-    Uint64 count = 0;
-    while ((count < maxCount) && (static_cast<Uint64>(m_stream->tell()) < m_dataEnd))
-    {
-        switch (m_bytesPerSample)
-        {
-        case 1:
-        {
-            Uint8 sample = 0;
-            if (decode(*m_stream, sample))
-                *samples++ = (static_cast<Int16>(sample) - 128) << 8;
-            else
-                return count;
-            break;
-        }
-
-        case 2:
-        {
-            Int16 sample = 0;
-            if (decode(*m_stream, sample))
-                *samples++ = sample;
-            else
-                return count;
-            break;
-        }
-
-        case 3:
-        {
-            Uint32 sample = 0;
-            if (decode24bit(*m_stream, sample))
-                *samples++ = sample >> 8;
-            else
-                return count;
-            break;
-        }
-
-        case 4:
-        {
-            Uint32 sample = 0;
-            if (decode(*m_stream, sample))
-                *samples++ = sample >> 16;
-            else
-                return count;
-            break;
-        }
-
-        default:
-        {
-            assert(false);
-            return 0;
-        }
-        }
-
-        ++count;
-    }
-
-    return count;
-}
-*/
