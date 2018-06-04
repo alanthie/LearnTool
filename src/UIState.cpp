@@ -36,10 +36,10 @@ void UIState::img_changed()
         _vc->playing_request = false;
         
         // keep in v_vc
-        // VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
         _vc = nullptr;
     }
 
+    //  cleanup v_vcd
     if (v_vcd.size() > 0)
     {
         bool all_done = true;
@@ -71,7 +71,6 @@ void UIState::img_changed()
     }
 
 
-
     // v_vc
     if (v_vc.size() > 0)
     {
@@ -82,7 +81,6 @@ void UIState::img_changed()
             { 
                 if (v_vc[j] != nullptr)
                 {
-                    //if (v_vc[j]->vc.)
                     n++;
                 }
             }
@@ -93,10 +91,7 @@ void UIState::img_changed()
                 //...locate...
                 if (n > 10)
                 {
-                   /* if (i < v_vc.size() - 10)*/
-                    {
-                        VideoSoundCapturing::clear(item_vc->_file, v_vc, v_vcd);
-                    }
+                    VideoSoundCapturing::clear(item_vc->_file, v_vc, v_vcd);
                 }
             }
             else
@@ -108,7 +103,7 @@ void UIState::img_changed()
 
 void UIState::widget_changed(std::string& b_name)
 {
-    //...minimap changed
+    // minimap changed
 }
 
 void UIState::widget_clicked(std::string& b_name)
@@ -133,18 +128,17 @@ void UIState::widget_clicked(std::string& b_name)
             button_menu[0][0]->setText("pause");
             if (_vc != nullptr)
             {
+                _vc->pause_unpause_pending = true;
                 if (_vc->has_sound)
                 {
                     _vc->music.play();
-                    //_vc->play_sound();
                 }
             }
         }
     }
 
     else if (b_name == "b_shot")
-    {
-		
+    {	
         if ((_mode == display_mode::show_movie) && (_vc != nullptr))
         {
             cv::Mat frameRGBA;
@@ -382,8 +376,7 @@ void UIState::handleEvent(sf::Event e)
     button_name.handleEvent(e,  m_pGame->getWindow(), *this);
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
     button_msg.handleEvent(e,   m_pGame->getWindow(), *this);
-
-    minimap.handleEvent(e, m_pGame->getWindow(), *this);
+    minimap.handleEvent(e,      m_pGame->getWindow(), *this);
 }
 
 void UIState::handleInput() 
@@ -427,13 +420,14 @@ void UIState::update(sf::Time deltaTime)
                     float tsec = t.asSeconds();
 
                     sf::Time t2 = _vc->music.getDuration();
-                    float t2sec = t2.asSeconds();
+                    float m_duration = t2.asSeconds();
 
-                    if (std::abs(tsec - (np / fps)) > 0.5f)
+                    float frame_time = np / fps;
+                    if ((std::abs(tsec - frame_time) > 0.5f) && (std::abs(tsec - frame_time) < 30.0f))
                     {
-                        if ((np / fps) < t2sec)
+                        if (frame_time < m_duration)
                         {
-                            _vc->music.setPlayingOffset(sf::seconds((float)(np / fps))); // if fps frame/sec
+                            _vc->music.setPlayingOffset(sf::seconds(frame_time)); // if fps frame/sec
                         }
                     }
 
@@ -665,6 +659,8 @@ void UIState::render(sf::RenderTarget& renderer)
                         }
                         
                         new_entry = true;
+                        long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+                        _vc->entry_frame = np;
 
                         if (_vc->open() == false)
                         {
@@ -761,17 +757,26 @@ void UIState::render(sf::RenderTarget& renderer)
                     {
                         // reset frame
                         np = 0;
+                        _vc->entry_frame = 0;
                         _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
                         _vc->done = false;
                         _vc->play_sound();
                         _vc->music.setPlayingOffset(sf::seconds((float)0)); // if fps frame/sec
+                    }
+                    else if (_vc->pause_unpause_pending == true)
+                    {
+                       _vc->entry_frame = np;
+                       _vc->pause_unpause_pending = false;
+                       _vc->play_sound();
+                       float frame_time = np / fps;
+                       _vc->music.setPlayingOffset(sf::seconds(frame_time));
                     }
 
                     fps = fps * vitesse_video_factor;
 
                     bool skip = false;
                     int skip_n = 0;
-                    if (np == 0)
+                    if (np == _vc->entry_frame)
                     {
                         _vc->start = std::chrono::system_clock::now();
                         _vc->music.setVolume(sound_volume);
@@ -781,7 +786,7 @@ void UIState::render(sf::RenderTarget& renderer)
                         auto end = std::chrono::system_clock::now();
                         std::chrono::duration<double> diff_sec = end - _vc->start;
 
-                        long target = (long) ( fps * diff_sec.count() );
+                        long target = _vc->entry_frame + (long) ( fps * diff_sec.count() );
                         if (target > np + 1)
                         {
                             // read more

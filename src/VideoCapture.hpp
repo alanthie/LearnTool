@@ -48,8 +48,10 @@ public:
     std::string         _file;
     cv::VideoCapture    vc;
     cv::Mat             frame;
+    long                entry_frame = 0;
     std::chrono::time_point<std::chrono::system_clock> start;
     bool                done = false;
+    bool                pause_unpause_pending = false;
 
     bool                has_sound = false;
     bool                sound_loaded = false;
