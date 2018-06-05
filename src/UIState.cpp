@@ -486,7 +486,6 @@ void UIState::update(sf::Time deltaTime)
     //---------------------------------
     if (ui.cfg.load_sound_file == 1)
     {
-        /*if (count_sound_preloading() < ui.cfg.preload_N_sound_file)*/
         {
             int k = 0;
             for (size_t i = 0; i < v_vc.size(); i++)
@@ -497,13 +496,9 @@ void UIState::update(sf::Time deltaTime)
                     {
                         if (v_vc[i]->sound_loaded == false)
                         {
-                            /*if (v_vc[i]->thread_load_sound == nullptr)*/
                             {
                                 v_vc[i]->load_sound();
                                 k++;
-
-                                //if (k + count_sound_preloading() >= ui.cfg.preload_N_sound_file)
-                                //    break;
                             }
                         }
                     }
@@ -521,6 +516,8 @@ void UIState::fixedUpdate(sf::Time deltaTime)
 
 void UIState::render(sf::RenderTarget& renderer) 
 {
+    button_msg.setText("");
+
     recalc_size();
     if (img_files.size() > 0)
     {
@@ -558,7 +555,8 @@ void UIState::render(sf::RenderTarget& renderer)
                 {
                     button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string((long)img_files.size()) + "] " +
                                          img_files[index_img].filename() +
-                                         "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
+                                         "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]" +
+                                         "[W" + std::to_string(count_sound_making()) + "]");
                 }
 
                 sprite_canva.reset();
@@ -608,7 +606,9 @@ void UIState::render(sf::RenderTarget& renderer)
                         {
                             msg = "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
                                 img_files[index_img].filename() +
-                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                                "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
+                                + "[W" + std::to_string(count_sound_making()) + "]";
+                            button_msg.setText(msg);
                         }
 
                         VideoSoundCapturing* r = VideoSoundCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
@@ -618,7 +618,8 @@ void UIState::render(sf::RenderTarget& renderer)
                             // VideoSoundCapturing already in cache
                             //-------------------------------------
                             _vc = r;
-                            _vc->play_sound(); //...
+                            if (is_pause == false)
+                                _vc->play_sound(); //...
                             _vc->music.setVolume(sound_volume);
                         }
                         else
@@ -660,8 +661,6 @@ void UIState::render(sf::RenderTarget& renderer)
                                 }
                             }
                         }
-
-                        button_msg.setText(msg);
                     }
                 }
             }
@@ -695,7 +694,8 @@ void UIState::render(sf::RenderTarget& renderer)
                                 std::string msg;
                                 msg =   "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
                                         img_files[index_img].filename() +
-                                        "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]";
+                                        "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]" +
+                                        "[W" + std::to_string(count_sound_making()) + "]";
 
                                 button_msg.setText(msg);
                             }
@@ -716,20 +716,24 @@ void UIState::render(sf::RenderTarget& renderer)
                         _vc->entry_frame = 0;
                         _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
                         _vc->done = false;
-                        _vc->play_sound();
+                        if (is_pause == false)
+                            _vc->play_sound();
                         _vc->music.setPlayingOffset(sf::seconds((float)0)); // if fps frame/sec
                     }
                     else if (_vc->pause_unpause_pending == true)
                     {
                        _vc->entry_frame = np;
+                       _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, np);
                        _vc->pause_unpause_pending = false;
-                       _vc->play_sound();
+                       if (is_pause == false)
+                         _vc->play_sound();
                        float frame_time = (float)(np / fps);
                        _vc->music.setPlayingOffset(sf::seconds(frame_time));
                     }
                     else if (_vc->speed_changed_pending == true)
                     {
                         _vc->entry_frame = np;
+                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, np);
                         _vc->speed_changed_pending = false;
                         float frame_time = (float)(np / fps);
                         _vc->music.setPlayingOffset(sf::seconds(frame_time));
@@ -749,6 +753,8 @@ void UIState::render(sf::RenderTarget& renderer)
                         auto end = std::chrono::system_clock::now();
                         std::chrono::duration<double> diff_sec = end - _vc->start;
 
+                        // ???
+
                         long target = _vc->entry_frame + (long) ( fps * diff_sec.count() );
                         if (target > np + 1)
                         {
@@ -760,16 +766,14 @@ void UIState::render(sf::RenderTarget& renderer)
                             // read less
                             skip = true;
                         }
-                    }
-                    
-                    // TODO: Reset sound or frame if sound was just created...
-
-                    if ( (std::abs(vitesse_video_factor - 1.0f) <= 0.01) && (_vc->has_sound == true) )
+                    }                   
+                    else if ( (std::abs(vitesse_video_factor - 1.0f) <= 0.01) && (_vc->has_sound == true) )
                     {
+                        // TODO: Reset sound or frame if sound was just created...
                         sf::Time t = _vc->music.getPlayingOffset();
                         float tsec = t.asSeconds();
                         float frame_time = (float)(np / fps);
-                        if (tsec < frame_time - (1.0f/fps))
+                        if ((tsec > 0.00) && (tsec < frame_time - (1.0f/fps)))
                         {
                             // WAIT SOUND!
                             skip = true;
@@ -838,7 +842,8 @@ void UIState::render(sf::RenderTarget& renderer)
                         double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
                         button_msg.setText("[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
-                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]");
+                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]" 
+                            + "[W" + std::to_string(count_sound_making()) + "]");
                     }
                 }
                 else
@@ -879,11 +884,6 @@ void UIState::render(sf::RenderTarget& renderer)
 
     button_name.render(renderer);
     button_parts.render(renderer);
-
-    std::string s = button_msg.m_text.getString();// +"[L" + std::to_string(count_sound_preloading()) + "]";
-    s = s +"[W" + std::to_string(count_sound_making()) + "]";
-    button_msg.setText(s);
-
     button_msg.render(renderer);
 
     renderer.draw(minimap.m_drag_rect);
@@ -1045,29 +1045,6 @@ void UIState::load_path(filesystem::path& p)
     button_parts.setText(desc);
     button_msg.setText("");
 }
-
-//int UIState::count_sound_preloading()
-//{
-//    int n = 0;
-//    for (size_t i = 0; i < v_vc.size(); i++)
-//    {
-//        if (v_vc[i] != nullptr)
-//        {
-//            if (v_vc[i]->has_sound)
-//            {
-//                if (v_vc[i]->sound_loaded == false)
-//                {
-//                    /*if (v_vc[i]->thread_load_sound != nullptr)*/
-//                    {
-//                        n++;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    return n;
-//}
-
 
 int UIState::count_sound_making()
 {

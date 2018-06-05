@@ -104,10 +104,6 @@ void Game::handleEvent()
                 break;
 
             case sf::Event::Resized:
-
-                std::cout << "new width: " << e.size.width << std::endl;
-                std::cout << "new height: " << e.size.height << std::endl;
-
                 m_window.setView(sf::View(sf::FloatRect(0, 0, (float)e.size.width, (float)e.size.height)));
                 break;
 
@@ -140,8 +136,7 @@ void Game::exitGame()
     m_shouldExit = true;
 }
 
-// on tin
-/*const */sf::RenderWindow& Game::getWindow() /*const*/
+sf::RenderWindow& Game::getWindow()
 {
     return m_window;
 }

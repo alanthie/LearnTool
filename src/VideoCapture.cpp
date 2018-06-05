@@ -37,7 +37,6 @@ void VideoSoundCapturingDeleter::run()
 }
 
 
-
 VideoSoundCapturing::VideoSoundCapturing(const std::string& file, bool _auto_play) : _file(file), vc(file), sound_file()
 {
     filesystem::path p(file + ".wav");

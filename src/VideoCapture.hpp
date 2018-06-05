@@ -71,9 +71,6 @@ public:
     void                recheck_sound();
     bool                readNextFrame();
     cv::Mat&            getFrame();
-
-protected:
-    void                asych_load_sound();
 };
 
 
