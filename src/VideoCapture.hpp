@@ -22,6 +22,9 @@ using namespace std::chrono_literals;
 
 class VideoSoundCapturing;
 
+//-----------------------------------
+//
+//-----------------------------------
 class VideoSoundCapturingDeleter
 {
 public:
@@ -35,7 +38,9 @@ public:
     std::atomic<bool>       is_done = false;
 };
 
-
+//-----------------------------------
+//
+//-----------------------------------
 class VideoSoundCapturing
 {
 public:
@@ -52,27 +57,29 @@ public:
     std::chrono::time_point<std::chrono::system_clock> start;
     bool                done = false;
     bool                pause_unpause_pending = false;
+    bool                speed_changed_pending = false;
 
-    bool                has_sound = false;
-    bool                sound_loaded = false;
-    std::atomic<bool>   sound_isloading = false;
-    std::string         sound_file;
     sf::Music           music;
-    std::thread*        thread_load_sound = nullptr;
-    std::atomic<bool>   stop_thread = false;
+    bool                has_sound       = false;
+    bool                sound_loaded    = false;
+    std::string         sound_file;
     bool                playing_request = false;
-    bool                auto_play = false;
 
-    bool open();
-    void load_sound();
-    void asych_load_sound();
-    void play_sound();
-    void recheck_sound();
-    bool readNextFrame();
-    cv::Mat& getFrame();
+    bool                open();
+    void                load_sound();
+    void                play_sound();
+    void                recheck_sound();
+    bool                readNextFrame();
+    cv::Mat&            getFrame();
+
+protected:
+    void                asych_load_sound();
 };
 
 
+//-----------------------------------
+//
+//-----------------------------------
 class ExtractSound
 {
 public:

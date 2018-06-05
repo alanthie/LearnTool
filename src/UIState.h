@@ -80,6 +80,6 @@ public:
     void widget_clicked(std::string& b_name) override;
     void widget_changed(std::string& b_name) override;
 
-    int count_sound_preloading();
+    //int count_sound_preloading();
     int count_sound_making();
 };
