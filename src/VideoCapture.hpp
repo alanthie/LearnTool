@@ -110,7 +110,7 @@ public:
 
         // ffmpeg -i 0001.mp4 0001.mp4.wav
         filesystem::path cmd_path("..\\tools");
-        std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -i \"" + _file + "\" \"" + _file + ".wav\"";
+        std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
         std::cout << cmd << std::endl;
         int r = system(cmd.c_str());
 

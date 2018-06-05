@@ -70,6 +70,7 @@ void UIState::img_changed()
         }
     }
 
+    // TODO - only 256 vc allowed...
 
     // v_vc
     if (v_vc.size() > 0)
@@ -480,6 +481,7 @@ void UIState::update(sf::Time deltaTime)
         }
     }
 
+
     //---------------------------------
     // sound loading quota
     //---------------------------------
@@ -808,6 +810,19 @@ void UIState::render(sf::RenderTarget& renderer)
 
                     if (skip == false)
                     {
+                        if (_vc->readNextFrame() == false)
+                        {
+                            done = true;
+                            _vc->done = true;
+                        }
+                    }
+                }
+                else
+                {
+                    long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+                    if ((np == _vc->entry_frame) && (np == 0))
+                    {
+                        // show 1th frame
                         if (_vc->readNextFrame() == false)
                         {
                             done = true;
