@@ -140,7 +140,7 @@ void VideoSoundCapturing::play_sound()
 {
     if (has_sound && sound_loaded)
     {
-        if (playing_request == false)
+        if ((playing_request == false) || (music.getStatus() != sf::SoundSource::Status::Playing))
         {
             playing_request = true;
             music.play();

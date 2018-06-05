@@ -228,11 +228,6 @@ void UIState::widget_clicked(std::string& b_name)
         else
         {
             vitesse_video_factor /= 1.25f;
-
-            if (vitesse_video_factor < 1.0) // stay with frame longer
-            {
-                //...
-            }
         }
         if (_vc != nullptr)
             _vc->speed_changed_pending = true;
@@ -257,15 +252,19 @@ void UIState::widget_clicked(std::string& b_name)
     {
         sound_volume *= 1.10f; 
         if (sound_volume > 100.0) sound_volume = 100.0f;
+        if (_vc != nullptr)
+        {
+            _vc->music.setVolume(sound_volume);
+        }
     }
     else if (b_name == "b_vol_less")
     {
         sound_volume /= 1.10f;
         if (sound_volume < 0.0) sound_volume = 0.0f;
-    }
-    if (_vc)
-    {
-        _vc->music.setVolume(sound_volume);
+        if (_vc != nullptr)
+        {
+            _vc->music.setVolume(sound_volume);
+        }
     }
 }
 
@@ -671,7 +670,7 @@ void UIState::render(sf::RenderTarget& renderer)
                 {
                     if (ui.cfg.mak_wav_file == 1)
                     {
-                        if (_vc->has_sound == false)
+                        if (_vc->sound_loaded == false)
                         {
                             _vc->recheck_sound();
                         }
@@ -679,7 +678,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
                     if (_vc->has_sound == true)
                     {
-                        if (_vc->playing_request == false)
+                        if ((_vc->playing_request == false) || (_vc->music.getStatus() != sf::SoundSource::Status::Playing))
                         {
                             if (_vc->sound_loaded == false)
                             {
@@ -703,6 +702,7 @@ void UIState::render(sf::RenderTarget& renderer)
                     }
                 }
 
+                bool waiting_sound = false;
                 if (is_pause == false)
                 {
                     long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
@@ -736,6 +736,18 @@ void UIState::render(sf::RenderTarget& renderer)
                         _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, np);
                         _vc->speed_changed_pending = false;
                         float frame_time = (float)(np / fps);
+                        if (is_pause == false)
+                            _vc->play_sound();
+                        _vc->music.setPlayingOffset(sf::seconds(frame_time));
+                    }
+                    if (new_entry == true)
+                    {
+                        _vc->entry_frame = np;
+                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, np);
+                        _vc->speed_changed_pending = false;
+                        float frame_time = (float)(np / fps);
+                        if (is_pause == false)
+                            _vc->play_sound();
                         _vc->music.setPlayingOffset(sf::seconds(frame_time));
                     }
 
@@ -770,6 +782,7 @@ void UIState::render(sf::RenderTarget& renderer)
                     else if ( (std::abs(vitesse_video_factor - 1.0f) <= 0.01) && (_vc->has_sound == true) )
                     {
                         // TODO: Reset sound or frame if sound was just created...
+
                         sf::Time t = _vc->music.getPlayingOffset();
                         float tsec = t.asSeconds();
                         float frame_time = (float)(np / fps);
@@ -778,6 +791,7 @@ void UIState::render(sf::RenderTarget& renderer)
                             // WAIT SOUND!
                             skip = true;
                             pass_n = 0;
+                            waiting_sound = true;
                         }
                     }
 
@@ -842,8 +856,9 @@ void UIState::render(sf::RenderTarget& renderer)
                         double nc = _vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
                         button_msg.setText("[" + std::to_string(1 + (long)index_img) + "/" + std::to_string(0 + (long)img_files.size()) + "] " +
                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
-                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]" 
+                            + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
                             + "[W" + std::to_string(count_sound_making()) + "]");
+                           // + ( (_vc->has_sound && waiting_sound) ? "[Waiting sound catching up...]" : "") );
                     }
                 }
                 else
