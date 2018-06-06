@@ -31,12 +31,6 @@ VideoSoundCapturingDeleter::~VideoSoundCapturingDeleter()
     }
 }
 
-void VideoSoundCapturingDeleter::run()
-{
-    is_done.store(true);
-}
-
-
 VideoSoundCapturing::VideoSoundCapturing(const std::string& file, bool _auto_play) : _file(file), vc(file), sound_file()
 {
     filesystem::path p(file + ".wav");
@@ -140,9 +134,8 @@ void VideoSoundCapturing::play_sound()
 {
     if (has_sound && sound_loaded)
     {
-        if ((playing_request == false) || (music.getStatus() != sf::SoundSource::Status::Playing))
+        if (music.getStatus() != sf::SoundSource::Status::Playing)
         {
-            playing_request = true;
             music.play();
         }
     }

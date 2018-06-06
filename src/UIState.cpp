@@ -33,9 +33,8 @@ void UIState::img_changed()
     if (_vc != nullptr)
     {
         _vc->music.pause();
-        _vc->playing_request = false;
         
-        // keep in v_vc
+        // keep in v_vc cache
         _vc = nullptr;
     }
 
@@ -50,11 +49,11 @@ void UIState::img_changed()
             {
                 if (item_deleter->vs_cap != nullptr)
                 {
-                    if (item_deleter->is_done.load() == false)
-                    {
-                        all_done = false;
-                        break;
-                    }
+                    //if (item_deleter->is_done.load() == false)
+                    //{
+                    //    all_done = false;
+                    //    break;
+                    //}
                 }
                 else
                 {
@@ -69,8 +68,6 @@ void UIState::img_changed()
             v_vcd.clear();
         }
     }
-
-    // TODO - only 256 vc allowed...
 
     // v_vc
     if (v_vc.size() > 0)
@@ -89,8 +86,8 @@ void UIState::img_changed()
             VideoSoundCapturing* item_vc = v_vc[i];
             if (item_vc != nullptr)
             {
-                //...locate...
-                if (n > 10)
+                //...locate middle...
+                if (n > 10) // only 256 vc music allowed...
                 {
                     VideoSoundCapturing::clear(item_vc->_file, v_vc, v_vcd);
                 }
@@ -104,7 +101,7 @@ void UIState::img_changed()
 
 void UIState::widget_changed(std::string& b_name)
 {
-    // minimap changed
+    // minimap changed...
 }
 
 void UIState::widget_clicked(std::string& b_name)
@@ -120,7 +117,6 @@ void UIState::widget_clicked(std::string& b_name)
                 if (_vc->has_sound)
                 {
                     _vc->music.pause();
-                    _vc->playing_request = false;
                 }
             }
         }
@@ -483,25 +479,19 @@ void UIState::update(sf::Time deltaTime)
 
 
     //---------------------------------
-    // sound loading quota
+    // sound loading 
     //---------------------------------
     if (ui.cfg.load_sound_file == 1)
     {
+        for (size_t i = 0; i < v_vc.size(); i++)
         {
-            int k = 0;
-            for (size_t i = 0; i < v_vc.size(); i++)
+            if (v_vc[i] != nullptr)
             {
-                if (v_vc[i] != nullptr)
+                if (v_vc[i]->has_sound)
                 {
-                    if (v_vc[i]->has_sound)
+                    if (v_vc[i]->sound_loaded == false)
                     {
-                        if (v_vc[i]->sound_loaded == false)
-                        {
-                            {
-                                v_vc[i]->load_sound();
-                                k++;
-                            }
-                        }
+                        v_vc[i]->load_sound();
                     }
                 }
             }
@@ -620,7 +610,7 @@ void UIState::render(sf::RenderTarget& renderer)
                             //-------------------------------------
                             _vc = r;
                             if (is_pause == false)
-                                _vc->play_sound(); //...
+                                _vc->play_sound();
                             _vc->music.setVolume(sound_volume);
                         }
                         else
@@ -640,7 +630,6 @@ void UIState::render(sf::RenderTarget& renderer)
                         if (_vc->open() == false)
                         {
                             _vc->music.pause();
-                            _vc->playing_request = false;
                             VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
                             _vc = nullptr;
                         }
@@ -680,7 +669,7 @@ void UIState::render(sf::RenderTarget& renderer)
 
                     if (_vc->has_sound == true)
                     {
-                        if ((_vc->playing_request == false) || (_vc->music.getStatus() != sf::SoundSource::Status::Playing))
+                        if (_vc->music.getStatus() != sf::SoundSource::Status::Playing)
                         {
                             if (_vc->sound_loaded == false)
                             {
@@ -704,7 +693,6 @@ void UIState::render(sf::RenderTarget& renderer)
                     }
                 }
 
-                bool waiting_sound = false;
                 if (is_pause == false)
                 {
                     long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
@@ -793,7 +781,6 @@ void UIState::render(sf::RenderTarget& renderer)
                             // WAIT SOUND!
                             skip = true;
                             pass_n = 0;
-                            waiting_sound = true;
                         }
                     }
 
@@ -873,17 +860,14 @@ void UIState::render(sf::RenderTarget& renderer)
                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
                             + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
                             + "[W" + std::to_string(count_sound_making()) + "]");
-                           // + ( (_vc->has_sound && waiting_sound) ? "[Waiting sound catching up...]" : "") );
                     }
                 }
                 else
                 {
                     // done
                     _vc->music.pause();
-                    _vc->playing_request = false;
 
                     // keep for a awhile
-                    //VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd); 
                     _vc = nullptr;
                 }
             }

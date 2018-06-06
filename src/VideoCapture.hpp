@@ -23,7 +23,7 @@ using namespace std::chrono_literals;
 class VideoSoundCapturing;
 
 //-----------------------------------
-//
+// VideoSoundCapturingDeleter
 //-----------------------------------
 class VideoSoundCapturingDeleter
 {
@@ -31,15 +31,11 @@ public:
     VideoSoundCapturingDeleter(VideoSoundCapturing* v);
     ~VideoSoundCapturingDeleter();
 
-    void run();
-
-    VideoSoundCapturing*    vs_cap;
-    std::thread*            thread_watch_loading_sound = nullptr;
-    std::atomic<bool>       is_done = false;
+    VideoSoundCapturing* vs_cap;
 };
 
 //-----------------------------------
-//
+// VideoSoundCapturing
 //-----------------------------------
 class VideoSoundCapturing
 {
@@ -63,7 +59,6 @@ public:
     bool                has_sound       = false;
     bool                sound_loaded    = false;
     std::string         sound_file;
-    bool                playing_request = false;
 
     bool                open();
     void                load_sound();
@@ -75,7 +70,7 @@ public:
 
 
 //-----------------------------------
-//
+// ExtractSound
 //-----------------------------------
 class ExtractSound
 {

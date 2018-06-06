@@ -27,7 +27,7 @@ public:
     FolderNavigation            _fnav;
 
     VideoSoundCapturing*                     _vc = nullptr;  // current
-    std::vector<VideoSoundCapturing*>        v_vc;           // preload
+    std::vector<VideoSoundCapturing*>        v_vc;           // caches
     std::vector<VideoSoundCapturingDeleter*> v_vcd;
     std::vector<ExtractSound*>               v_extract_sound;
 
