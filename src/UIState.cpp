@@ -784,14 +784,21 @@ void UIState::render(sf::RenderTarget& renderer)
                         }
                     }
 
-                    while (pass_n > 0)
+                    np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+                    nc = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
+                    if (pass_n > 0)
                     {
-                        pass_n--;
-                        if (_vc->readNextFrame() == false)
+                        np += pass_n;
+                        if (np >= nc) np = nc;
+                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, np);
+                        if (np >= nc)
                         {
                             done = true;
                             _vc->done = true;
-                            break;
+                        }
+                        else
+                        {
+                            _vc->readNextFrame();
                         }
                     }
 
