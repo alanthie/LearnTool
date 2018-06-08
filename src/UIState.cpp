@@ -44,20 +44,11 @@ void UIState::img_changed()
         bool all_done = true;
         for( size_t i=0; i< v_vcd.size(); i++)
         {
-            VideoSoundCapturingDeleter* item_deleter = v_vcd[i];
-            if (item_deleter != nullptr)
+            if (v_vcd[i] != nullptr)
             {
-                if (item_deleter->vs_cap != nullptr)
+                if (v_vcd[i]->vs_cap != nullptr)
                 {
-                    //if (item_deleter->is_done.load() == false)
-                    //{
-                    //    all_done = false;
-                    //    break;
-                    //}
-                }
-                else
-                {
-                    delete item_deleter;
+                    delete v_vcd[i];
                     v_vcd[i] = nullptr;
                 }
             }
@@ -70,30 +61,13 @@ void UIState::img_changed()
     }
 
     // v_vc
-    if (v_vc.size() > 0)
+    if (v_vc.size() > 20)
     {
-        for (size_t i = 0; i< v_vc.size(); i++)
+        for (size_t i = 0; i< v_vc.size() - 10; i++)
         {
-            int n = 0; 
-            for (size_t j = i+1; j < v_vc.size(); j++)
-            { 
-                if (v_vc[j] != nullptr)
-                {
-                    n++;
-                }
-            }
-
-            VideoSoundCapturing* item_vc = v_vc[i];
-            if (item_vc != nullptr)
+            if (v_vc[i] != nullptr)
             {
-                //...locate middle...
-                if (n > 10) // only 256 vc music allowed...
-                {
-                    VideoSoundCapturing::clear(item_vc->_file, v_vc, v_vcd);
-                }
-            }
-            else
-            {
+                VideoSoundCapturing::clear(v_vc[i]->_file, v_vc, v_vcd);
             }
         }
     }
@@ -473,6 +447,26 @@ void UIState::update(sf::Time deltaTime)
             if (all_done)
             {
                 v_extract_sound.clear();
+            }
+
+            // TODO...
+            if (v_extract_sound.size() > 10) 
+            {
+                for (int i = 0; i< v_extract_sound.size(); i++)
+                {
+                    //if (i < 5)
+                    {
+                        if (v_extract_sound[i] != nullptr)
+                        {
+                            if (v_extract_sound[i]->is_done == true)
+                            {
+                                delete v_extract_sound[i];
+                                v_extract_sound[i] = nullptr;
+                            }
+                        }
+                    }
+                }
+                //...
             }
         }
     }

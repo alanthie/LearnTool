@@ -99,7 +99,7 @@ VideoSoundCapturing::~VideoSoundCapturing()
         music.stop();
     }
 
-    vc.release();
+    //vc.release();
 }
 
 
