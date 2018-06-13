@@ -29,18 +29,6 @@
 //
 // Ex: LearnTool.exe .\\LearnTool.ini
 //-----------------------------------------
-// Contents of LearnTool.ini:
-//
-//  [main]
-//  path_folder=E:\000 plant
-//  title=Plant database
-//  w=1024
-//  h=800
-//  zoom=1.50
-//  exclude_folder=.Thumbs;.dummy
-//  img=jpg;png;gif;jpeg;bmp;mp4;avi
-//-----------------------------------------
-
 int main(int argc, char *argv[])
 {
     Config cfg; // has defaults values

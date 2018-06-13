@@ -265,8 +265,8 @@ UIState::UIState(UImain& g) :
     button_menu[4][1] = nullptr;
 	button_menu[5][0] = new gui::Button("b_speed_slow", gui::ButtonSize::Small);
 	button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
-    button_menu[6][0] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
-    button_menu[6][1] = new gui::Button("b_vol_less", gui::ButtonSize::Small);
+    button_menu[6][0] = new gui::Button("b_vol_less", gui::ButtonSize::Small);
+    button_menu[6][1] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
 
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
     for (int i = 0; i < 7; i++)
@@ -295,8 +295,8 @@ UIState::UIState(UImain& g) :
     //button_menu[4][1
 	button_menu[5][0]->setText("slower");
 	button_menu[5][1]->setText("faster");
-    button_menu[6][0]->setText("vol +");
-    button_menu[6][1]->setText("vol -");
+    button_menu[6][0]->setText("vol -");
+    button_menu[6][1]->setText("vol +");
     
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
     button_menu[4][0]->m_rect.setSize({ 2 * b_w , b_h });
