@@ -24,6 +24,20 @@
 #include <iterator>
 #include <cassert>
 
+#include "tinyfiledialogs/tinyfiledialogs.h"
+std::string select_folder()
+{
+    char const * lTheSelectFolderName;
+    lTheSelectFolderName = tinyfd_selectFolderDialog("let us just select a directory", NULL);
+    if (!lTheSelectFolderName)
+    {
+        tinyfd_messageBox("Error", "Select folder name is NULL", "ok", "error", 1);
+        return std::string();
+    }
+    /*tinyfd_messageBox("The selected folder is", lTheSelectFolderName, "ok", "info", 1);*/
+    return std::string(lTheSelectFolderName);
+}
+
 void UIState::img_changed()
 {
     minimap.reset();
@@ -80,7 +94,36 @@ void UIState::widget_changed(std::string& b_name)
 
 void UIState::widget_clicked(std::string& b_name)
 {
-    if (b_name == "b_pause")
+    if (b_name == "b_folder")
+    {
+        std::string folder = select_folder();
+        if (folder.empty() == false)
+        {
+            filesystem::path path_folder(folder);
+            if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
+            {
+                filesystem::path fnext = _fnav.find_next_folder(path_folder, filesystem::path());
+
+                if (fnext.empty() == false)
+                {
+                    // ok
+                    _fnav.reset(folder);
+                    _fnav.load_root();
+                    img_changed();
+                }
+                else
+                {
+                    tinyfd_messageBox("The selected folder must have a sub folder inside", folder.c_str(), "ok", "error", 1);
+                }
+            }
+            else
+            {
+                tinyfd_messageBox("The selected folder is invalid", folder.c_str(), "ok", "error", 1);
+            }
+        }
+    }
+
+    else if (b_name == "b_pause")
     {
         is_pause = !is_pause;
         if (is_pause)
@@ -267,9 +310,11 @@ UIState::UIState(UImain& g) :
 	button_menu[5][1] = new gui::Button("b_speed_fast", gui::ButtonSize::Small);
     button_menu[6][0] = new gui::Button("b_vol_less", gui::ButtonSize::Small);
     button_menu[6][1] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
+    button_menu[7][0] = new gui::Button("b_folder", gui::ButtonSize::Small);
+    button_menu[7][1] = nullptr;
 
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -297,9 +342,12 @@ UIState::UIState(UImain& g) :
 	button_menu[5][1]->setText("faster");
     button_menu[6][0]->setText("vol -");
     button_menu[6][1]->setText("vol +");
+    button_menu[7][0]->setText("folder");
+    //button_menu[7][1
     
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
     button_menu[4][0]->m_rect.setSize({ 2 * b_w , b_h });
+    button_menu[7][0]->m_rect.setSize({ 2 * b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
 
@@ -336,7 +384,7 @@ void UIState::handleEvent(sf::Event e)
         break;
     }
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -875,7 +923,7 @@ void UIState::render(sf::RenderTarget& renderer)
         }
     }
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -928,6 +976,8 @@ void UIState::recalc_size()
     button_menu[5][1]->m_rect.setSize({ b_w , b_h });
     button_menu[6][0]->m_rect.setSize({ b_w , b_h });
     button_menu[6][1]->m_rect.setSize({ b_w , b_h });
+    button_menu[7][0]->m_rect.setSize({ 2 * b_w , b_h });
+    // button_menu[7][1]
 
     button_menu[1][0]->setPosition({ canvas_w, b_h });
     button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
@@ -941,6 +991,8 @@ void UIState::recalc_size()
 	button_menu[5][1]->setPosition({ canvas_w + b_w, 9 * b_h });
     button_menu[6][0]->setPosition({ canvas_w, 10 * b_h });
     button_menu[6][1]->setPosition({ canvas_w + b_w, 10 * b_h });
+    button_menu[7][0]->setPosition({ canvas_w, 11 * b_h });
+    // button_menu[7][1]
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });

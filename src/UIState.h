@@ -32,7 +32,7 @@ public:
     std::vector<ExtractSound*>               v_extract_sound;
 
     float                       sound_volume = 100.0;
-    gui::Button*                button_menu[7][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr },{ nullptr } };
+    gui::Button*                button_menu[8][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr },{ nullptr },{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
     gui::Button                 button_msg;

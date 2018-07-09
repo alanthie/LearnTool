@@ -25,6 +25,15 @@ FolderNavigation::FolderNavigation(UIState& st, const std::string& _path_dir, co
     current_path    = find_next_folder(root, filesystem::path());
 }
 
+void FolderNavigation::reset(const std::string& _path_dir)
+{
+    path_dir = _path_dir;
+    root = filesystem::path(_path_dir);
+    root_files = filesystem::path::get_directory_file(root, false, true);
+    current_parent = filesystem::path(root);
+    current_path = find_next_folder(root, filesystem::path());
+}
+
 FolderNavigation::~FolderNavigation()
 {
 }

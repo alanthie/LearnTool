@@ -22,6 +22,9 @@
     <Filter Include="Source Files\filesystem">
       <UniqueIdentifier>{32c006e1-bd3f-4f06-83a2-bc574e8f7e4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\tinyfiledialogs">
+      <UniqueIdentifier>{1d480373-2ece-42af-88c5-536072827375}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="..\src\VideoCapture.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tinyfiledialogs\tinyfiledialogs.c">
+      <Filter>Source Files\tinyfiledialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="..\src\UIMain.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tinyfiledialogs\tinyfiledialogs.h">
+      <Filter>Source Files\tinyfiledialogs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

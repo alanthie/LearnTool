@@ -24,6 +24,20 @@
 #include <iostream>
 #include <memory>
 
+//#include "tinyfiledialogs/tinyfiledialogs.h"
+//std::string select_folder()
+//{
+//    char const * lTheSelectFolderName;
+//    lTheSelectFolderName = tinyfd_selectFolderDialog("let us just select a directory", NULL);
+//    if (!lTheSelectFolderName)
+//    {
+//        tinyfd_messageBox( "Error","Select folder name is NULL", "ok","error",1);
+//        return std::string();
+//    }
+//    tinyfd_messageBox("The selected folder is", lTheSelectFolderName, "ok", "info", 1);
+//    return std::string(lTheSelectFolderName);   
+//}
+
 //-----------------------------------------
 // Argument: Config file path
 //

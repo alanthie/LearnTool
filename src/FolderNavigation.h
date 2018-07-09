@@ -31,6 +31,8 @@ public:
 
     FolderNavigation(UIState& st, const std::string& _path_dir, const std::vector<std::string>& _exclude_folder, const std::vector<std::string>& _img);
     ~FolderNavigation();
+
+    void reset(const std::string& _path_dir);
   
     void load_root();   
     std::vector<std::string> get_img_files(filesystem::path& p);
