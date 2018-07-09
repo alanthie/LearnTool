@@ -17,26 +17,14 @@
 #include "opencv2/imgproc/imgproc_c.h"
 #include "opencv2/highgui.hpp"
 
+#include "tinyfiledialogs/tinyfiledialogs.h"
+
 #include <memory>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
 #include <cassert>
-
-#include "tinyfiledialogs/tinyfiledialogs.h"
-std::string select_folder()
-{
-    char const * lTheSelectFolderName;
-    lTheSelectFolderName = tinyfd_selectFolderDialog("let us just select a directory", NULL);
-    if (!lTheSelectFolderName)
-    {
-        tinyfd_messageBox("Error", "Select folder name is NULL", "ok", "error", 1);
-        return std::string();
-    }
-    /*tinyfd_messageBox("The selected folder is", lTheSelectFolderName, "ok", "info", 1);*/
-    return std::string(lTheSelectFolderName);
-}
 
 void UIState::img_changed()
 {
@@ -96,7 +84,7 @@ void UIState::widget_clicked(std::string& b_name)
 {
     if (b_name == "b_folder")
     {
-        std::string folder = select_folder();
+        std::string folder = FolderNavigation::select_folder(_fnav.root.make_absolute().str().c_str());
         if (folder.empty() == false)
         {
             filesystem::path path_folder(folder);
@@ -113,7 +101,7 @@ void UIState::widget_clicked(std::string& b_name)
                 }
                 else
                 {
-                    tinyfd_messageBox("The selected folder must have a sub folder inside", folder.c_str(), "ok", "error", 1);
+                    tinyfd_messageBox("The selected folder must have a sub folder inside (with contents)", folder.c_str(), "ok", "error", 1);
                 }
             }
             else
@@ -342,7 +330,7 @@ UIState::UIState(UImain& g) :
 	button_menu[5][1]->setText("faster");
     button_menu[6][0]->setText("vol -");
     button_menu[6][1]->setText("vol +");
-    button_menu[7][0]->setText("folder");
+    button_menu[7][0]->setText("root folder");
     //button_menu[7][1
     
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });

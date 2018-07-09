@@ -45,5 +45,7 @@ public:
     filesystem::path find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening = false);
 
     filesystem::path preview_next_path(bool no_deepening = false);
+
+    static std::string select_folder(char const * const aDefaultPath);
 };
 

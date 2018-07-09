@@ -6,6 +6,7 @@
 
 #include "FolderNavigation.h"
 #include "UIState.h"
+#include "tinyfiledialogs/tinyfiledialogs.h"
 #include <iostream>
 #include <stdio.h>
 #include <atomic>
@@ -450,4 +451,17 @@ filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
         }
     }
     return ret_path;
+}
+
+std::string FolderNavigation::select_folder(char const * const aDefaultPath)
+{
+    char const * lTheSelectFolderName;
+    lTheSelectFolderName = tinyfd_selectFolderDialog("Select a directory", aDefaultPath);
+    if (!lTheSelectFolderName)
+    {
+        return std::string();
+    }
+    if (strcmp(aDefaultPath, lTheSelectFolderName) != 0)
+        return std::string(lTheSelectFolderName);
+    return std::string();
 }
