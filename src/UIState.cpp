@@ -84,24 +84,29 @@ void UIState::widget_clicked(std::string& b_name)
 {
     if (b_name == "b_folder")
     {
-        std::string folder = FolderNavigation::select_folder(_fnav.root.make_absolute().str().c_str());
+        std::string default_folder = _fnav.root.make_absolute().str();
+        if (_fnav.current_path.empty() == false)  default_folder = _fnav.current_path.make_absolute().str();
+        std::string folder = FolderNavigation::select_folder(default_folder.c_str());
         if (folder.empty() == false)
         {
             filesystem::path path_folder(folder);
             if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
             {
-                filesystem::path fnext = _fnav.find_next_folder(path_folder, filesystem::path());
-
-                if (fnext.empty() == false)
+                filesystem::path parent_path = path_folder.parent_path();
+                if ((parent_path.empty() == false) && (parent_path.exists() == true) && (parent_path.is_directory() == true))
                 {
                     // ok
-                    _fnav.reset(folder);
-                    _fnav.load_root();
+                    _fnav.reset(parent_path.make_absolute().str(), path_folder);
+                    load_path(path_folder);
+                    if (img_files.size() == 0)
+                    {
+                        _fnav.next_path();
+                    }
                     img_changed();
                 }
                 else
                 {
-                    tinyfd_messageBox("The selected folder must have a sub folder inside (with contents)", folder.c_str(), "ok", "error", 1);
+                    tinyfd_messageBox("The parent folder of the selected folder should exist", folder.c_str(), "ok", "error", 1);
                 }
             }
             else
