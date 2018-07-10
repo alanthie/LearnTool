@@ -989,13 +989,20 @@ void UIState::recalc_size(bool is_resizing)
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
-    if (is_resizing) 
+    if (is_resizing)
+    {
         minimap.m_drag_rect.setSize({ minimap.m_rect.getSize().x - 1, minimap.m_rect.getSize().y - 1 });
+        minimap.set_view(canvas_w, canvas_h, canvas_bounds);
+    }
+
     if (minimap.moving == false)
     {
         minimap.setPosition({ canvas_w, 4 * b_h });
-        if (is_resizing) 
+        if (is_resizing)
+        {
             minimap.m_drag_rect.setPosition(minimap.m_rect.getPosition().x + 1, minimap.m_rect.getPosition().y + 1);
+            minimap.set_view(canvas_w, canvas_h, canvas_bounds);
+        }
     }
 
     button_name.setPosition({ (float)1, canvas_h });
