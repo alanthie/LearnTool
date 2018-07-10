@@ -71,7 +71,7 @@ public:
     void fixedUpdate(sf::Time deltaTime) override;
     void render(sf::RenderTarget& renderer) override;
 
-    void            recalc_size();
+    void            recalc_size(bool is_resizing = false);
     sf::Vector2f    scale_sprite(std::shared_ptr<sf::Sprite> sprite);
     sf::Vector2f    canvas_scale = { 1.0f, 1.0f };
 

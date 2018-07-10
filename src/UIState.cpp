@@ -369,7 +369,7 @@ void UIState::handleEvent(sf::Event e)
 
     case sf::Event::Resized:
         //m_pGame->getWindow().setView(sf::View(sf::FloatRect(0, 0, (float)e.size.width, (float)e.size.height)));
-        recalc_size();
+        recalc_size(true);
 
         break;
 
@@ -945,7 +945,7 @@ void UIState::render(sf::RenderTarget& renderer)
     renderer.draw(minimap.m_drag_rect);
 }
 
-void UIState::recalc_size()
+void UIState::recalc_size(bool is_resizing)
 {
     w = (float)ui.getWindow().getSize().x;
     h = (float)ui.getWindow().getSize().y;
@@ -989,9 +989,13 @@ void UIState::recalc_size()
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
+    if (is_resizing) 
+        minimap.m_drag_rect.setSize({ minimap.m_rect.getSize().x - 1, minimap.m_rect.getSize().y - 1 });
     if (minimap.moving == false)
     {
         minimap.setPosition({ canvas_w, 4 * b_h });
+        if (is_resizing) 
+            minimap.m_drag_rect.setPosition(minimap.m_rect.getPosition().x + 1, minimap.m_rect.getPosition().y + 1);
     }
 
     button_name.setPosition({ (float)1, canvas_h });

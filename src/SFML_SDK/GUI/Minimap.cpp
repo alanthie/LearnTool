@@ -25,7 +25,7 @@ namespace gui {
         const sf::Vector2f wh_rect  = m_rect.getSize();
 
         m_drag_rect.setPosition(pos_rect.x + 1, pos_rect.y + 1);
-        m_drag_rect.setSize({ wh_rect.x - 1, wh_rect.y - 1 });
+        m_drag_rect.setSize({ m_rect.getSize().x - 1, m_rect.getSize().y - 1 });
     }
 
 
