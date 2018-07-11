@@ -10,16 +10,13 @@ TODO list
 [Simple]        Add more fonts and add a default font in Config
 [Average]       Create a CheckBox class (check github: sfml-widgets)
 [Average]       Create quiz files (*.quiz) and manage the quiz questions/answers on the screen
-[Simple]        Fix minimap selection rectangle
+[DONE]          Fix minimap selection rectangle
 [Average]       Add an XML parser (tinyxml2 )for *.quiz and maybe also for the config file
 [Average]       Add an option to shows multiple images simultaneously on screen
-[Simple]        Add NanoLog for logging
-[Average]       Add multiple root path in Config and buttons to navigate them
-[Average]       Add Catch.hpp for unit testing and create unit tests
 [Average]       Random quiz of N topics with/without scores
 [Average]       Put back changed library code into own maintained library [Filesystem, SFML_SDK, ini_parser, ...]
-[Complex]       Create a config/build to automatically get all latest source library and compile them
 [Simple]        Add a fading transition between images (optional - set in config file)
 [Very Complex]  Add dynamic SFML small game *.game.dll - Define game virtual interface [load/play/stop/unload/...] - Use Boost.DLL
 [DONE]          Add button to save an image from the video into a file in current path (generate unique name)
-[Average]       Add a navigation bar (line+drag_circle) for the video. Add buttons to change video speed (+/-).
+[DONE]      	Add a navigation bar for the video. Add buttons to change video speed (+/-).
+[DONE]      	Add a folder selection button.
