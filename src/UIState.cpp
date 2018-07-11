@@ -789,7 +789,9 @@ void UIState::render(sf::RenderTarget& renderer)
                         float nc = (float)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
                         _vc->entry_frame = (long)(nc * _vc->videobar_perc);
                         if (_vc->entry_frame > nc - 1) _vc->entry_frame = (long) (nc - 1);
-                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, _vc->entry_frame);
+
+                        np = _vc->entry_frame;
+                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, np);
 
                         _vc->videobar_changed_pending = false;
                         float frame_time = (float)(_vc->entry_frame / fps);
