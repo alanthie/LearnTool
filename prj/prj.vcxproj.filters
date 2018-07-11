@@ -84,6 +84,9 @@
     <ClCompile Include="..\src\tinyfiledialogs\tinyfiledialogs.c">
       <Filter>Source Files\tinyfiledialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\SFML_SDK\GUI\ProgressBar.cpp">
+      <Filter>Source Files\SFML_SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Config.hpp">
@@ -172,6 +175,9 @@
     </ClInclude>
     <ClInclude Include="..\src\tinyfiledialogs\tinyfiledialogs.h">
       <Filter>Source Files\tinyfiledialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SFML_SDK\GUI\ProgressBar.h">
+      <Filter>Source Files\SFML_SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

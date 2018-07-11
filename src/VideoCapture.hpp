@@ -55,6 +55,9 @@ public:
     bool                pause_unpause_pending = false;
     bool                speed_changed_pending = false;
 
+    bool                videobar_changed_pending = false;
+    float               videobar_perc = 0.0;
+
     sf::Music           music;
     bool                has_sound       = false;
     bool                sound_loaded    = false;

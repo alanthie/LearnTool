@@ -11,6 +11,7 @@
 #include "SFML_SDK/GUI/StackMenu.h"
 #include "SFML_SDK/GUI/Button.h"
 #include "SFML_SDK/GUI/Minimap.h"
+#include "SFML_SDK/GUI/ProgressBar.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
 #include "FolderNavigation.h"
@@ -39,6 +40,7 @@ public:
     std::shared_ptr<sf::Sprite> sprite_canva;
     gui::Minimap                minimap;
     sf::View                    view_minimap;
+    gui::ProgressBar            progress_bar;
 
     bool                        is_pause = false;
 

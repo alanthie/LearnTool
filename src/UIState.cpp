@@ -82,7 +82,21 @@ void UIState::widget_changed(std::string& b_name)
 
 void UIState::widget_clicked(std::string& b_name)
 {
-    if (b_name == "b_folder")
+    if (b_name == "pbar")
+    {
+        std::cout << progress_bar.perc << std::endl;
+
+        if (_mode == display_mode::show_movie)
+        {
+            if (_vc != nullptr)
+            {
+                _vc->videobar_changed_pending = true;
+                _vc->videobar_perc = progress_bar.perc;
+            }
+        }
+    }
+
+    else if (b_name == "b_folder")
     {
         std::string default_folder = _fnav.root.make_absolute().str();
         if (_fnav.current_path.empty() == false)  default_folder = _fnav.current_path.make_absolute().str();
@@ -283,7 +297,8 @@ UIState::UIState(UImain& g) :
 	button_name(    "b_name",   gui::ButtonSize::Small),
 	button_parts(   "b_parts",  gui::ButtonSize::Wide),
 	button_msg(     "b_msg",    gui::ButtonSize::Wide),
-	minimap(        "mmap",     50, 50)
+	minimap(        "mmap",     50, 50),
+    progress_bar(   "pbar",     0, 0, 2, 2)
 {
 	button_name.m_text.setFont( ResourceHolder::get().fonts.get("arial"));
 	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
@@ -343,12 +358,14 @@ UIState::UIState(UImain& g) :
     button_menu[7][0]->m_rect.setSize({ 2 * b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
+    progress_bar.reset(8, canvas_h - 16, w - 16, 2);
 
     button_name.setFunction(    &StateBase::widget_clicked);
     button_parts.setFunction(   &StateBase::widget_clicked);
     button_msg.setFunction(     &StateBase::widget_clicked);
 
     minimap.setFunction(&StateBase::widget_changed);
+    progress_bar.setFunction(&StateBase::widget_clicked);
 
     if (_fnav.current_path.empty() == false)
     {
@@ -392,6 +409,7 @@ void UIState::handleEvent(sf::Event e)
     button_parts.handleEvent(e, m_pGame->getWindow(), *this);
     button_msg.handleEvent(e,   m_pGame->getWindow(), *this);
     minimap.handleEvent(e,      m_pGame->getWindow(), *this);
+    progress_bar.handleEvent(e, m_pGame->getWindow(), *this);
 }
 
 void UIState::handleInput() 
@@ -634,6 +652,7 @@ void UIState::render(sf::RenderTarget& renderer)
                                 img_files[index_img].filename() +
                                 "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
                                 + "[W" + std::to_string(count_sound_making()) + "]";
+
                             button_msg.setText(msg);
                         }
 
@@ -765,6 +784,20 @@ void UIState::render(sf::RenderTarget& renderer)
                             _vc->play_sound();
                         _vc->music.setPlayingOffset(sf::seconds(frame_time));
                     }
+                    else if (_vc->videobar_changed_pending == true)
+                    {
+                        float nc = (float)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
+                        _vc->entry_frame = (long)(nc * _vc->videobar_perc);
+                        if (_vc->entry_frame > nc - 1) _vc->entry_frame = (long) (nc - 1);
+                        _vc->vc.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, _vc->entry_frame);
+
+                        _vc->videobar_changed_pending = false;
+                        float frame_time = (float)(_vc->entry_frame / fps);
+                        if (is_pause == false)
+                            _vc->play_sound();
+                        _vc->music.setPlayingOffset(sf::seconds(frame_time));
+                    }
+
                     if (new_entry == true)
                     {
                         _vc->entry_frame = np;
@@ -902,6 +935,15 @@ void UIState::render(sf::RenderTarget& renderer)
                             img_files[index_img].filename() + " - " + std::to_string((long)np) + "/" + std::to_string((long)nc)
                             + "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]"
                             + "[W" + std::to_string(count_sound_making()) + "]");
+
+                        if (nc > 0)
+                        {
+                            progress_bar.setPerc(((float)(0 + np)) / (float)nc);
+                        }
+                        else
+                        {
+                            progress_bar.setPerc(0.0f);
+                        }
                     }
                 }
                 else
@@ -943,6 +985,12 @@ void UIState::render(sf::RenderTarget& renderer)
     button_msg.render(renderer);
 
     renderer.draw(minimap.m_drag_rect);
+
+    if (_mode == display_mode::show_movie)
+    {
+        progress_bar.render(renderer);
+        renderer.draw(progress_bar.m_drag_rect);
+    }
 }
 
 void UIState::recalc_size(bool is_resizing)
@@ -1021,6 +1069,8 @@ void UIState::recalc_size(bool is_resizing)
     view_minimap.setCenter(canvas_w / 2.0f, canvas_h / 2.0f);
     view_minimap.setSize(canvas_w, canvas_h);
     view_minimap.setViewport(sf::FloatRect(minimap.m_rect.getPosition().x / w , minimap.m_rect.getPosition().y / h, minimap.m_rect.getSize().x / w, minimap.m_rect.getSize().y / h));
+
+    progress_bar.reset(8, canvas_h - 16, w - 16, 2);
 }
 
 sf::Vector2f UIState::scale_sprite(std::shared_ptr<sf::Sprite> sprite)

@@ -129,6 +129,7 @@
     <ClCompile Include="..\src\SFML_SDK\Game.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\Button.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\Minimap.cpp" />
+    <ClCompile Include="..\src\SFML_SDK\GUI\ProgressBar.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\StackMenu.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\Textbox.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\Widget.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="..\src\SFML_SDK\Game.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\Button.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\Minimap.h" />
+    <ClInclude Include="..\src\SFML_SDK\GUI\ProgressBar.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\StackMenu.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\Textbox.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\Widget.h" />
