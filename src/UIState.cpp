@@ -84,8 +84,6 @@ void UIState::widget_clicked(std::string& b_name)
 {
     if (b_name == "pbar")
     {
-        std::cout << progress_bar.perc << std::endl;
-
         if (_mode == display_mode::show_movie)
         {
             if (_vc != nullptr)
