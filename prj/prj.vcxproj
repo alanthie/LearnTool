@@ -126,8 +126,10 @@
   <ItemGroup>
     <ClCompile Include="..\src\FolderNavigation.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Quiz.cpp" />
     <ClCompile Include="..\src\SFML_SDK\Game.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\Button.cpp" />
+    <ClCompile Include="..\src\SFML_SDK\GUI\GuiQuiz.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\Minimap.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\ProgressBar.cpp" />
     <ClCompile Include="..\src\SFML_SDK\GUI\StackMenu.cpp" />
@@ -141,6 +143,7 @@
     <ClCompile Include="..\src\SFML_SDK\Util\Maths.cpp" />
     <ClCompile Include="..\src\SFML_SDK\Util\ToggleKey.cpp" />
     <ClCompile Include="..\src\tinyfiledialogs\tinyfiledialogs.c" />
+    <ClCompile Include="..\src\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="..\src\UIMain.cpp" />
     <ClCompile Include="..\src\UIState.cpp" />
     <ClCompile Include="..\src\VideoCapture.cpp" />
@@ -153,8 +156,10 @@
     <ClInclude Include="..\src\filesystem\windirent.h" />
     <ClInclude Include="..\src\FolderNavigation.h" />
     <ClInclude Include="..\src\ini_parser\ini_parser.hpp" />
+    <ClInclude Include="..\src\Quiz.h" />
     <ClInclude Include="..\src\SFML_SDK\Game.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\Button.h" />
+    <ClInclude Include="..\src\SFML_SDK\GUI\GuiQuiz.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\Minimap.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\ProgressBar.h" />
     <ClInclude Include="..\src\SFML_SDK\GUI\StackMenu.h" />
@@ -173,6 +178,7 @@
     <ClInclude Include="..\src\SFML_SDK\Util\Random.h" />
     <ClInclude Include="..\src\SFML_SDK\Util\ToggleKey.h" />
     <ClInclude Include="..\src\tinyfiledialogs\tinyfiledialogs.h" />
+    <ClInclude Include="..\src\tinyxml2\tinyxml2.h" />
     <ClInclude Include="..\src\UIMain.h" />
     <ClInclude Include="..\src\UIState.h" />
     <ClInclude Include="..\src\VideoCapture.hpp" />

@@ -12,6 +12,8 @@
 #include "SFML_SDK/GUI/Button.h"
 #include "SFML_SDK/GUI/Minimap.h"
 #include "SFML_SDK/GUI/ProgressBar.h"
+#include "SFML_SDK/GUI/GuiQuiz.h"
+
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
 #include "FolderNavigation.h"
@@ -41,6 +43,9 @@ public:
     gui::Minimap                minimap;
     sf::View                    view_minimap;
     gui::ProgressBar            progress_bar;
+
+    bool                        img_index_has_quiz = false;
+    gui::GuiQuiz                quiz;
 
     bool                        is_pause = false;
 
@@ -72,6 +77,8 @@ public:
     void update(sf::Time deltaTime) override;
     void fixedUpdate(sf::Time deltaTime) override;
     void render(sf::RenderTarget& renderer) override;
+
+    void load_img_quiz();
 
     void            recalc_size(bool is_resizing = false);
     sf::Vector2f    scale_sprite(std::shared_ptr<sf::Sprite> sprite);

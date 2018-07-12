@@ -29,7 +29,7 @@ public:
     int             make_N_sound_file = 1;
 
     std::vector<std::string> exclude_folder = { ".Thumbs" };
-    std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi" };
+    std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi"};
 
     Config() = default;
 

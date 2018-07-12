@@ -18,6 +18,7 @@
 #include "opencv2/highgui.hpp"
 
 #include "tinyfiledialogs/tinyfiledialogs.h"
+#include "Quiz.h"
 
 #include <memory>
 #include <iostream>
@@ -92,6 +93,11 @@ void UIState::widget_clicked(std::string& b_name)
                 _vc->videobar_perc = progress_bar.perc;
             }
         }
+    }
+
+    else if (b_name == "quiz")
+    {
+        size_t a = quiz.answer_index_clicked;
     }
 
     else if (b_name == "b_folder")
@@ -296,8 +302,12 @@ UIState::UIState(UImain& g) :
 	button_parts(   "b_parts",  gui::ButtonSize::Wide),
 	button_msg(     "b_msg",    gui::ButtonSize::Wide),
 	minimap(        "mmap",     50, 50),
-    progress_bar(   "pbar",     0, 0, 2, 2)
+    progress_bar(   "pbar",     0, 0, 2, 2),
+    quiz(           "quiz",     500, 500, 50)     
 {
+    // TEST
+    //quiz.load_quiz("../res/quiz001.xml");
+
 	button_name.m_text.setFont( ResourceHolder::get().fonts.get("arial"));
 	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));
 	button_msg.m_text.setFont(  ResourceHolder::get().fonts.get("arial"));
@@ -348,7 +358,7 @@ UIState::UIState(UImain& g) :
 	button_menu[5][1]->setText("faster");
     button_menu[6][0]->setText("vol -");
     button_menu[6][1]->setText("vol +");
-    button_menu[7][0]->setText("root folder");
+    button_menu[7][0]->setText("folder");
     //button_menu[7][1
     
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -364,6 +374,8 @@ UIState::UIState(UImain& g) :
 
     minimap.setFunction(&StateBase::widget_changed);
     progress_bar.setFunction(&StateBase::widget_clicked);
+
+    quiz.setFunction(&StateBase::widget_clicked);
 
     if (_fnav.current_path.empty() == false)
     {
@@ -408,6 +420,11 @@ void UIState::handleEvent(sf::Event e)
     button_msg.handleEvent(e,   m_pGame->getWindow(), *this);
     minimap.handleEvent(e,      m_pGame->getWindow(), *this);
     progress_bar.handleEvent(e, m_pGame->getWindow(), *this);
+
+    if (img_index_has_quiz == true)
+    {
+        quiz.handleEvent(e, m_pGame->getWindow(), *this);
+    }
 }
 
 void UIState::handleInput() 
@@ -556,6 +573,32 @@ void UIState::fixedUpdate(sf::Time deltaTime)
 
 }
 
+void UIState::load_img_quiz()
+{
+    img_index_has_quiz = false;
+
+    if (img_files.size() > index_img)
+    {
+        std::string quizfile = img_files[index_img].make_absolute().str() + ".quiz.xml";
+        filesystem::path quiz_path(quizfile);
+        if ((quiz_path.empty() == false) && (quiz_path.exists() == true) && (quiz_path.is_file() == true))
+        {
+            if (quiz.is_loaded(quizfile) == true)
+            {
+                img_index_has_quiz = true;
+            }
+            else
+            {
+                quiz.reset();
+                if (quiz.load_quiz(quizfile) == true)
+                {
+                    img_index_has_quiz = true;
+                }
+            }
+        }
+    }
+}
+
 void UIState::render(sf::RenderTarget& renderer) 
 {
     button_msg.setText("");
@@ -595,6 +638,8 @@ void UIState::render(sf::RenderTarget& renderer)
             {
                 if (index_img < img_files.size())
                 {
+                    load_img_quiz();
+
                     button_msg.setText( "[" + std::to_string(1 + (long)index_img) + "/" + std::to_string((long)img_files.size()) + "] " +
                                          img_files[index_img].filename() +
                                          "[" + std::to_string(vitesse_img_sec) + "," + std::to_string(vitesse_video_factor) + "]" +
@@ -991,6 +1036,14 @@ void UIState::render(sf::RenderTarget& renderer)
         progress_bar.render(renderer);
         renderer.draw(progress_bar.m_drag_rect);
     }
+
+    if (_mode == display_mode::show_img)
+    {
+        if (img_index_has_quiz == true)
+        {
+            quiz.render(renderer);
+        }
+    }
 }
 
 void UIState::recalc_size(bool is_resizing)
@@ -1071,6 +1124,14 @@ void UIState::recalc_size(bool is_resizing)
     view_minimap.setViewport(sf::FloatRect(minimap.m_rect.getPosition().x / w , minimap.m_rect.getPosition().y / h, minimap.m_rect.getSize().x / w, minimap.m_rect.getSize().y / h));
 
     progress_bar.reset(8, canvas_h - 16, w - 16, 2);
+
+    if (_mode == display_mode::show_img)
+    {
+        if (img_index_has_quiz == true)
+        {
+            quiz.setPosition(sf::Vector2f(canvas_w - quiz.getSize().x, 0));
+        }
+    }
 }
 
 sf::Vector2f UIState::scale_sprite(std::shared_ptr<sf::Sprite> sprite)

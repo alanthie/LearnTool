@@ -25,6 +25,9 @@
     <Filter Include="Source Files\tinyfiledialogs">
       <UniqueIdentifier>{1d480373-2ece-42af-88c5-536072827375}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\tinyxml">
+      <UniqueIdentifier>{5cce28b4-abb1-4bb3-bf92-a8c3c21db366}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -86,6 +89,15 @@
     </ClCompile>
     <ClCompile Include="..\src\SFML_SDK\GUI\ProgressBar.cpp">
       <Filter>Source Files\SFML_SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tinyxml2\tinyxml2.cpp">
+      <Filter>Source Files\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SFML_SDK\GUI\GuiQuiz.cpp">
+      <Filter>Source Files\SFML_SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Quiz.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +189,15 @@
       <Filter>Source Files\tinyfiledialogs</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SFML_SDK\GUI\ProgressBar.h">
+      <Filter>Source Files\SFML_SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tinyxml2\tinyxml2.h">
+      <Filter>Source Files\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Quiz.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SFML_SDK\GUI\GuiQuiz.h">
       <Filter>Source Files\SFML_SDK</Filter>
     </ClInclude>
   </ItemGroup>

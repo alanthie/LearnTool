@@ -37,4 +37,5 @@ namespace gui
     };
 
     inline std::unique_ptr<Button> makeButton(const std::string& n) { return std::make_unique<Button>(n); }
+    inline std::shared_ptr<Button> makeSharedButton(const std::string& n) { return std::make_shared<Button>(n); }
 }
