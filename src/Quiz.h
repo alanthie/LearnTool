@@ -5,6 +5,7 @@
 #pragma once
 
 #include "tinyxml2/tinyxml2.h"
+#include "filesystem/path.h"
 #include <string>
 #include <vector>
 
@@ -55,4 +56,12 @@ public:
 
     int read_xml(const std::string& filename);
     void clear() { _choice.clear(); }
+};
+
+class QuizMaker
+{
+public:
+
+    static void make_multi_image(const filesystem::path& current_path, const std::vector<filesystem::path>& img_files);
+
 };

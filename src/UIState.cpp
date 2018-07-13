@@ -632,6 +632,11 @@ void UIState::render(sf::RenderTarget& renderer)
             {
                 img_texture[index_img] = std::shared_ptr<sf::Texture>(new sf::Texture);
                 img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
+
+                if (index_img == 0)
+                {
+                    QuizMaker::make_multi_image(_fnav.current_path, img_files);
+                }
             }
 
             if (img_texture[index_img].get() != nullptr)
