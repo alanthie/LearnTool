@@ -16,6 +16,7 @@
 //#include <opencv2/highgui.hpp>
 
 #include <iostream>
+#include <fstream> 
 
 
 int Quiz::read_xml(const std::string& filename)
@@ -128,13 +129,13 @@ void QuizMaker::make_multi_image(const filesystem::path& current_path, const std
 
                         float ratio_x = img1.cols / (float)W;
                         float ratio_y = img1.rows / (float)H;
-                        float factor = factor = 1.0 / std::max(ratio_x, ratio_y);
+                        float factor = 1.0f / std::max(ratio_x, ratio_y);
 
                         cv::Mat3b outImg;
                         if (factor < 1.0)
-                            cv::resize(img1, outImg, cv::Size(img1.cols * factor, img1.rows * factor), 0, 0, cv::INTER_AREA);
+                            cv::resize(img1, outImg, cv::Size( (int) (img1.cols * factor), int (img1.rows * factor) ), 0, 0, cv::INTER_AREA);
                         else
-                            cv::resize(img1, outImg, cv::Size(img1.cols * factor, img1.rows * factor), 0, 0, cv::INTER_LINEAR);
+                            cv::resize(img1, outImg, cv::Size( (int) (img1.cols * factor), int (img1.rows * factor)) , 0, 0, cv::INTER_LINEAR);
 
                         // Copy image in correct position
                         outImg.copyTo(res(cv::Rect(c*W, r*H, outImg.cols, outImg.rows)));
@@ -145,4 +146,173 @@ void QuizMaker::make_multi_image(const filesystem::path& current_path, const std
             cv::imwrite(fsave, res);
         }
     }
+}
+
+void QuizMaker::dump_folders(const filesystem::path& path, bool recursive, const std::string& outfilename, bool overwrite)
+{
+    std::vector<std::string> exclude_folder = { ".Thumbs" };
+    std::vector<std::string> v = filesystem::path::get_directory_file(path, recursive, true);
+    std::string root = path.make_absolute().str() + "\\";
+
+    filesystem::path f_outfilename(outfilename);
+    if (overwrite == false)
+    {
+        if (f_outfilename.exists() == true)
+            return;
+    }
+
+    std::ofstream outfile(outfilename);
+    for (size_t j = 0; j < v.size(); j++)
+    {
+        if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[j]).filename()) == exclude_folder.end())
+        {
+            size_t n = v[j].find(root);
+            std::string s = v[j].substr(n + root.size());
+            outfile << s << "\n";
+        }
+    }
+    outfile.close();
+}
+
+std::vector<std::string> QuizMaker::read_file(const std::string& infilename)
+{
+    std::vector<std::string> v;
+    filesystem::path f_outfilename(infilename);
+    if (f_outfilename.exists() == false)
+        return v;
+
+    std::string s;
+    std::ifstream infile(infilename);
+
+    if (infile.is_open())
+    {
+        while (std::getline(infile, s))
+        {
+            v.push_back(s);
+        }
+    }
+    infile.close();
+    return v;
+}
+
+void QuizMaker::make_all_plant_quiz(const std::string& quiz_folder, int start_sequ, const std::string& plant_folder, const std::string& plant_file)
+{
+    std::vector<std::string> img = { "jpg",  "png", "jpeg", "bmp" };
+
+    //QuizMaker::dump_folders(filesystem::path("Y:\\000 plant\\p"), true, "../res/plant.txt", false);
+    //std::vector<std::string> v = QuizMaker::read_file("../res/plant.txt");
+    QuizMaker::dump_folders(filesystem::path(plant_folder), true, plant_file, false);
+    std::vector<std::string> vp = QuizMaker::read_file(plant_file);
+
+    std::vector<std::string> exclude_folder = { ".Thumbs" };
+    std::vector<std::string> v = filesystem::path::get_directory_file(filesystem::path(plant_folder), true, true);
+    std::string root = filesystem::path(plant_folder).make_absolute().str() + "\\";
+
+    int sequ = start_sequ;
+    for (size_t j = 0; j < v.size(); j++)
+    {
+        if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[j]).filename()) == exclude_folder.end())
+        {
+            std::string jpg = v[j] + "\\" + "000_all.jpg";
+
+            filesystem::path fmake_jpg(jpg);
+            if (fmake_jpg.exists() == false)
+            {
+                std::vector<filesystem::path> img_files;
+                std::vector<std::string> files = filesystem::path::get_directory_file(filesystem::path(v[j]), false);
+                for (size_t i = 0; i < files.size(); i++)
+                {
+                    filesystem::path pv = files.at(i);
+                    if (pv.is_file())
+                    {
+                        std::string s = pv.extension();
+                        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+                        if (std::find(img.begin(), img.end(), s) != img.end())
+                        {
+                            img_files.push_back(pv);
+                        }
+                    }
+                }
+
+                if (img_files.size() > 0)
+                {
+                    QuizMaker::make_multi_image(filesystem::path(v[j]), img_files);
+                }            
+            }
+
+            filesystem::path f_jpg(jpg);
+            if (f_jpg.exists() == true)
+            {
+                try
+                {
+                    std::string outxmlfilename = quiz_folder + "\\" + std::to_string(sequ) + ".jpg.quiz.xml";
+                    std::ofstream outxmlfile(outxmlfilename);
+                    outxmlfile << "<?xml version=\"1.0\"?>" << "\n";
+                    outxmlfile << "<Quiz>" << "\n";
+
+                    outxmlfile << "<Type>one_response</Type>" << "\n";
+                    outxmlfile << "<Subject>Plant Identification</Subject>" << "\n";
+                    outxmlfile << "<Question>What is the name of this plant?</Question>" << "\n";
+                    outxmlfile << "<Image>" << jpg << "</Image>" << "\n";
+
+                    size_t n = v[j].find(root);
+                    std::string s = v[j].substr(n + root.size());
+
+                    int r = rand() % 6;
+                    for (int i = 0; i < 6; i++)
+                    {
+                        if (i == r)
+                        {
+                            outxmlfile << "<Choice>" << "\n";
+                            outxmlfile << "<Text>" << s << "</Text>" << "\n";
+                            outxmlfile << "<Response>true</Response>" << "\n";
+                            outxmlfile << "</Choice>" << "\n";
+                        }
+                        else
+                        {
+                            int c = rand() % vp.size();
+
+                            outxmlfile << "<Choice>" << "\n";
+                            outxmlfile << "<Text>" << vp[c] << "</Text>" << "\n";
+                            outxmlfile << "<Response>false</Response>" << "\n";
+                            outxmlfile << "</Choice>" << "\n";
+                        }
+                    }
+                    outxmlfile << "</Quiz>" << "\n";
+                    outxmlfile.close();
+
+                    std::string outjpgfilename = quiz_folder + "\\" + std::to_string(sequ) + ".jpg";
+                    copy_file(jpg, outjpgfilename);
+                }
+                catch (...)
+                {
+                    std::cout << "error" << std::endl;
+                }
+                sequ++;
+            }
+        }
+    }
+}
+
+
+void QuizMaker::copy_file(const std::string& src, const std::string& dst)
+{
+    std::ifstream source(src, std::ios::binary);
+    std::ofstream dest(dst, std::ios::binary);
+
+    // file size
+    source.seekg(0, std::ios::end);
+    std::ifstream::pos_type size = source.tellg();
+    source.seekg(0);
+    // allocate memory for buffer
+    char* buffer = new char[size];
+
+    // copy file    
+    source.read(buffer, size);
+    dest.write(buffer, size);
+
+    // clean up
+    delete[] buffer;
+    source.close();
+    dest.close();
 }

@@ -303,10 +303,12 @@ UIState::UIState(UImain& g) :
 	button_msg(     "b_msg",    gui::ButtonSize::Wide),
 	minimap(        "mmap",     50, 50),
     progress_bar(   "pbar",     0, 0, 2, 2),
-    quiz(           "quiz",     500, 500, 50)     
+    quiz(           "quiz",     1000, 500, 50)     
 {
     // TEST
-    //quiz.load_quiz("../res/quiz001.xml");
+    //QuizMaker::make_all_plant_quiz("Y:\\000 quiz_plant", 1000, "Y:\\000 plant\\p", "../res/plant.txt");
+    //QuizMaker::make_all_plant_quiz("Y:\\000 quiz_root", 1000, "Y:\\000 plant\\p root", "../res/root.txt");
+    //QuizMaker::make_all_plant_quiz("Y:\\000 quiz_plant_medical", 1000, "Y:\\000 plant\\p medical", "../res/plant_medical.txt");
 
 	button_name.m_text.setFont( ResourceHolder::get().fonts.get("arial"));
 	button_parts.m_text.setFont(ResourceHolder::get().fonts.get("arial"));

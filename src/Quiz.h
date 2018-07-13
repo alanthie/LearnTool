@@ -63,5 +63,10 @@ class QuizMaker
 public:
 
     static void make_multi_image(const filesystem::path& current_path, const std::vector<filesystem::path>& img_files);
+    static void dump_folders(const filesystem::path& current_path, bool recursive, const std::string& outfilename, bool overwrite);
+    static std::vector<std::string> read_file(const std::string& infilename);
 
+    static void make_all_plant_quiz(const std::string& quiz_folder, int start_sequ, const std::string& plant_folder, const std::string& plant_file);
+
+    static void copy_file(const std::string& src, const std::string& dst);
 };
