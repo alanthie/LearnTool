@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9D9A3803-BCCC-4B4E-AF3C-9E76FD7E35D9}</ProjectGuid>
     <RootNamespace>prj</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -85,7 +85,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\000Lib\SFML-2.5.0\include;..\src;..\..\..\000Lib\opencv\modules\imgcodecs\include;..\..\..\000Lib\opencv\modules\videoio\include;..\..\..\000Lib\opencv\modules\highgui\include;..\..\..\000Lib\opencv\modules\core\include;..\..\..\000Lib\opencv\builds;..\..\..\000Lib\opencv\modules\imgproc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\000Lib\SFML-2.5.0\include;..\src;..\..\..\000Lib\opencv\modules\imgcodecs\include;..\..\..\000Lib\opencv\modules\videoio\include;..\..\..\000Lib\opencv\modules\highgui\include;..\..\..\000Lib\opencv\modules\core\include;..\..\..\000Lib\opencv\builds;..\..\..\000Lib\opencv\modules\imgproc\include;..\..\..\000Lib\opencv\\include;..\..\..\000Lib\opencv\modules\calib3d\include;..\..\..\000Lib\opencv\modules\features2d\include;..\..\..\000Lib\opencv\modules\flann\include;..\..\..\000Lib\opencv\modules\dnn\include;..\..\..\000Lib\opencv\modules\ml\include;..\..\..\000Lib\opencv\modules\objdetect\include;..\..\..\000Lib\opencv\modules\photo\include;..\..\..\000Lib\opencv\modules\shape\include;..\..\..\000Lib\opencv\modules\stitching\include;..\..\..\000Lib\opencv\modules\superres\include;..\..\..\000Lib\opencv\modules\video\include;..\..\..\000Lib\opencv\modules\videostab\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

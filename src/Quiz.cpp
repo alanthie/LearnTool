@@ -132,9 +132,9 @@ void QuizMaker::make_multi_image(const filesystem::path& current_path, const std
 
                         cv::Mat3b outImg;
                         if (factor < 1.0)
-                            cv::resize(img1, outImg, cv::Size(img1.cols * factor, img1.rows * factor), 0, 0, CV_INTER_AREA);
+                            cv::resize(img1, outImg, cv::Size(img1.cols * factor, img1.rows * factor), 0, 0, cv::INTER_AREA);
                         else
-                            cv::resize(img1, outImg, cv::Size(img1.cols * factor, img1.rows * factor), 0, 0, CV_INTER_LINEAR);
+                            cv::resize(img1, outImg, cv::Size(img1.cols * factor, img1.rows * factor), 0, 0, cv::INTER_LINEAR);
 
                         // Copy image in correct position
                         outImg.copyTo(res(cv::Rect(c*W, r*H, outImg.cols, outImg.rows)));
