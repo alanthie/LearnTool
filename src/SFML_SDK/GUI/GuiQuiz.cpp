@@ -3,12 +3,22 @@
 
 namespace gui {
 
+    const int SizeAnswer = 25;
+
     GuiQuiz::GuiQuiz(const std::string& name, float _w, float _h, float _h_text) : gui::Widget(name), w(_w), h(_h), h_text(_h_text)
     {
         m_rect.setOutlineThickness(1);
         m_rect.setOutlineColor(sf::Color::Green);
         m_rect.setFillColor(sf::Color::White);
         m_rect.setSize({ _w, _h });
+
+        m_rect.setOutlineThickness(1);
+
+        sf::Color cLine = sf::Color::Green; cLine.a = 128;
+        sf::Color cFill = sf::Color::Black; cFill.a = 128;
+
+        m_rect.setOutlineColor(cLine);
+        m_rect.setFillColor(cFill);
     }
 
     bool GuiQuiz::is_loaded(const std::string& filename)
@@ -58,6 +68,33 @@ namespace gui {
         b_result.reset();
     }
 
+    void  GuiQuiz::setSkin(int alpha)
+    {
+        sf::Color cLine = sf::Color::Green; cLine.a = alpha;
+        sf::Color cFill = sf::Color::Black; cFill.a = alpha;
+
+        m_rect.setOutlineColor(cLine);
+        m_rect.setFillColor(cFill);
+
+        b_subject->m_rect.setOutlineColor(cLine);
+        b_subject->m_rect.setFillColor(cFill);
+
+        b_question->m_rect.setOutlineColor(cLine);
+        b_question->m_rect.setFillColor(cFill);
+
+        for (size_t i = 0; i < m_quiz._choice.size(); i++)
+        {
+            b_choices[i]->m_rect.setOutlineColor(cLine);
+            b_choices[i]->m_rect.setFillColor(cFill);
+
+            b_answers[i]->m_rect.setOutlineColor(cLine);
+            b_answers[i]->m_rect.setFillColor(cFill);
+        }
+
+        b_result->m_rect.setOutlineColor(cLine);
+        b_result->m_rect.setFillColor(cFill);
+    }
+
     void GuiQuiz::load()
     {
         m_rect.setSize(sf::Vector2f(w, h_text * (3 + m_quiz._choice.size()) ) );
@@ -75,16 +112,16 @@ namespace gui {
         for (size_t i = 0; i < m_quiz._choice.size(); i++)
         {
             std::shared_ptr<Button> b = makeSharedButton("choice_" + std::to_string(i));
-            b->m_rect.setSize({ w - 50 * 3, h_text });
+            b->m_rect.setSize({ w - SizeAnswer * 3, h_text });
             b->setText(std::to_string(i+1) + ". " + m_quiz._choice[i]._text);
             b->setPosition(m_rect.getPosition() + sf::Vector2f(0.0f, (i+2) * h_text));
 
             b_choices.push_back(b);
 
             std::shared_ptr<Button> ba = makeSharedButton("answer_" + std::to_string(i));
-            ba->m_rect.setSize({ 50 * 3, h_text });
+            ba->m_rect.setSize({ SizeAnswer * 3, h_text });
             ba->setText("[ ]");
-            ba->setPosition(sf::Vector2f(w - 50 * 3, 0.0f) + sf::Vector2f(0.0f, (i + 2) * h_text));
+            ba->setPosition(sf::Vector2f(w - SizeAnswer * 3, 0.0f) + sf::Vector2f(0.0f, (i + 2) * h_text));
             b_answers.push_back(ba);
         }
 
@@ -92,6 +129,8 @@ namespace gui {
         b_result->m_rect.setSize({ w, h_text });
         b_result->setText(" ");
         b_result->setPosition(m_rect.getPosition() + sf::Vector2f(0.0f, (m_quiz._choice.size() + 2) * h_text));
+
+        setSkin(128);
     }
 
     void GuiQuiz::setTexture(const sf::Texture& tex)
@@ -123,7 +162,7 @@ namespace gui {
                             std::string s = b_answers[i]->m_text.getString();
                             if (s == "[ ]") s = "[X]";
                             else s = "[ ]";
-                            //b_answers[i]->m_text.setString(s);
+
                             b_answers[i]->setText(s);
 
                             if (isAnswerOK() == true)
@@ -211,7 +250,7 @@ namespace gui {
             for (size_t i = 0; i < m_quiz._choice.size(); i++)
             {
                 b_choices[i]->setPosition(m_rect.getPosition() + sf::Vector2f(0.0f, (i + 2) * h_text));
-                b_answers[i]->setPosition(sf::Vector2f(m_rect.getPosition().x + m_rect.getSize().x - 50 * 3, 0.0f) + sf::Vector2f(0.0f, (i + 2) * h_text));
+                b_answers[i]->setPosition(sf::Vector2f(m_rect.getPosition().x + m_rect.getSize().x - SizeAnswer * 3, 0.0f) + sf::Vector2f(0.0f, (i + 2) * h_text));
             }
             b_result->setPosition(m_rect.getPosition() + sf::Vector2f(0.0f, (m_quiz._choice.size() + 2) * h_text));
         }

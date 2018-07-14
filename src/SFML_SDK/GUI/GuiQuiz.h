@@ -30,6 +30,8 @@ namespace gui
         bool isAnswerIndexSelected(size_t index) const;
         bool isAnswerOK() const;
 
+        void setSkin(int alpha);
+
         float w;
         float h;
         float h_text;
