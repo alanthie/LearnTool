@@ -125,7 +125,7 @@ void UIState::widget_clicked(std::string& b_name)
                     // ok
                     _fnav.reset(parent_path.make_absolute().str(), path_folder);
                     load_path(path_folder);
-                    if (img_files.size() == 0)
+                    while (img_files.size() == 0)
                     {
                         _fnav.next_path();
                     }
@@ -201,7 +201,7 @@ void UIState::widget_clicked(std::string& b_name)
         if (index_img == img_files.size() - 1)
         {
             _fnav.next_path();
-            if (img_files.size() == 0)
+            while (img_files.size() == 0)
             {
                 _fnav.next_path();
             }
@@ -222,7 +222,7 @@ void UIState::widget_clicked(std::string& b_name)
         if (index_img == 0)
         {
             _fnav.prev_path();
-            if (img_files.size() == 0)
+            while (img_files.size() == 0)
             {
                 _fnav.prev_path();
             }
@@ -242,7 +242,7 @@ void UIState::widget_clicked(std::string& b_name)
     else if (b_name == "b_topic_prev")
     {
         _fnav.prev_path();
-        if (img_files.size() == 0)
+        while (img_files.size() == 0)
         {
             _fnav.prev_path();
         }
@@ -251,7 +251,7 @@ void UIState::widget_clicked(std::string& b_name)
     else if (b_name == "b_topic_next")
     {
         _fnav.next_path();
-        if (img_files.size() == 0)
+        while (img_files.size() == 0)
         {
             _fnav.next_path();
         }
@@ -493,7 +493,7 @@ void UIState::update(sf::Time deltaTime)
                     if (index_img > img_files.size() - 1)
                     {
                         _fnav.next_path();
-                        if (img_files.size() == 0)
+                        while (img_files.size() == 0)
                         {
                             _fnav.next_path();
                         }

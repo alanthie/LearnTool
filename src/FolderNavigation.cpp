@@ -213,7 +213,6 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                 }
                 else
                 {
-                    // TODO...
                     std::vector<std::string> v_sub = filesystem::path::get_directory_file(filesystem::path(v[i]), false, true);
                     for (size_t j = 0; j < v_sub.size(); j++)
                     {
@@ -224,6 +223,26 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                             {
                                 p = filesystem::path(v_sub[j]);
                                 return p;
+                            }
+                            else
+                            {
+                                std::vector<std::string> v_sub_sub = filesystem::path::get_directory_file(filesystem::path(v_sub[j]), false, true);
+                                for (size_t k = 0; k < v_sub_sub.size(); k++)
+                                {
+                                    if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub_sub[k]).filename()) == exclude_folder.end())
+                                    {
+                                        std::vector<std::string> vff = get_img_files(filesystem::path(v_sub_sub[k]));
+                                        if (vff.size() > 0)
+                                        {
+                                            p = filesystem::path(v_sub_sub[k]);
+                                            return p;
+                                        }
+                                        else
+                                        {
+                                            // TODO...
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -256,6 +275,26 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                     {
                         p = filesystem::path(v_sub[j]);
                         return p;
+                    }
+                    else
+                    {
+                        std::vector<std::string> v_sub_sub = filesystem::path::get_directory_file(filesystem::path(v_sub[j]), false, true);
+                        for (size_t k = 0; k < v_sub_sub.size(); k++)
+                        {
+                            if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub_sub[k]).filename()) == exclude_folder.end())
+                            {
+                                std::vector<std::string> vff = get_img_files(filesystem::path(v_sub_sub[k]));
+                                if (vff.size() > 0)
+                                {
+                                    p = filesystem::path(v_sub_sub[k]);
+                                    return p;
+                                }
+                                else
+                                {
+                                    // TODO...
+                                }
+                            }
+                        }
                     }
                 }
             }
