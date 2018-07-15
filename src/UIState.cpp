@@ -284,11 +284,12 @@ void UIState::widget_clicked(std::string& b_name)
 	}
 	else if (b_name == "b_speed_fast")
 	{
+        const float MIN_SPEED = 0.025f;
         if (_mode == display_mode::show_img)
         {
-            vitesse_img_sec -= 1.0f;
-            if (vitesse_img_sec <= 0.25)
-                vitesse_img_sec = 0.25f;
+            vitesse_img_sec *= 0.50f;
+            if (vitesse_img_sec <= MIN_SPEED)
+                vitesse_img_sec = MIN_SPEED;
         }
         else
         {
