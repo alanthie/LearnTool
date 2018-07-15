@@ -11,9 +11,6 @@
 #include <SFML/Graphics/Texture.hpp>
 
 #include <opencv2/opencv.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/videoio.hpp>
-//#include <opencv2/highgui.hpp>
 
 #include <iostream>
 #include <fstream> 
@@ -82,6 +79,7 @@ int Quiz::read_xml(const std::string& filename)
 
 void QuizMaker::make_multi_image(const filesystem::path& current_path, const std::vector<filesystem::path>& img_files)
 {
+    const int MAX_IMG = 18;
     std::string fsave = current_path.make_absolute().str() + "\\" + "000_all.jpg";
     filesystem::path filesave(fsave);
     if ((filesave.empty() == false) && (filesave.exists() == false))
@@ -96,6 +94,8 @@ void QuizMaker::make_multi_image(const filesystem::path& current_path, const std
                 if (std::find(img.begin(), img.end(), img_files[i].extension()) != img.end())
                 {
                     cnt++;
+                    if (cnt >= MAX_IMG)
+                        break;
                 }
             }
 
@@ -113,6 +113,7 @@ void QuizMaker::make_multi_image(const filesystem::path& current_path, const std
 
             int r = 0;
             int c = -1;
+            int n = 0;
             for (size_t i = 0; i < img_files.size(); i++)
             {
                 if (std::find(img.begin(), img.end(), img_files[i].extension()) != img.end())
@@ -120,6 +121,10 @@ void QuizMaker::make_multi_image(const filesystem::path& current_path, const std
                     cv::Mat3b img1 = cv::imread(img_files[i].make_absolute().str());
                     if (img1.empty() == false)
                     {
+                        n++;
+                        if (n > cnt)
+                            break;
+
                         c++;
                         if (c >= 3)
                         {

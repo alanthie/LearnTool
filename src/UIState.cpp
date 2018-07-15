@@ -74,6 +74,8 @@ void UIState::img_changed()
             }
         }
     }
+
+    quiz.reset();
 }
 
 void UIState::widget_changed(std::string& b_name)
@@ -97,7 +99,14 @@ void UIState::widget_clicked(std::string& b_name)
 
     else if (b_name == "quiz")
     {
-        size_t a = quiz.answer_index_clicked;
+        if (quiz.number_quiz() > 1)
+        {
+            size_t k = quiz.current_quiz();
+            k++;
+            if (k >= quiz.number_quiz())
+                k = 0;
+            quiz.set_quiz(k);
+        }
     }
 
     else if (b_name == "b_folder")
@@ -192,6 +201,10 @@ void UIState::widget_clicked(std::string& b_name)
         if (index_img == img_files.size() - 1)
         {
             _fnav.next_path();
+            if (img_files.size() == 0)
+            {
+                _fnav.next_path();
+            }
             img_changed();
         }
         else
@@ -209,6 +222,10 @@ void UIState::widget_clicked(std::string& b_name)
         if (index_img == 0)
         {
             _fnav.prev_path();
+            if (img_files.size() == 0)
+            {
+                _fnav.prev_path();
+            }
             img_changed();
         }
         else
@@ -225,11 +242,19 @@ void UIState::widget_clicked(std::string& b_name)
     else if (b_name == "b_topic_prev")
     {
         _fnav.prev_path();
+        if (img_files.size() == 0)
+        {
+            _fnav.prev_path();
+        }
         img_changed();
     }
     else if (b_name == "b_topic_next")
     {
         _fnav.next_path();
+        if (img_files.size() == 0)
+        {
+            _fnav.next_path();
+        }
         img_changed();
     }
 
@@ -437,17 +462,21 @@ void UIState::update(sf::Time deltaTime)
 {
     if (_mode == display_mode::show_img)
     {
-        if (is_pause == false)
+        // ???
+        if (img_files.size() > 0)
         {
-            cnt_loop++;
-            if (cnt_loop > 60 * vitesse_img_sec) // 1 sec * vitesse_img_sec
+            if (is_pause == false)
             {
-                index_img++;
-                if (index_img > img_files.size() - 1)
+                cnt_loop++;
+                if (cnt_loop > 60 * vitesse_img_sec) // 1 sec * vitesse_img_sec
                 {
-                    _fnav.next_path();
+                    index_img++;
+                    if (index_img > img_files.size() - 1)
+                    {
+                        _fnav.next_path();
+                    }
+                    img_changed();
                 }
-                img_changed();
             }
         }
     }
@@ -464,6 +493,10 @@ void UIState::update(sf::Time deltaTime)
                     if (index_img > img_files.size() - 1)
                     {
                         _fnav.next_path();
+                        if (img_files.size() == 0)
+                        {
+                            _fnav.next_path();
+                        }
                     }
                     img_changed();
                 }
@@ -591,7 +624,28 @@ void UIState::load_img_quiz()
             }
             else
             {
-                quiz.reset();
+                //quiz.reset();
+                if (quiz.load_quiz(quizfile) == true)
+                {
+                    img_index_has_quiz = true;
+                }
+            }
+        }
+    }
+
+    if (img_files.size() > index_img)
+    {
+        std::string quizfile = img_files[index_img].make_absolute().str() + ".quiz2.xml";
+        filesystem::path quiz_path(quizfile);
+        if ((quiz_path.empty() == false) && (quiz_path.exists() == true) && (quiz_path.is_file() == true))
+        {
+            if (quiz.is_loaded(quizfile) == true)
+            {
+                img_index_has_quiz = true;
+            }
+            else
+            {
+                //quiz.reset();
                 if (quiz.load_quiz(quizfile) == true)
                 {
                     img_index_has_quiz = true;
@@ -1228,6 +1282,12 @@ void UIState::load_path(filesystem::path& p)
     {
         std::shared_ptr<sf::Texture> texture(nullptr);
         img_texture.push_back(texture);
+    }
+
+    // No img/video in this folder
+    if (img_files.size() == 0)
+    {
+        int a = 1;
     }
 
     button_name.setText(name);

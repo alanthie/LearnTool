@@ -26,11 +26,11 @@ namespace gui
 
         sf::Vector2f getSize() const override;
 
-        void load();
+        void load(size_t idx);
         bool isAnswerIndexSelected(size_t index) const;
         bool isAnswerOK() const;
 
-        void setSkin(int alpha);
+        void setSkin(int alpha, size_t idx);
 
         float w;
         float h;
@@ -39,15 +39,24 @@ namespace gui
         Rectangle       m_rect;
         StateBaseMemFn  m_state_func;
 
-        bool            m_is_loaded = false;
-        std::string     m_filename = "";
-        Quiz            m_quiz;
+        size_t number_quiz() { return v_quiz.size(); }
+        size_t current_quiz() { return quiz_idx; }
+        void set_quiz(size_t idx);
 
-        std::shared_ptr<Button>                 b_subject;
-        std::shared_ptr<Button>                 b_question;
-        std::vector<std::shared_ptr<Button>>    b_choices;
-        std::vector<std::shared_ptr<Button>>    b_answers;
-        std::shared_ptr<Button>                 b_result;
+        struct quiz_detail
+        {
+            std::string     m_filename = "";
+            Quiz            m_quiz;
+
+            std::shared_ptr<Button>                 b_subject;
+            std::shared_ptr<Button>                 b_question;
+            std::vector<std::shared_ptr<Button>>    b_choices;
+            std::vector<std::shared_ptr<Button>>    b_answers;
+            std::shared_ptr<Button>                 b_result;
+        };
+
+        size_t quiz_idx = 0;
+        std::vector<quiz_detail> v_quiz;
    
         size_t answer_index_clicked = 0;
     };
