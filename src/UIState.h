@@ -91,3 +91,26 @@ public:
 
     int count_sound_making();
 };
+
+inline bool filesort(const filesystem::path& a, const filesystem::path& b)
+{    
+    std::string sa = a.make_absolute().str();
+    std::string sb = b.make_absolute().str();
+    std::string sae = a.extension();
+    std::string sbe = b.extension();
+    if ((sae == "jpg") && (sbe == "jpg"))
+    {
+        if (sa.size() == sb.size())
+        {
+            return a.make_absolute().str() < b.make_absolute().str();
+        }
+        else
+        {
+            return sa.size() < sb.size();
+        }
+    }
+    else
+    {
+        return a.make_absolute().str() < b.make_absolute().str();
+    }
+}

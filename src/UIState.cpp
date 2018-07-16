@@ -1278,6 +1278,7 @@ void UIState::load_path(filesystem::path& p)
             }
         }
     }
+    std::sort(img_files.begin(), img_files.end(), filesort);
 
     for (size_t i = 0; i < img_files.size(); i++)
     {
