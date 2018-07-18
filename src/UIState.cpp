@@ -709,9 +709,12 @@ void UIState::render(sf::RenderTarget& renderer)
                 }
 
                 sprite_canva.reset();
+                img_texture[index_img]->setSmooth(true); // TEST
                 sprite_canva = std::shared_ptr<sf::Sprite>(new sf::Sprite(*img_texture[index_img].get()));
-                sprite_canva->scale(scale_sprite(sprite_canva));
-                sprite_canva->scale(canvas_scale);
+                sf::Vector2f f = scale_sprite(sprite_canva); f.x = f.x * canvas_scale.x;  f.y = f.y * canvas_scale.y;
+                sprite_canva->scale(f);
+                //sprite_canva->scale(scale_sprite(sprite_canva));
+                //sprite_canva->scale(canvas_scale);
                 sprite_canva->move(-1.0f * minimap.ratio_offset.x * canvas_w, -1.0f * minimap.ratio_offset.y * canvas_h);
                 canvas_bounds = sprite_canva->getGlobalBounds();
                 renderer.draw(*(sprite_canva.get()));
@@ -1201,6 +1204,7 @@ sf::Vector2f UIState::scale_sprite(std::shared_ptr<sf::Sprite> sprite)
     float sx = (canvas_w) / (float)sprite->getTextureRect().width;
     float sy = (canvas_h) / (float)sprite->getTextureRect().height;
     return sf::Vector2f{ std::min(sx, sy), std::min(sx, sy) };
+    //return sf::Vector2f{ 1.0f,  1.0f, };
 }
 
 void UIState::load_path(filesystem::path& p)
