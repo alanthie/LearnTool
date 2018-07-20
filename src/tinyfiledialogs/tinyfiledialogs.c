@@ -326,7 +326,7 @@ static void replaceSubStr ( char const * const aSource ,
 	char const * pOccurence ;
 	char const * p ;
 	char const * lNewSubStr = "" ;
-	int lOldSubLen = strlen ( aOldSubStr ) ;
+	size_t lOldSubLen = strlen ( aOldSubStr ) ;
 	
 	if ( ! aSource )
 	{
@@ -390,7 +390,7 @@ static char const * ensureFilesExist( char * const aDestination ,
 	char * lDestination = aDestination ;
 	char const * p ;
 	char const * p2 ;
-	int lLen ;
+    size_t lLen ;
 
 	if ( ! aSourcePathsAndNames )
 	{
@@ -665,7 +665,7 @@ static void runSilentA(char const * const aString)
 	char * pEnvCMD = NULL;
 	char * pDefaultCMD = "CMD.EXE";
 	ULONG rc;
-	int lStringLen = 0;
+    size_t lStringLen = 0;
 
 	memset(&StartupInfo, 0, sizeof(StartupInfo));
 	StartupInfo.cb = sizeof(STARTUPINFOA);
@@ -722,7 +722,7 @@ static void runSilentW(wchar_t const * const aString)
 	wchar_t * lArgs;
 	wchar_t * pEnvCMD;
 	wchar_t * pDefaultCMD = L"CMD.EXE";
-	int lStringLen = 0;
+    size_t lStringLen = 0;
 
 	memset(&StartupInfo, 0, sizeof(StartupInfo));
 	StartupInfo.cb = sizeof(STARTUPINFOW);
@@ -876,9 +876,9 @@ static char const * inputBoxWinGui(
 {
 	char * lDialogString;
 	FILE * lIn;
-	int lResult;
-	int lTitleLen;
-	int lMessageLen;
+    size_t lResult;
+    size_t lTitleLen;
+    size_t lMessageLen;
 	wchar_t * lDialogStringW;
 
 	lTitleLen =  aTitle ? strlen(aTitle) : 0 ;

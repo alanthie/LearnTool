@@ -115,6 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\..\..\000Lib\SFML-2.5.0\include;..\src;..\..\..\000Lib\opencv\modules\imgcodecs\include;..\..\..\000Lib\opencv\modules\videoio\include;..\..\..\000Lib\opencv\modules\highgui\include;..\..\..\000Lib\opencv\modules\core\include;..\..\..\000Lib\opencv\builds;..\..\..\000Lib\opencv\modules\imgproc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

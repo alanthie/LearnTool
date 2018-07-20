@@ -24,19 +24,13 @@
 #include <iostream>
 #include <memory>
 
-//#include "tinyfiledialogs/tinyfiledialogs.h"
-//std::string select_folder()
-//{
-//    char const * lTheSelectFolderName;
-//    lTheSelectFolderName = tinyfd_selectFolderDialog("let us just select a directory", NULL);
-//    if (!lTheSelectFolderName)
-//    {
-//        tinyfd_messageBox( "Error","Select folder name is NULL", "ok","error",1);
-//        return std::string();
-//    }
-//    tinyfd_messageBox("The selected folder is", lTheSelectFolderName, "ok", "info", 1);
-//    return std::string(lTheSelectFolderName);   
-//}
+std::string ExePath() 
+{
+    char buffer[MAX_PATH];
+    GetModuleFileName(NULL, buffer, MAX_PATH);
+    std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+    return std::string(buffer).substr(0, pos);
+}
 
 //-----------------------------------------
 // Argument: Config file path
@@ -59,6 +53,21 @@ int main(int argc, char *argv[])
         {
 			std::cerr << "Invalid config file." << std::endl;
 			return -1;
+        }
+    }
+    else
+    {
+        std::string exe_path = ExePath();
+        std::cout << "Looking for config file: " + exe_path << "\\LearnTool.ini" << std::endl;
+
+        if (cfg.setup(exe_path + "\\LearnTool.ini") == true)
+        {
+
+        }
+        else
+        {
+            std::cerr << "Invalid config LearnTool.ini file." << std::endl;
+            return -1;
         }
     }
 
