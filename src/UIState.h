@@ -43,6 +43,7 @@ public:
     gui::Minimap                minimap;
     sf::View                    view_minimap;
     gui::ProgressBar            progress_bar;
+    gui::ProgressBar            progress_filebar;
 
     bool                        img_index_has_quiz = false;
     gui::GuiQuiz                quiz;
