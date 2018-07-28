@@ -95,6 +95,35 @@ void UIState::widget_clicked(std::string& b_name)
                 _vc->videobar_perc = progress_bar.perc;
             }
         }
+        else if (_mode == display_mode::show_img)
+        {
+            if (img_files.size() > 1)
+            {
+                float findex = (float)index_img;
+                float n = (float)img_files.size();
+                int idx = (int)(progress_bar.perc * n);
+                if ( (idx!= index_img) && (idx >=0) && (idx <= img_files.size() - 1) )
+                {
+                    index_img = idx;
+                    img_changed();
+                }
+            }
+        }
+    }
+
+    else if (b_name == "pfilebar")
+    {
+        if (img_files.size() > 1)
+        {
+            float findex = (float)index_img;
+            float n = (float)img_files.size();
+            int idx = (int)(progress_filebar.perc * n);
+            if ((idx != index_img) && (idx >= 0) && (idx <= img_files.size() - 1))
+            {
+                index_img = idx;
+                img_changed();
+            }
+        }
     }
 
     else if (b_name == "quiz")
@@ -269,6 +298,43 @@ void UIState::widget_clicked(std::string& b_name)
         minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
 
+    else if (b_name == "b_scale_plus")
+    {
+        text_scale = text_scale * 1.10f,
+        button_msg.m_text.setScale(text_scale, text_scale);
+        button_name.m_text.setScale(text_scale, text_scale);
+        button_parts.m_text.setScale(text_scale, text_scale);
+
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (button_menu[i][j] != nullptr)
+                {
+                    button_menu[i][j]->m_text.setScale(text_scale, text_scale);
+                }
+            }
+        }
+    }
+    else if (b_name == "b_scale_less")
+    {
+        text_scale = text_scale* 1.0f / 1.10f;
+        button_msg.m_text.setScale(text_scale, text_scale);
+        button_name.m_text.setScale(text_scale, text_scale);
+        button_parts.m_text.setScale(text_scale, text_scale);
+
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (button_menu[i][j] != nullptr)
+                {
+                    button_menu[i][j]->m_text.setScale(text_scale, text_scale);
+                }
+            }
+        }
+    }
+
 	else if (b_name == "b_speed_slow")
 	{
         if (_mode == display_mode::show_img)
@@ -329,6 +395,7 @@ UIState::UIState(UImain& g) :
 	button_msg(     "b_msg",    gui::ButtonSize::Wide),
 	minimap(        "mmap",     50, 50),
     progress_bar(   "pbar",     0, 0, 2, 2),
+    progress_filebar("pfilebar", 0, 0, 2, 2),
     quiz(           "quiz",     1000, 500, 50)     
 {
     // TEST
@@ -356,9 +423,11 @@ UIState::UIState(UImain& g) :
     button_menu[6][1] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
     button_menu[7][0] = new gui::Button("b_folder", gui::ButtonSize::Small);
     button_menu[7][1] = nullptr;
+    button_menu[8][0] = new gui::Button("b_scale_plus", gui::ButtonSize::Small);
+    button_menu[8][1] = new gui::Button("b_scale_less", gui::ButtonSize::Small);
 
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -387,14 +456,17 @@ UIState::UIState(UImain& g) :
     button_menu[6][0]->setText("vol -");
     button_menu[6][1]->setText("vol +");
     button_menu[7][0]->setText("folder");
-    //button_menu[7][1
+    //button_menu[7][1]
+    button_menu[8][0]->setText("text +");
+    button_menu[8][1]->setText("text -");
     
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
     button_menu[4][0]->m_rect.setSize({ 2 * b_w , b_h });
     button_menu[7][0]->m_rect.setSize({ 2 * b_w , b_h });
 
     minimap.m_rect.setSize({ 2 * b_w , 2 * b_w, });
-    progress_bar.reset(8, canvas_h - 16, w - 16, 2);
+    progress_bar.reset(8, canvas_h - 32, w - 16, 2);
+    progress_filebar.reset(8, canvas_h - 16, w - 16, 2);
 
     button_name.setFunction(    &StateBase::widget_clicked);
     button_parts.setFunction(   &StateBase::widget_clicked);
@@ -402,6 +474,7 @@ UIState::UIState(UImain& g) :
 
     minimap.setFunction(&StateBase::widget_changed);
     progress_bar.setFunction(&StateBase::widget_clicked);
+    progress_filebar.setFunction(&StateBase::widget_clicked);
 
     quiz.setFunction(&StateBase::widget_clicked);
 
@@ -432,7 +505,7 @@ void UIState::handleEvent(sf::Event e)
         break;
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i <9; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -448,6 +521,7 @@ void UIState::handleEvent(sf::Event e)
     button_msg.handleEvent(e,   m_pGame->getWindow(), *this);
     minimap.handleEvent(e,      m_pGame->getWindow(), *this);
     progress_bar.handleEvent(e, m_pGame->getWindow(), *this);
+    progress_filebar.handleEvent(e, m_pGame->getWindow(), *this);
 
     if (img_index_has_quiz == true)
     {
@@ -1067,8 +1141,20 @@ void UIState::render(sf::RenderTarget& renderer)
             }
         }
     }
+    
+    //else if (_mode == display_mode::show_img)
+    {
+        if (img_files.size() > 0)
+        {
+            progress_filebar.setPerc(((float)(1 + index_img)) / (float)img_files.size());
+        }
+        else
+        {
+            progress_filebar.setPerc(0.0f);
+        }
+    }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -1109,6 +1195,9 @@ void UIState::render(sf::RenderTarget& renderer)
             quiz.render(renderer);
         }
     }
+
+    progress_filebar.render(renderer);
+    renderer.draw(progress_filebar.m_drag_rect);
 }
 
 void UIState::recalc_size(bool is_resizing)
@@ -1137,6 +1226,8 @@ void UIState::recalc_size(bool is_resizing)
     button_menu[6][1]->m_rect.setSize({ b_w , b_h });
     button_menu[7][0]->m_rect.setSize({ 2 * b_w , b_h });
     // button_menu[7][1]
+    button_menu[8][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[8][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[1][0]->setPosition({ canvas_w, b_h });
     button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
@@ -1152,6 +1243,8 @@ void UIState::recalc_size(bool is_resizing)
     button_menu[6][1]->setPosition({ canvas_w + b_w, 10 * b_h });
     button_menu[7][0]->setPosition({ canvas_w, 11 * b_h });
     // button_menu[7][1]
+    button_menu[8][0]->setPosition({ canvas_w, 12 * b_h });
+    button_menu[8][1]->setPosition({ canvas_w + b_w, 12 * b_h });
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
@@ -1188,7 +1281,8 @@ void UIState::recalc_size(bool is_resizing)
     view_minimap.setSize(canvas_w, canvas_h);
     view_minimap.setViewport(sf::FloatRect(minimap.m_rect.getPosition().x / w , minimap.m_rect.getPosition().y / h, minimap.m_rect.getSize().x / w, minimap.m_rect.getSize().y / h));
 
-    progress_bar.reset(8, canvas_h - 16, w - 16, 2);
+    progress_bar.reset(8, canvas_h - 32, w - 16, 2);
+    progress_filebar.reset(8, canvas_h - 16, w - 16, 2);
 
     if (_mode == display_mode::show_img)
     {

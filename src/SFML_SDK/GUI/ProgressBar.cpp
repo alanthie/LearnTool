@@ -6,8 +6,8 @@ namespace gui {
     ProgressBar::ProgressBar(const std::string& name, float _x, float _y, float _w, float _h) : gui::Widget(name), x(_x), y(_y), w(_w), h(_h)
     {
         m_rect.setOutlineThickness(1);
-        m_rect.setOutlineColor(sf::Color::White);
-        m_rect.setFillColor(sf::Color::White);
+        m_rect.setOutlineColor(sf::Color::Color(128,128, 128));
+        m_rect.setFillColor(sf::Color::Color(128, 128, 128));
         m_rect.setSize({ _w, _h });
         m_rect.setPosition({ x, y });
 

@@ -35,7 +35,7 @@ public:
     std::vector<ExtractSound*>               v_extract_sound;
 
     float                       sound_volume = 100.0;
-    gui::Button*                button_menu[8][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr },{ nullptr },{ nullptr } };
+    gui::Button*                button_menu[9][2] = { {nullptr}, { nullptr },{ nullptr } ,{ nullptr } ,{ nullptr } ,{ nullptr },{ nullptr },{ nullptr },{ nullptr } };
     gui::Button                 button_name;
     gui::Button                 button_parts;
     gui::Button                 button_msg;
@@ -43,6 +43,7 @@ public:
     gui::Minimap                minimap;
     sf::View                    view_minimap;
     gui::ProgressBar            progress_bar;
+    gui::ProgressBar            progress_filebar;
 
     bool                        img_index_has_quiz = false;
     gui::GuiQuiz                quiz;
@@ -66,6 +67,8 @@ public:
     float canvas_h;
     float b_h = 50;
     sf::FloatRect canvas_bounds;
+
+    float text_scale = 1.0f;
 
 public:
     UIState(UImain& g);
