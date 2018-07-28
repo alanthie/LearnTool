@@ -298,6 +298,43 @@ void UIState::widget_clicked(std::string& b_name)
         minimap.set_view(canvas_w, canvas_h, canvas_bounds);
     }
 
+    else if (b_name == "b_scale_plus")
+    {
+        text_scale = text_scale * 1.10f,
+        button_msg.m_text.setScale(text_scale, text_scale);
+        button_name.m_text.setScale(text_scale, text_scale);
+        button_parts.m_text.setScale(text_scale, text_scale);
+
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (button_menu[i][j] != nullptr)
+                {
+                    button_menu[i][j]->m_text.setScale(text_scale, text_scale);
+                }
+            }
+        }
+    }
+    else if (b_name == "b_scale_less")
+    {
+        text_scale = text_scale* 1.0f / 1.10f;
+        button_msg.m_text.setScale(text_scale, text_scale);
+        button_name.m_text.setScale(text_scale, text_scale);
+        button_parts.m_text.setScale(text_scale, text_scale);
+
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (button_menu[i][j] != nullptr)
+                {
+                    button_menu[i][j]->m_text.setScale(text_scale, text_scale);
+                }
+            }
+        }
+    }
+
 	else if (b_name == "b_speed_slow")
 	{
         if (_mode == display_mode::show_img)
@@ -386,9 +423,11 @@ UIState::UIState(UImain& g) :
     button_menu[6][1] = new gui::Button("b_vol_plus", gui::ButtonSize::Small);
     button_menu[7][0] = new gui::Button("b_folder", gui::ButtonSize::Small);
     button_menu[7][1] = nullptr;
+    button_menu[8][0] = new gui::Button("b_scale_plus", gui::ButtonSize::Small);
+    button_menu[8][1] = new gui::Button("b_scale_less", gui::ButtonSize::Small);
 
     float b_w = button_menu[0][0]->m_text.getLocalBounds().width;
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -417,7 +456,9 @@ UIState::UIState(UImain& g) :
     button_menu[6][0]->setText("vol -");
     button_menu[6][1]->setText("vol +");
     button_menu[7][0]->setText("folder");
-    //button_menu[7][1
+    //button_menu[7][1]
+    button_menu[8][0]->setText("text +");
+    button_menu[8][1]->setText("text -");
     
     button_menu[0][0]->m_rect.setSize({ 2 * b_w , b_h });
     button_menu[4][0]->m_rect.setSize({ 2 * b_w , b_h });
@@ -464,7 +505,7 @@ void UIState::handleEvent(sf::Event e)
         break;
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i <9; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -1113,7 +1154,7 @@ void UIState::render(sf::RenderTarget& renderer)
         }
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 2; j++)
         {
@@ -1185,6 +1226,8 @@ void UIState::recalc_size(bool is_resizing)
     button_menu[6][1]->m_rect.setSize({ b_w , b_h });
     button_menu[7][0]->m_rect.setSize({ 2 * b_w , b_h });
     // button_menu[7][1]
+    button_menu[8][0]->m_rect.setSize({ b_w , b_h });
+    button_menu[8][1]->m_rect.setSize({ b_w , b_h });
 
     button_menu[1][0]->setPosition({ canvas_w, b_h });
     button_menu[1][1]->setPosition({ canvas_w + b_w, b_h });
@@ -1200,6 +1243,8 @@ void UIState::recalc_size(bool is_resizing)
     button_menu[6][1]->setPosition({ canvas_w + b_w, 10 * b_h });
     button_menu[7][0]->setPosition({ canvas_w, 11 * b_h });
     // button_menu[7][1]
+    button_menu[8][0]->setPosition({ canvas_w, 12 * b_h });
+    button_menu[8][1]->setPosition({ canvas_w + b_w, 12 * b_h });
 
     float mmap_w = 2 * b_w;
     minimap.m_rect.setSize({ mmap_w , 4 * b_h, });
