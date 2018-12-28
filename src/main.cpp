@@ -15,21 +15,97 @@
 #include "filesystem/path.h"
 #include "filesystem/resolver.h"
 #include "ini_parser/ini_parser.hpp"
-
-#include "UImain.h"
+#include "UIMain.h"
 #include "Config.hpp"
+
 #include <string>
 #include <chrono>
 #include <thread>
 #include <iostream>
 #include <memory>
 
+#ifndef _WIN32
+#include "core/config.h"
+#include <cstdlib>
+#include <cstdio>
+#endif
+
+#ifdef _WIN32
 std::string ExePath() 
 {
     char buffer[MAX_PATH];
     GetModuleFileName(NULL, buffer, MAX_PATH);
     std::string::size_type pos = std::string(buffer).find_last_of("\\/");
     return std::string(buffer).substr(0, pos);
+}
+#endif
+
+#ifndef _WIN32
+#define POSITIVE_ANSWER  0
+#define NEGATIVE_ANSWER -1
+int syscommand(std::string aCommand, std::string & result)
+{
+    FILE * f;
+    if ( !(f = popen( aCommand.c_str(), "r" )) ) 
+    {
+            std::cout << "Can not open file" << std::endl;
+            return NEGATIVE_ANSWER;
+    }
+    const int BUFSIZE = 4096;
+    char buf[ BUFSIZE ];
+    if (fgets(buf,BUFSIZE,f)!=NULL) 
+    {      
+       result = buf;
+    }
+    pclose( f );
+    return POSITIVE_ANSWER;
+}
+
+std::string getBundleName() 
+{
+    pid_t procpid = getpid();
+    std::stringstream toCom;
+    toCom << "cat /proc/" << procpid << "/comm";
+    std::string fRes="";
+    int lRet = syscommand(toCom.str(),fRes);
+    if (lRet == NEGATIVE_ANSWER)
+    {
+       // ...
+    }
+    size_t last_pos = fRes.find_last_not_of(" \n\r\t") + 1;
+    if (last_pos != std::string::npos) {
+        fRes.erase(last_pos);
+    }
+    return fRes;
+}
+
+std::string getBundlePath() 
+{
+    pid_t procpid = getpid();
+    std::string appName = getBundleName();
+    std::stringstream command;
+    command <<  "readlink /proc/" << procpid << "/exe | sed \"s/\\(\\/" << appName << "\\)$//\"";
+    std::string fRes;
+    int lRet = syscommand(command.str(),fRes);
+    if (lRet == NEGATIVE_ANSWER)
+    {
+       // ...
+    }
+    return fRes;
+}
+#endif
+
+std::string trim(const std::string &s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && isspace(*it))
+        it++;
+
+    std::string::const_reverse_iterator rit = s.rbegin();
+    while (rit.base() != it && isspace(*rit))
+        rit++;
+
+    return std::string(it, rit.base());
 }
 
 //-----------------------------------------
@@ -51,13 +127,18 @@ int main(int argc, char *argv[])
         }
         else
         {
-			std::cerr << "Invalid config file." << std::endl;
-			return -1;
+		std::cerr << "Invalid config file:" << config_file << std::endl;
+		return -1;
         }
     }
     else
     {
+#ifdef _WIN32
         std::string exe_path = ExePath();
+#else
+	std::string exe_path = getBundlePath();
+	exe_path = trim(exe_path);
+#endif
         std::cout << "Looking for config file: " + exe_path << "\\LearnTool.ini" << std::endl;
 
         if (cfg.setup(exe_path + "\\LearnTool.ini") == true)

@@ -26,6 +26,9 @@
 #include <memory>
 #else
 # include <unistd.h>
+//#include <sys/types.h>
+#include <dirent.h> // TEST
+#include <memory>
 #endif
 #include <sys/stat.h>
 
@@ -335,7 +338,7 @@ protected:
 #endif
     }
 
-#if defined(_WIN32)
+//#if defined(_WIN32)
     static std::vector<std::string> get_directory_file(const path& p, bool recursive = false, bool only_folder = false)
     {
         std::vector<std::string> files;
@@ -388,7 +391,7 @@ protected:
         std::sort(files.begin(), files.end());
         return files;
     }
-#endif
+//#endif
 
 protected:
     path_type m_type;

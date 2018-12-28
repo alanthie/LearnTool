@@ -23,7 +23,8 @@ FolderNavigation::FolderNavigation(UIState& st, const std::string& _path_dir, co
     root            = filesystem::path(path_dir);
     root_files      = filesystem::path::get_directory_file(root, false, true);
     current_parent  = filesystem::path(root);
-    current_path    = find_next_folder(root, filesystem::path());
+    filesystem::path lEmptyPath = filesystem::path();
+    current_path    = find_next_folder(root, lEmptyPath);
 }
 
 void FolderNavigation::reset(const std::string& new_root, const filesystem::path& new_current_path)
@@ -43,7 +44,8 @@ void FolderNavigation::load_root()
 {
     // Restart
     current_parent = filesystem::path(root);
-    current_path = find_next_folder(root, filesystem::path());
+    filesystem::path lEmptyPath = filesystem::path();
+    current_path = find_next_folder(root, lEmptyPath);
 
     if (current_path.empty() == false)
     {
@@ -205,7 +207,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
         {
             if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[i]).filename()) == exclude_folder.end())
             {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+		filesystem::path lImgPath = filesystem::path(v[i]);
+                std::vector<std::string> vf = get_img_files(lImgPath);
                 if (vf.size() > 0)
                 {
                     p = filesystem::path(v[i]);
@@ -218,7 +221,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                     {
                         if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == exclude_folder.end())
                         {
-                            std::vector<std::string> vf = get_img_files(filesystem::path(v_sub[j]));
+			    filesystem::path lImgPathJ = filesystem::path(v_sub[j]);
+                            std::vector<std::string> vf = get_img_files(lImgPathJ);
                             if (vf.size() > 0)
                             {
                                 p = filesystem::path(v_sub[j]);
@@ -231,7 +235,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                                 {
                                     if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub_sub[k]).filename()) == exclude_folder.end())
                                     {
-                                        std::vector<std::string> vff = get_img_files(filesystem::path(v_sub_sub[k]));
+					filesystem::path lImgPathK = filesystem::path(v_sub_sub[k]);
+                                        std::vector<std::string> vff = get_img_files(lImgPathK);
                                         if (vff.size() > 0)
                                         {
                                             p = filesystem::path(v_sub_sub[k]);
@@ -270,7 +275,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
             {
                 if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == exclude_folder.end())
                 {
-                    std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
+		    filesystem::path lImgPathJ = filesystem::path(v_sub[j]);
+                    std::vector<std::string> vf_sub = get_img_files(lImgPathJ);
                     if (vf_sub.size() > 0)
                     {
                         p = filesystem::path(v_sub[j]);
@@ -283,7 +289,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
                         {
                             if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub_sub[k]).filename()) == exclude_folder.end())
                             {
-                                std::vector<std::string> vff = get_img_files(filesystem::path(v_sub_sub[k]));
+				filesystem::path lImgPathK = filesystem::path(v_sub_sub[k]);
+                                std::vector<std::string> vff = get_img_files(lImgPathK);
                                 if (vff.size() > 0)
                                 {
                                     p = filesystem::path(v_sub_sub[k]);
@@ -304,7 +311,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
         {
             if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[i]).filename()) == exclude_folder.end())
             {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+		filesystem::path lImgPathi = filesystem::path(v[i]);
+                std::vector<std::string> vf = get_img_files(lImgPathi);
                 if (vf.size() > 0)
                 {
                     p = filesystem::path(v[i]);
@@ -317,7 +325,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
             {
                 if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v_sub[j]).filename()) == exclude_folder.end())
                 {
-                    std::vector<std::string> vf_sub = get_img_files(filesystem::path(v_sub[j]));
+		    filesystem::path lImgPathj = filesystem::path(v_sub[j]);
+                    std::vector<std::string> vf_sub = get_img_files(lImgPathj);
                     if (vf_sub.size() > 0)
                     {
                         p = filesystem::path(v_sub[j]);
@@ -341,7 +350,8 @@ filesystem::path FolderNavigation::find_last_folder(filesystem::path& parent_fol
     {
         if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[i]).filename()) == exclude_folder.end())
         {
-            std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+	    filesystem::path lImgPath = filesystem::path(v[i]);
+            std::vector<std::string> vf = get_img_files(lImgPath);
             if (vf.size() > 0)
             {
                 p = filesystem::path(v[i]);
@@ -362,7 +372,8 @@ filesystem::path FolderNavigation::find_prev_folder(filesystem::path& parent_fol
         {
             if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[i]).filename()) == exclude_folder.end())
             {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+                filesystem::path lImgPath = filesystem::path(v[i]);
+                std::vector<std::string> vf = get_img_files(lImgPath);
                 if (vf.size() > 0)
                 {
                     p = filesystem::path(v[i]);
@@ -388,7 +399,8 @@ filesystem::path FolderNavigation::find_prev_folder(filesystem::path& parent_fol
         {
             if (std::find(exclude_folder.begin(), exclude_folder.end(), filesystem::path(v[i]).filename()) == exclude_folder.end())
             {
-                std::vector<std::string> vf = get_img_files(filesystem::path(v[i]));
+                filesystem::path lImgPath = filesystem::path(v[i]);
+                std::vector<std::string> vf = get_img_files(lImgPath);
                 if (vf.size() > 0)
                 {
                     p = filesystem::path(v[i]);
@@ -436,7 +448,8 @@ filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
     {
         // Restart
         //load_root();
-        ret_path        = find_next_folder(root, filesystem::path());
+	filesystem::path lEmptyPath = filesystem::path();
+        ret_path        = find_next_folder(root, lEmptyPath);
         current_path    = save_current_path;
         current_parent  = save_current_parent;
         return ret_path;
@@ -449,7 +462,8 @@ filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
         {
             // Restart
             //load_root();
-            ret_path        = find_next_folder(root, filesystem::path());
+	    filesystem::path lEmptyPath = filesystem::path();
+            ret_path        = find_next_folder(root, lEmptyPath);
             current_path    = save_current_path;
             current_parent  = save_current_parent;
             return ret_path;
@@ -465,7 +479,8 @@ filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
             {
                 // Restart
                 //load_root();
-                ret_path        = find_next_folder(root, filesystem::path());
+		filesystem::path lEmptyPath = filesystem::path();
+                ret_path        = find_next_folder(root, lEmptyPath);
                 current_path    = save_current_path;
                 current_parent  = save_current_parent;
                 return ret_path;

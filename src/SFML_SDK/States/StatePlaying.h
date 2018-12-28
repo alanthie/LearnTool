@@ -3,7 +3,7 @@
 
 #include "StateBase.h"
 #include "../GUI/StackMenu.h"
-#include "../Gui/Textbox.h"
+#include "../GUI/Textbox.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics.hpp>
 #include <memory>

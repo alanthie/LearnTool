@@ -39,3 +39,8 @@ make
 Install:
 make install 
 
+Run:
+./learntool ../prj/LearnTool_AL.ini
+./res folder must be present
+
+

@@ -35,11 +35,19 @@ public:
 
 	bool setup(std::string config_file)
 	{
+		if (config_file.size() == 0)
+		{
+			std::cerr << "Config file empty" << std::endl;
+			return false;
+		}
+
 		if (config_file.size() > 0)
 		{
 		    filesystem::path p(config_file);
 		    if ((p.empty() == false) && (p.exists() == true) && (p.is_file() == true))
 		    {
+			std::cout << "Verifying config file ..." << std::endl;
+
 		        std::shared_ptr<ini_parser> cfg_ini = std::shared_ptr<ini_parser>(new ini_parser(p.make_absolute().str()));
 		        if (cfg_ini)
 		        {
@@ -52,9 +60,14 @@ public:
 		                {
 		                    this->path_dir = path_folder.make_absolute().str();
 		                }
+				else
+				{
+					std::cerr << "Unreachable content path (check path_folder entry): " << path_dir_temp << std::endl;
+				}
 		            }
 		            catch (...)
 		            {
+				std::cerr << "Unexpected error" << std::endl;
 		            }
 
 		            try
@@ -67,7 +80,7 @@ public:
 
 		            try
 		            {
-						this->default_w = cfg_ini->get_int("w", "main");
+				this->default_w = cfg_ini->get_int("w", "main");
 		            }
 		            catch (...)
 		            {
@@ -75,7 +88,7 @@ public:
 
 		            try
 		            {
-						this->default_h = cfg_ini->get_int("h", "main");
+				this->default_h = cfg_ini->get_int("h", "main");
 		            }
 		            catch (...)
 		            {
@@ -83,7 +96,7 @@ public:
 
 		            try
 		            {
-						this->zoom = std::max<float>(1.05f, cfg_ini->get_float("zoom", "main") );
+				this->zoom = std::max<float>(1.05f, cfg_ini->get_float("zoom", "main") );
 		            }
 		            catch (...)
 		            {
@@ -92,7 +105,7 @@ public:
 		            try
 		            {
 		                std::string s_excl = cfg_ini->get_string("exclude_folder", "main");
-						this->exclude_folder = Config::split(s_excl, ';');
+				this->exclude_folder = Config::split(s_excl, ';');
 		            }
 		            catch (...)
 		            {
@@ -101,51 +114,60 @@ public:
 		            try
 		            {
 		                std::string s_img = cfg_ini->get_string("img", "main");
-						this->img = Config::split(s_img, ';');
+				this->img = Config::split(s_img, ';');
 		            }
 		            catch (...)
 		            {
 		            }
 
-                    try
-                    {
-                        this->mak_wav_file = cfg_ini->get_int("mak_wav_file", "main");
-                    }
-                    catch (...)
-                    {
-                    }
+		            try
+		            {
+		                this->mak_wav_file = cfg_ini->get_int("mak_wav_file", "main");
+		            }
+		            catch (...)
+		            {
+		            }
 
-                    try
-                    {
-                        this->load_sound_file = cfg_ini->get_int("load_sound_file", "main");
-                    }
-                    catch (...)
-                    {
-                    }
+		            try
+		            {
+		                this->load_sound_file = cfg_ini->get_int("load_sound_file", "main");
+		            }
+		            catch (...)
+		            {
+		            }
 
-                    try
-                    {
-                        this->make_N_sound_file = cfg_ini->get_int("make_N_sound_file", "main");
-                    }
-                    catch (...)
-                    {
-                    }
+		            try
+		            {
+		                this->make_N_sound_file = cfg_ini->get_int("make_N_sound_file", "main");
+		            }
+		            catch (...)
+		            {
+		            }
 
 		        }
 		    }
 			
-	    }
+	    	}
 
 		filesystem::path path_folder(this->path_dir);
-		if ((path_folder.empty() == false) && (path_folder.exists() == true) && (path_folder.is_directory() == true))
+		if (path_folder.empty() == true)
 		{
-			return true;// ok
-		}
-		else
-		{
-			
+			std::cerr << "Invalid content path - path empty:" << this->path_dir << std::endl;
 			return false;
 		}
+		if (path_folder.exists() == false)
+		{
+			std::cerr << "Invalid content path - doesnot exist:" << this->path_dir << std::endl;
+			return false;
+		}
+		if (path_folder.is_directory() == false)
+		{
+			std::cerr << "Invalid content path - not a folder:" << this->path_dir << std::endl;
+			return false;
+		}
+
+		return true; // ok
+
 	}
 
     static std::vector<std::string> split(const std::string &text, char sep)
