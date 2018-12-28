@@ -29,6 +29,9 @@
 
 void UIState::img_changed()
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::img_changed()" << std::endl;
+
     minimap.reset();
     canvas_scale = { 1.0f, 1.0f };
     cnt_loop = 0;
@@ -85,6 +88,9 @@ void UIState::widget_changed(std::string& b_name)
 
 void UIState::widget_clicked(std::string& b_name)
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::widget_clicked() " << b_name << std::endl;
+
     if (b_name == "pbar")
     {
         if (_mode == display_mode::show_movie)
@@ -140,7 +146,16 @@ void UIState::widget_clicked(std::string& b_name)
 
     else if (b_name == "b_folder")
     {
-        std::string default_folder = _fnav.root.make_absolute().str();
+	std::string default_folder;
+	try
+	{
+		default_folder = _fnav.root.make_absolute().str();
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in UIState::widget_clicked- _fnav.root.make_absolute().str()" << std::endl;
+	}
+
         if (_fnav.current_path.empty() == false)  default_folder = _fnav.current_path.make_absolute().str();
         std::string folder = FolderNavigation::select_folder(default_folder.c_str());
         if (folder.empty() == false)
@@ -152,13 +167,23 @@ void UIState::widget_clicked(std::string& b_name)
                 if ((parent_path.empty() == false) && (parent_path.exists() == true) && (parent_path.is_directory() == true))
                 {
                     // ok
-                    _fnav.reset(parent_path.make_absolute().str(), path_folder);
-                    load_path(path_folder);
-                    while (img_files.size() == 0)
-                    {
-                        _fnav.next_path();
-                    }
-                    img_changed();
+		    std::string pfolder;
+		    try
+		    {
+			pfolder = parent_path.make_absolute().str();
+
+                    	_fnav.reset(pfolder, path_folder);
+                    	load_path(path_folder);
+                    	while (img_files.size() == 0)
+                    	{
+                       	 	_fnav.next_path();
+                    	}
+                    	img_changed();
+		    }
+		    catch(...)
+		    {
+			std::cerr <<"Unexpect error in UIState::widget_clicked- parent_path.make_absolute().str()" << std::endl;
+		    }
                 }
                 else
                 {
@@ -177,7 +202,7 @@ void UIState::widget_clicked(std::string& b_name)
         is_pause = !is_pause;
         if (is_pause)
         {
-			button_menu[0][0]->setText("continue");
+	    button_menu[0][0]->setText("continue");
             if (_vc != nullptr)
             {
                 if (_vc->has_sound)
@@ -398,6 +423,9 @@ UIState::UIState(UImain& g) :
     progress_filebar("pfilebar", 0, 0, 2, 2),
     quiz(           "quiz",     1000, 500, 50)     
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::UIState " << std::endl;
+
     // TEST
     //QuizMaker::make_all_plant_quiz("Y:\\000 quiz_plant", 1000, "Y:\\000 plant\\p", "../res/plant.txt");
     //QuizMaker::make_all_plant_quiz("Y:\\000 quiz_root", 1000, "Y:\\000 plant\\p root", "../res/root.txt");
@@ -490,6 +518,9 @@ UIState::UIState(UImain& g) :
 
 void UIState::handleEvent(sf::Event e) 
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::handleEvent() " << std::endl;
+
     switch (e.type)
     {
     case sf::Event::Closed:
@@ -535,6 +566,10 @@ void UIState::handleInput()
 
 void UIState::update(sf::Time deltaTime) 
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::update() " << std::endl;
+
+
     if (_mode == display_mode::show_img)
     {
         // ???
@@ -685,10 +720,17 @@ void UIState::fixedUpdate(sf::Time deltaTime)
 
 void UIState::load_img_quiz()
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::load_img_quiz() " << std::endl;
+
+
     img_index_has_quiz = false;
 
     if (img_files.size() > index_img)
     {
+    	if (ui.cfg.verbose > 1)
+		std::cout <<"UIState::load_img_quiz() check .quiz.xml" << std::endl;
+
         std::string quizfile = img_files[index_img].make_absolute().str() + ".quiz.xml";
         filesystem::path quiz_path(quizfile);
         if ((quiz_path.empty() == false) && (quiz_path.exists() == true) && (quiz_path.is_file() == true))
@@ -710,6 +752,9 @@ void UIState::load_img_quiz()
 
     if (img_files.size() > index_img)
     {
+    	if (ui.cfg.verbose > 1)
+		std::cout <<"UIState::load_img_quiz() check .quiz2.xml" << std::endl;
+
         std::string quizfile = img_files[index_img].make_absolute().str() + ".quiz2.xml";
         filesystem::path quiz_path(quizfile);
         if ((quiz_path.empty() == false) && (quiz_path.exists() == true) && (quiz_path.is_file() == true))
@@ -732,6 +777,9 @@ void UIState::load_img_quiz()
 
 void UIState::render(sf::RenderTarget& renderer) 
 {
+    if (ui.cfg.verbose> 1)
+	std::cout <<"UIState::render() " << std::endl;
+
     button_msg.setText("");
 
     recalc_size();
@@ -762,7 +810,16 @@ void UIState::render(sf::RenderTarget& renderer)
             if (img_texture[index_img].get() == nullptr)
             {
                 img_texture[index_img] = std::shared_ptr<sf::Texture>(new sf::Texture);
-                img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
+		try
+		{
+			img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
+		}
+		catch(...)
+		{
+			std::cerr <<"Unexpect error in UIState::render - img_files[index_img].make_absolute().str()" << std::endl;
+		}
+
+                //img_texture[index_img]->loadFromFile(img_files[index_img].make_absolute().str());
 
                 if (index_img == 0)
                 {
@@ -838,55 +895,72 @@ void UIState::render(sf::RenderTarget& renderer)
                             button_msg.setText(msg);
                         }
 
-                        VideoSoundCapturing* r = VideoSoundCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
-                        if (r != nullptr)
-                        {
-                            //-------------------------------------
-                            // VideoSoundCapturing already in cache
-                            //-------------------------------------
-                            _vc = r;
-                            if (is_pause == false)
-                                _vc->play_sound();
-                            _vc->music.setVolume(sound_volume);
-                        }
-                        else
-                        {
-                            //----------------------------------
-                            // new VideoSoundCapturing
-                            // ----------------------------------
-                            _vc = new VideoSoundCapturing(img_files[index_img].make_absolute().str());
-                            _vc->music.setVolume(sound_volume);
-                            v_vc.push_back(_vc);
-                        }
-                        
-                        new_entry = true;
-                        long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
-                        _vc->entry_frame = np;
+			bool ok = true;
+			VideoSoundCapturing* r = nullptr;
+			std::string fimg;
+			try
+			{
+				fimg = img_files[index_img].make_absolute().str();
+				r = VideoSoundCapturing::find(fimg, v_vc);
+			}
+			catch(...)
+			{
+				ok = false;
+				std::cerr <<"Unexpect error in UIState::render - iVideoSoundCapturing::find(img_files[index_img].make_absolute().str(), v_vc);" << std::endl;
+			}
 
-                        if (_vc->open() == false)
-                        {
-                            _vc->music.pause();
-                            VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
-                            _vc = nullptr;
-                        }
-                        else
-                        {
-                            if (_vc->has_sound)
-                            {
-                                if (_vc->sound_loaded == false)
-                                {
-                                    _vc->load_sound();
-                                }
-                            }
-                            else
-                            {   
-                                // Create sound file 
-                                if (ui.cfg.mak_wav_file == 1)
-                                {
-                                    v_extract_sound.push_back(new ExtractSound(img_files[index_img].make_absolute().str()));
-                                }
-                            }
-                        }
+			if (ok)
+			{
+		                //VideoSoundCapturing* r = VideoSoundCapturing::find(img_files[index_img].make_absolute().str(), v_vc);
+		                if (r != nullptr)
+		                {
+		                    //-------------------------------------
+		                    // VideoSoundCapturing already in cache
+		                    //-------------------------------------
+		                    _vc = r;
+		                    if (is_pause == false)
+		                        _vc->play_sound();
+		                    _vc->music.setVolume(sound_volume);
+		                }
+		                else
+		                {
+		                    //----------------------------------
+		                    // new VideoSoundCapturing
+		                    // ----------------------------------
+		                    _vc = new VideoSoundCapturing(fimg);
+		                    _vc->music.setVolume(sound_volume);
+		                    v_vc.push_back(_vc);
+		                }
+		                
+		                new_entry = true;
+		                long np = (long)_vc->vc.get(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES);
+		                _vc->entry_frame = np;
+
+		                if (_vc->open() == false)
+		                {
+		                    _vc->music.pause();
+		                    VideoSoundCapturing::clear(_vc->_file, v_vc, v_vcd);
+		                    _vc = nullptr;
+		                }
+		                else
+		                {
+		                    if (_vc->has_sound)
+		                    {
+		                        if (_vc->sound_loaded == false)
+		                        {
+		                            _vc->load_sound();
+		                        }
+		                    }
+		                    else
+		                    {   
+		                        // Create sound file 
+		                        if (ui.cfg.mak_wav_file == 1)
+		                        {
+		                            v_extract_sound.push_back(new ExtractSound(fimg));
+		                        }
+		                    }
+		                }
+			}
                     }
                 }
             }
@@ -1202,6 +1276,9 @@ void UIState::render(sf::RenderTarget& renderer)
 
 void UIState::recalc_size(bool is_resizing)
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::recalc_size() " << std::endl;
+
     w = (float)ui.getWindow().getSize().x;
     h = (float)ui.getWindow().getSize().y;
 
@@ -1295,6 +1372,9 @@ void UIState::recalc_size(bool is_resizing)
 
 sf::Vector2f UIState::scale_sprite(std::shared_ptr<sf::Sprite> sprite)
 {
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::scale_sprite() " << std::endl;
+
     float sx = (canvas_w) / (float)sprite->getTextureRect().width;
     float sy = (canvas_h) / (float)sprite->getTextureRect().height;
     return sf::Vector2f{ std::min(sx, sy), std::min(sx, sy) };
@@ -1302,6 +1382,11 @@ sf::Vector2f UIState::scale_sprite(std::shared_ptr<sf::Sprite> sprite)
 }
 
 void UIState::load_path(filesystem::path& p)
+{
+    if (ui.cfg.verbose > 1)
+	std::cout <<"UIState::load_path() " << std::endl;
+
+try
 {
     ini_filename.clear();
     img_files.clear();
@@ -1314,7 +1399,24 @@ void UIState::load_path(filesystem::path& p)
     button_name.setText("");
     button_parts.setText("");
 
-    std::string fullname = p.make_absolute().str();
+    std::string fullname;
+    try
+    {
+	fullname = p.make_absolute().str();
+    }
+    catch(...)
+    {
+	std::cerr <<"Unexpect error in UIState::load_path() - std::string fullname = p.make_absolute().str(); " << std::endl;
+    }
+    try
+    {
+	_fnav.root.make_absolute().str();
+    }
+    catch(...)
+    {
+	std::cerr <<"Unexpect error in UIState::load_path() - _fnav.root.make_absolute().str() " << std::endl;
+    }
+
     std::string name = fullname.substr(fullname.find(_fnav.root.make_absolute().str()) + _fnav.root.make_absolute().str().size());
     std::string desc;
 
@@ -1333,12 +1435,18 @@ void UIState::load_path(filesystem::path& p)
             if (std::find(ui.cfg.img.begin(), ui.cfg.img.end(), s) != ui.cfg.img.end())
             {
                 img_files.push_back(pv);
+
+		if (ui.cfg.verbose > 1)
+			std::cout <<"UIState::load_path() register:" << files.at(i) << std::endl;
             }
 
             if (pv.extension() == "ini")
             {
                 if (pv.filename() == "desc.ini")
                 {
+		    if (ui.cfg.verbose > 1)
+			std::cout <<"UIState::load_path() check desc.ini" << std::endl;
+
                     ini = std::shared_ptr<ini_parser>(new ini_parser(pv.make_absolute().str()));
 
                     try
@@ -1387,26 +1495,46 @@ void UIState::load_path(filesystem::path& p)
     // No img/video in this folder
     if (img_files.size() == 0)
     {
-        int a = 1;
+	if (ui.cfg.verbose > 1)
+		std::cout <<"UIState::load_path() no imag or videos in folder" << std::endl;
     }
 
     button_name.setText(name);
     button_parts.setText(desc);
     button_msg.setText("");
 }
+catch(...)
+{
+	std::cerr <<"Unexpect error in UIState::load_path() " << std::endl;
+}
+
+}
 
 int UIState::count_sound_making()
 {
-    int n = 0;
-    for (size_t i = 0; i < v_extract_sound.size(); i++)
+    if (ui.cfg.verbose > 1)
     {
-        if (v_extract_sound[i] != nullptr)
-        {
-            if ((v_extract_sound[i]->is_done.load() == false) && (v_extract_sound[i]->is_started.load() == true))
-            {
-                n++;
-            }
-        }
+	std::cout <<"UIState::count_sound_making() " << std::endl;
     }
-    return n;
+
+	try
+	{
+	    int n = 0;
+	    for (size_t i = 0; i < v_extract_sound.size(); i++)
+	    {
+		if (v_extract_sound[i] != nullptr)
+		{
+		    if ((v_extract_sound[i]->is_done.load() == false) && (v_extract_sound[i]->is_started.load() == true))
+		    {
+		        n++;
+		    }
+		}
+	    }
+	    return n;
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in count_sound_making()" << std::endl;
+	}
+
 }

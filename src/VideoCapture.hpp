@@ -99,29 +99,67 @@ public:
         }
     }
 
+#ifndef _WIN32
+#define POSITIVE_ANSWER  0
+#define NEGATIVE_ANSWER -1
+int syscommand(std::string aCommand, std::string & result)
+{
+    FILE * f;
+    if ( !(f = popen( aCommand.c_str(), "r" )) ) 
+    {
+            std::cout << "Can not open file" << std::endl;
+            return NEGATIVE_ANSWER;
+    }
+    const int BUFSIZE = 4096;
+    char buf[ BUFSIZE ];
+    if (fgets(buf,BUFSIZE,f)!=NULL) 
+    {      
+       result = buf;
+    }
+    pclose( f );
+    return POSITIVE_ANSWER;
+}
+#endif
+
+
     void run()
     {
-        while (is_started.load() == false)
+	try
         {
-            std::this_thread::sleep_for(1000ms);
-        }
+		while (is_started.load() == false)
+		{
+		    std::this_thread::sleep_for(1000ms);
+		}
 
-        // ffmpeg -i 0001.mp4 0001.mp4.wav
-        filesystem::path cmd_path("..\\tools");
-        std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
-        std::cout << cmd << std::endl;
-        int r = system(cmd.c_str());
+#ifdef _WIN32
+		// ffmpeg -i 0001.mp4 0001.mp4.wav
+		filesystem::path cmd_path("..\\tools");
+		std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
+		std::cout << cmd << std::endl;
+		int r = system(cmd.c_str());
+#else
+		std::string cmd = "ffmpeg -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
+		std::cout << cmd << std::endl;
+		std::string result;
+		int r = syscommand(cmd.c_str(), result);
+#endif
 
-        filesystem::path wav_path(_file + ".wav");
-        while (wav_path.exists() == false)
-        {
-            // check size...
+		filesystem::path wav_path(_file + ".wav");
+		while (wav_path.exists() == false)
+		{
+		    // check size...
 
-            if (is_done.load() == true)
-                break;
-            std::this_thread::sleep_for(1ms);
-        }
-        is_done.store(true);
+		    if (is_done.load() == true)
+		        break;
+		    std::this_thread::sleep_for(1ms);
+		}
+		is_done.store(true);
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in ExtractSound::run() " << std::endl;
+		is_done.store(true);
+	}
     }
 
     std::atomic<bool> is_started = false;

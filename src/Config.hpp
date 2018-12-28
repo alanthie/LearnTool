@@ -27,6 +27,7 @@ public:
     int             mak_wav_file = 0;
     int             load_sound_file = 0;
     int             make_N_sound_file = 1;
+    int             verbose = 0;
 
     std::vector<std::string> exclude_folder = { ".Thumbs" };
     std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi"};
@@ -139,6 +140,14 @@ public:
 		            try
 		            {
 		                this->make_N_sound_file = cfg_ini->get_int("make_N_sound_file", "main");
+		            }
+		            catch (...)
+		            {
+		            }
+
+		            try
+		            {
+				this->verbose = cfg_ini->get_int("verbose", "main");
 		            }
 		            catch (...)
 		            {

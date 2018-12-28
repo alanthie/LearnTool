@@ -36,11 +36,12 @@ cd build
 cmake ..  
 make  
 
-Install:
+Install (TODO):
 make install 
 
 Run:
-./learntool ../prj/LearnTool_AL.ini
-./res folder must be present
+sudo ./learntool ../prj/LearnTool_AL.ini
+./res sub folder must be present
+ffmpeg must be present (to extract sound from mp4)
 
 

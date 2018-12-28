@@ -19,6 +19,8 @@ FolderNavigation::FolderNavigation(UIState& st, const std::string& _path_dir, co
     exclude_folder(_exclude_folder),
     img(_img)
 {
+    std::cout <<"FolderNavigation::FolderNavigation()" << std::endl;
+
     //root = filesystem::path("..\\res\\topic");
     root            = filesystem::path(path_dir);
     root_files      = filesystem::path::get_directory_file(root, false, true);
@@ -29,6 +31,8 @@ FolderNavigation::FolderNavigation(UIState& st, const std::string& _path_dir, co
 
 void FolderNavigation::reset(const std::string& new_root, const filesystem::path& new_current_path)
 {
+   std::cout <<"FolderNavigation::reset()" << std::endl;
+
     path_dir = new_root;
     root = filesystem::path(new_root);
     root_files = filesystem::path::get_directory_file(root, false, true);
@@ -42,6 +46,8 @@ FolderNavigation::~FolderNavigation()
 
 void FolderNavigation::load_root()
 {
+    std::cout <<"FolderNavigation::load_root()" << std::endl;
+
     // Restart
     current_parent = filesystem::path(root);
     filesystem::path lEmptyPath = filesystem::path();
@@ -60,6 +66,8 @@ void FolderNavigation::load_root()
 
 std::vector<std::string> FolderNavigation::get_img_files(filesystem::path& p)
 {
+    std::cout <<"FolderNavigation::get_img_files()" << std::endl;
+
     std::vector<std::string> imgfiles;
     std::vector<std::string> files = filesystem::path::get_directory_file(p, false);
     for (size_t i = 0; i < files.size(); i++)
@@ -80,12 +88,37 @@ std::vector<std::string> FolderNavigation::get_img_files(filesystem::path& p)
 
 void FolderNavigation::next_path(bool no_deepening)
 {
+    std::cout <<"FolderNavigation::next_path()" << std::endl;
+  
     filesystem::path save_current_path = current_path;
     filesystem::path save_current_parent = save_current_path.parent_path();
 
     assert(save_current_parent.empty() == false);
 
     current_path = find_next_folder(save_current_parent, save_current_path, no_deepening);
+
+    std::string str_current_path;
+    std::string str_root;
+    if (current_path.empty() == true)
+    {
+	try
+	{
+		str_current_path = save_current_parent.make_absolute().str();
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in FolderNavigation::next_path - save_current_parent.make_absolute().str()" << std::endl;
+	}
+	try
+	{
+		str_root = root.make_absolute().str();
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in FolderNavigation::next_path - root.make_absolute().str()" << std::endl;
+	}
+    }
+
     if (current_path.empty() == false)
     {
         if (current_parent != current_path.parent_path())
@@ -102,7 +135,7 @@ void FolderNavigation::next_path(bool no_deepening)
             assert(false);
         }
     }
-    else if (save_current_parent.make_absolute().str() == root.make_absolute().str())
+    else if (str_current_path == str_root)
     {
         // Restart
         load_root();
@@ -112,7 +145,24 @@ void FolderNavigation::next_path(bool no_deepening)
     {
         current_path = save_current_parent;
         current_parent = save_current_parent.parent_path();
-        if (current_path.make_absolute().str() == root.make_absolute().str())
+	try
+	{
+		str_current_path = save_current_parent.make_absolute().str();
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in FolderNavigation::next_path 2 - save_current_parent.make_absolute().str()" << std::endl;
+	}
+	try
+	{
+		str_root = root.make_absolute().str();
+	}
+	catch(...)
+	{
+		std::cerr <<"Unexpect error in FolderNavigation::next_path 2 - root.make_absolute().str()" << std::endl;
+	}
+
+        if (str_current_path == str_root)
         {
             // Restart
             load_root();
@@ -124,8 +174,24 @@ void FolderNavigation::next_path(bool no_deepening)
         {
             current_path = save_current_parent.parent_path();
             current_parent = save_current_parent.parent_path().parent_path();
+		try
+		{
+			str_current_path = current_path.make_absolute().str();
+		}
+		catch(...)
+		{
+			std::cerr <<"Unexpect error in FolderNavigation::next_path 2 - save_current_parent.make_absolute().str()" << std::endl;
+		}
+		try
+		{
+			str_root = root.make_absolute().str();
+		}
+		catch(...)
+		{
+			std::cerr <<"Unexpect error in FolderNavigation::next_path 2 - root.make_absolute().str()" << std::endl;
+		}
 
-            if (current_path.make_absolute().str() == root.make_absolute().str())
+            if (str_current_path == str_root)
             {
                 // Restart
                 load_root();
@@ -141,6 +207,7 @@ void FolderNavigation::next_path(bool no_deepening)
         }
         else
         {
+	    std::cerr <<"Error in FolderNavigation::next_path - current_path.empty()" << std::endl;
             assert(false);
         }
     }
@@ -148,6 +215,8 @@ void FolderNavigation::next_path(bool no_deepening)
 
 void FolderNavigation::prev_path(bool no_deepening)
 {
+    std::cout <<"FolderNavigation::prev_path()" << std::endl;
+
     filesystem::path save_current_path = current_path;
     filesystem::path save_current_parent = save_current_path.parent_path();
 
@@ -199,6 +268,8 @@ void FolderNavigation::prev_path(bool no_deepening)
 
 filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening)
 {
+    std::cout <<"FolderNavigation::find_next_folder()" << std::endl;
+
     filesystem::path p;
     if (last_folder.empty())
     {
@@ -343,6 +414,8 @@ filesystem::path FolderNavigation::find_next_folder(filesystem::path& parent_fol
 
 filesystem::path FolderNavigation::find_last_folder(filesystem::path& parent_folder)
 {
+    std::cout <<"FolderNavigation::find_last_folder()" << std::endl;
+
     filesystem::path p;
 
     std::vector<std::string> v = filesystem::path::get_directory_file(parent_folder, false, true);
@@ -364,6 +437,8 @@ filesystem::path FolderNavigation::find_last_folder(filesystem::path& parent_fol
 
 filesystem::path FolderNavigation::find_prev_folder(filesystem::path& parent_folder, filesystem::path& last_folder, bool no_deepening)
 {
+    std::cout <<"FolderNavigation::find_prev_folder()" << std::endl;
+
     filesystem::path p;
     if (last_folder.empty())
     {
@@ -418,6 +493,8 @@ filesystem::path FolderNavigation::find_prev_folder(filesystem::path& parent_fol
 
 filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
 {
+    std::cout <<"FolderNavigation::preview_next_path()" << std::endl;
+
     filesystem::path ret_path;
     filesystem::path save_current_path      = current_path;
     filesystem::path save_current_parent    = save_current_path.parent_path();
@@ -509,6 +586,8 @@ filesystem::path FolderNavigation::preview_next_path(bool no_deepening)
 
 std::string FolderNavigation::select_folder(char const * const aDefaultPath)
 {
+    std::cout <<"FolderNavigation::select_folder()" << std::endl;
+
     char const * lTheSelectFolderName;
     lTheSelectFolderName = tinyfd_selectFolderDialog("Select a directory", aDefaultPath);
     if (!lTheSelectFolderName)
