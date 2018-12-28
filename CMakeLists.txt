@@ -22,7 +22,9 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 # CMake Scripts
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# Future lib (TODO)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -std=${STD_CXX}")
 set (CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -DNDEBUG")
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -34,10 +36,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/core/config.h.in ${CMAKE_CURRENT_
 set (LIBRARIES "")
 
 #------------------------ SFML --------------------------
+#/usr/share/SFML/cmake/Modules/FindSFML.cmake
 find_package(SFML 2 REQUIRED system window graphics network audio)
 include_directories(${SFML_INCLUDE_DIRS})
 link_directories(${SFML_LIBRARY_DIRS})
-#target_link_libraries(${EXECUTABLE_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 
 set (LIBRARIES
 	${LIBRARIES}
@@ -46,10 +48,10 @@ set (LIBRARIES
 
 
 #------------------------ OpenCV --------------------------
+#/usr/share/OpenCV/OpenCVModules.cmake
 find_package(OpenCV 3 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
-#target_link_libraries(${EXECUTABLE_NAME} ${OpenCV_LIBRARIES} ${OpenCV_DEPENDENCIES})
 
 set (LIBRARIES
 	${LIBRARIES}
@@ -101,6 +103,8 @@ set(LIBRARIES
 include_directories (src)
 include_directories (${HEADERS})
 
+# Future install include (TODO)
+#set (INCLUDE_INSTALL_DIR ${PROJECT_LC}/include
 set (INCLUDE_INSTALL_DIR ${PROJECT_LC}/src)
 set (LIBS_INSTALL_DIR ${PROJECT_LC}/lib)
 set (LIB_INSTALL_DIR lib)
@@ -121,11 +125,10 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LC}-config.cmake
 #target_link_libraries (${PROJECT_LC} ${LIBRARIES})
 
 #install (TARGETS ${PROJECT_LC} EXPORT ${PROJECT_LC} ARCHIVE DESTINATION lib
-#install(DIRECTORY src/${PROJECT_LC} DESTINATION src)
+#install (DIRECTORY src/${PROJECT_LC} DESTINATION src)
 
 # Recurse into subdirectories. 
 # add_subdirectory (src)
-
 
 add_executable (
 	learntool 

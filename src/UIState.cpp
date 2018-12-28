@@ -414,7 +414,7 @@ void UIState::widget_clicked(std::string& b_name)
 UIState::UIState(UImain& g) : 
 	StateBase(g),
 	ui(g),
-    _fnav(*this, ui.cfg.path_dir, ui.cfg.exclude_folder, ui.cfg.img),
+    _fnav(*this, ui.cfg.path_dir, ui.cfg.exclude_folder, ui.cfg.img, ui.cfg.verbose),
 	button_name(    "b_name",   gui::ButtonSize::Small),
 	button_parts(   "b_parts",  gui::ButtonSize::Wide),
 	button_msg(     "b_msg",    gui::ButtonSize::Wide),
@@ -566,10 +566,6 @@ void UIState::handleInput()
 
 void UIState::update(sf::Time deltaTime) 
 {
-    if (ui.cfg.verbose > 1)
-	std::cout <<"UIState::update() " << std::endl;
-
-
     if (_mode == display_mode::show_img)
     {
         // ???

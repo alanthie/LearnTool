@@ -28,8 +28,9 @@ public:
     std::vector<std::string>    root_files;
     filesystem::path            current_parent;
     filesystem::path            current_path;
-
-    FolderNavigation(UIState& st, const std::string& _path_dir, const std::vector<std::string>& _exclude_folder, const std::vector<std::string>& _img);
+    int                         verbose;
+    
+    FolderNavigation(UIState& st, const std::string& _path_dir, const std::vector<std::string>& _exclude_folder, const std::vector<std::string>& _img, int pverbose = 0);
     ~FolderNavigation();
 
     //void reset(const std::string& _path_dir);
