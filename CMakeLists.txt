@@ -111,24 +111,36 @@ set (LIB_INSTALL_DIR lib)
 
 include(CMakePackageConfigHelpers)
 
+# relocatable package
+#CONFIGURE_PACKAGE_CONFIG_FILE(<input> <output> INSTALL_DESTINATION <path>
+#                                               [PATH_VARS <var1> <var2> ... <varN>]
+#                                               [NO_SET_AND_CHECK_MACRO]
+#                                               [NO_CHECK_REQUIRED_COMPONENTS_MACRO])
 configure_package_config_file(cmake/config.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LC}-config.cmake
     INSTALL_DESTINATION ${LIB_INSTALL_DIR}
     PATH_VARS INCLUDE_INSTALL_DIR LIBS_INSTALL_DIR
 )
 
+# generates installation rules for a project
+#install(TARGETS targets... [EXPORT <export-name>]
+#        [[ARCHIVE|LIBRARY|RUNTIME|FRAMEWORK|BUNDLE|PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
+#         [DESTINATION <dir>]
+#         [INCLUDES DESTINATION [<dir> ...]]
+#         [PERMISSIONS permissions...]
+#         [CONFIGURATIONS [Debug|Release|...]]
+#         [COMPONENT <component>]
+#         [OPTIONAL] [NAMELINK_ONLY|NAMELINK_SKIP]
+#        ] [...])
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LC}-config.cmake
     DESTINATION ${LIB_INSTALL_DIR}/../
 )
 
+# Future lib
 #add_library (${PROJECT_LC} STATIC ${SOURCES})
 #target_link_libraries (${PROJECT_LC} ${LIBRARIES})
-
 #install (TARGETS ${PROJECT_LC} EXPORT ${PROJECT_LC} ARCHIVE DESTINATION lib
 #install (DIRECTORY src/${PROJECT_LC} DESTINATION src)
-
-# Recurse into subdirectories. 
-# add_subdirectory (src)
 
 add_executable (
 	learntool 
@@ -142,4 +154,8 @@ target_link_libraries(learntool
 	${SFML_DEPENDENCIES}
         -lpthread 
 )
+
+
+# Recurse into subdirectories. 
+# add_subdirectory (src)
 
