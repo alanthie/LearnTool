@@ -132,23 +132,40 @@ int syscommand(std::string aCommand, std::string & result)
 		}
 
 		bool ok = true;
+        filesystem::path file_path(_file);
+        if (file_path.exists() == false)
+        {
+            ok = false;
+            std::cerr<< "Invalid filename: " << _file << std::endl;
+        }
+        else if (!file_path.is_file())
+        {
+            ok = false;
+            std::cerr<< "Invalid filename: " << _file << std::endl;
+        }
+        
 #ifdef _WIN32
 		// ffmpeg -i 0001.mp4 0001.mp4.wav
-		filesystem::path cmd_path("..\\tools");
-		std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
-		std::cout << cmd << std::endl;
-		int r = system(cmd.c_str());
+        if (ok == true)
+        {
+            filesystem::path cmd_path("..\\tools");
+            std::string cmd = cmd_path.make_absolute().str()+"\\ffmpeg.exe -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
+            std::cout << cmd << std::endl;
+            int r = system(cmd.c_str());
+        }
 #else
-		std::string cmd = "ffmpeg -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
-		std::cout << cmd << std::endl;
-		std::string result;
-		int r = syscommand(cmd.c_str(), result);
-		std::cout << "Cmd result: [" << result <<"]" << std::endl;
-                if (r == NEGATIVE_ANSWER)
-		   ok = false;
+        if (ok == true)
+		{
+            std::string cmd = "ffmpeg -y -nostdin -i \"" + _file + "\" \"" + _file + ".wav\"";
+            std::cout << cmd << std::endl;
+            std::string result;
+            int r = syscommand(cmd.c_str(), result);
+            if (r == NEGATIVE_ANSWER)
+               ok = false;
+        }
 
 #endif
-                if (ok == true)
+        if (ok == true)
 		{
 		    filesystem::path wav_path(_file + ".wav");
 		    while (wav_path.exists() == false)
@@ -159,7 +176,7 @@ int syscommand(std::string aCommand, std::string & result)
 		            break;
 		        std::this_thread::sleep_for(1ms);
 		   }
-                }
+        }
 		is_done.store(true);
 	}
 	catch(...)
