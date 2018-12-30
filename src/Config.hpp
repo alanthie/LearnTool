@@ -30,7 +30,7 @@ public:
     int             verbose = 0;
 
     std::vector<std::string> exclude_folder = { ".Thumbs" };
-    std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi", "mkv"};
+    std::vector<std::string> img = { "jpg",  "png", "gif", "jpeg", "bmp", "mp4" , "avi", "mkv", "webm"};
 
     Config() = default;
 

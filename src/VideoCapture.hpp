@@ -131,6 +131,7 @@ int syscommand(std::string aCommand, std::string & result)
 		    std::this_thread::sleep_for(1000ms);
 		}
 
+		bool ok = true;
 #ifdef _WIN32
 		// ffmpeg -i 0001.mp4 0001.mp4.wav
 		filesystem::path cmd_path("..\\tools");
@@ -142,17 +143,23 @@ int syscommand(std::string aCommand, std::string & result)
 		std::cout << cmd << std::endl;
 		std::string result;
 		int r = syscommand(cmd.c_str(), result);
+		std::cout << "Cmd result: [" << result <<"]" << std::endl;
+                if (r == NEGATIVE_ANSWER)
+		   ok = false;
+
 #endif
-
-		filesystem::path wav_path(_file + ".wav");
-		while (wav_path.exists() == false)
+                if (ok == true)
 		{
-		    // check size...
+		    filesystem::path wav_path(_file + ".wav");
+		    while (wav_path.exists() == false)
+		    {
+		        // check size...
 
-		    if (is_done.load() == true)
-		        break;
-		    std::this_thread::sleep_for(1ms);
-		}
+		        if (is_done.load() == true)
+		            break;
+		        std::this_thread::sleep_for(1ms);
+		   }
+                }
 		is_done.store(true);
 	}
 	catch(...)

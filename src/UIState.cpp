@@ -782,7 +782,7 @@ void UIState::render(sf::RenderTarget& renderer)
     if (img_files.size() > 0)
     {
         std::string s = img_files[index_img].extension();
-        if ((s == "mp4") || (s == "avi") || (s == "mkv"))
+        if ((s == "mp4") || (s == "avi") || (s == "mkv") || (s == "webm"))
         {
             _mode = display_mode::show_movie;
         }
