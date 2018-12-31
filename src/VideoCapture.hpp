@@ -107,7 +107,7 @@ int syscommand(std::string aCommand, std::string & result)
     FILE * f;
     if ( !(f = popen( aCommand.c_str(), "r" )) ) 
     {
-            std::cout << "Can not open file" << std::endl;
+            std::cerr << "Can not open file" << std::endl;
             return NEGATIVE_ANSWER;
     }
     const int BUFSIZE = 4096;
@@ -116,8 +116,8 @@ int syscommand(std::string aCommand, std::string & result)
     {      
        result = buf;
     }
-    pclose( f );
-    return POSITIVE_ANSWER;
+    int r = pclose( f );
+    return r;
 }
 #endif
 
@@ -160,8 +160,15 @@ int syscommand(std::string aCommand, std::string & result)
             std::cout << cmd << std::endl;
             std::string result;
             int r = syscommand(cmd.c_str(), result);
-            if (r == NEGATIVE_ANSWER)
-               ok = false;
+            if (r != POSITIVE_ANSWER)
+            {
+                ok = false;
+                std::cerr << "ffmpeg failed:[" << result << "]" << std::endl;
+            }
+            else
+            {
+                std::cout << "ffmpeg result:[" << result << "]" << std::endl;
+            }
         }
 
 #endif
@@ -174,7 +181,7 @@ int syscommand(std::string aCommand, std::string & result)
 
 		        if (is_done.load() == true)
 		            break;
-		        std::this_thread::sleep_for(1ms);
+		        std::this_thread::sleep_for(10ms);
 		   }
         }
 		is_done.store(true);
