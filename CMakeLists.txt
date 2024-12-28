@@ -49,7 +49,12 @@ set (LIBRARIES
 
 #------------------------ OpenCV --------------------------
 #/usr/share/OpenCV/OpenCVModules.cmake
-find_package(OpenCV 3 REQUIRED)
+#find_package(OpenCV 3 REQUIRED)
+
+#/usr/lib/x86_64-linux-gnu/cmake/opencv4
+set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
+
+find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 
