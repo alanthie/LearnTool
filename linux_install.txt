@@ -40,7 +40,7 @@ Install (TODO):
 make install 
 
 Run:
-sudo ./learntool ../prj/LearnTool_AL.ini
+./learntool ../prj/LearnTool_AL.ini
 ./res sub folder must be present
 ffmpeg must be present (to extract sound from mp4)
 
